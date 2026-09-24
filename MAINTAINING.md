@@ -1,6 +1,6 @@
 # 维护与正式发布
 
-维护源位于主项目 `yisi-ai-skills/apps/web/skills/selfstudy-coach/`，说明、浏览器脚本及 tools 随主项目提交。正式产物仓库位于 `~/project/skills/selfstudy-coach-skill/`，在该目录单独初始化 Git。仓库名为 `selfstudy-coach-skill`，Skill 的安装目录与调用名仍为 `selfstudy-coach`。安装用户不需要主项目或打包工具；直接操作网页不需要 Node.js，学习本机连接需要宿主可运行 Node.js 22+。Skill 当前未配置远程更新源。
+维护源位于主项目 `yisi-ai-skills/apps/web/skills/selfstudy-coach/`，说明、浏览器脚本及 tools 随主项目提交。正式产物仓库位于 `~/project/skills/selfstudy-coach-skill/`，在该目录单独初始化 Git。仓库名为 `selfstudy-coach-skill`，Skill 的安装目录与调用名仍为 `selfstudy-coach`。安装用户不需要主项目或打包工具；直接操作网页不需要 Node.js，学习本机连接需要宿主可运行 Node.js 22+。正式版默认更新来源为 [yisi-ai/selfstudy-coach-skill](https://github.com/yisi-ai/selfstudy-coach-skill)，用户指定其他正式来源时按其选择核验。
 
 ## Skill 操作版本
 
@@ -46,6 +46,6 @@ pnpm web:skill:pack --output ~/project/skills/selfstudy-coach-skill
 
 `--output` 必须指向名为 `selfstudy-coach-skill` 的独立 Git 仓库根目录。命令先校验并生成正式安装目录，再将 SKILL.md、README.md、MAINTAINING.md、release.json、agents、references 和 scripts 同步到产物仓库根目录，不创建 `packages/` 或压缩包。这些生成文件和目录会整体替换，旧脚本会移除；维护修改应在主项目源码中进行。仓库的 `.git` 和其他文件保留。本地测试产物、tools、node_modules、备份和主项目源码不导出。
 
-不带 `--output` 的 `pnpm web:skill:pack` 仅生成 dist 中的正式目录，供 CI 校验和本地测试版复用，不写入开发者的产物仓库。导出不自动提交、配置远程或推送；检查差异后使用中文提交信息保存产物。远程发布地址由维护者另行指定，不能沿用已移除的旧仓库地址或把本地产物声称为公开下载。主项目仍按功能分支与 PR 规则提交。
+不带 `--output` 的 `pnpm web:skill:pack` 仅生成 dist 中的正式目录，供 CI 校验和本地测试版复用，不写入开发者的产物仓库。导出不自动提交、配置远程或推送；检查差异后使用中文提交信息保存产物。正式内容发布到 [yisi-ai/selfstudy-coach-skill](https://github.com/yisi-ai/selfstudy-coach-skill)，在独立仓库使用 `git push skill-apps HEAD:refs/heads/main` 显式推送；推送前核对远程 main 和正式文件范围，不强制覆盖远程。主项目仍按功能分支与 PR 规则提交。
 
 上线新的 Skill 操作版本之前，先准备可交付的对应正式目录。更新时选择与网页 Skill 操作版本相同的正式内容，不盲目下载 latest；用户同意后才安装，先备份并保留定制。本地测试版始终使用本机生成的测试目录。

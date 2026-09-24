@@ -28,7 +28,7 @@ Agent 根据当前宿主识别实际安装位置，获取本仓库的完整 Skil
 
 例如：“使用 $selfstudy-coach 帮我入门一个主题”“总结当前会话的知识与疑点”“我卡在这个概念上”“把刚才学的内容出成测验让我做”。学习阶段从当前情况判断，不要求从课程第一步开始，也不强制每次都出题。
 
-准备使用 Web 且具备页面读取能力时，Agent 静默读取网页的 Skill 操作版本 data-skill-operation-version（旧页面兼容 data-gaga-version 和 data-gaga-release.version），与 Skill 的 metadata.version 比较；网页版无法读取时直接提供指导，不要求用户额外检查。版本相同直接继续，不向用户汇报“版本一致”或“无需更新”。只有网页对应的 Skill 版本更新时，才显示双方版本并询问用户是否更新；同意后由 Agent 使用用户提供的正式目录或明确指定的发布来源更新并保留定制。当前未配置远程更新地址，缺少可用版本时保留当前安装，不声称更新完成。版本差异不阻止继续使用，不依据内容哈希限制用户修改。具体见 [更新流程](references/version-update.md)。
+准备使用 Web 且具备页面读取能力时，Agent 静默读取网页的 Skill 操作版本 data-skill-operation-version（旧页面兼容 data-gaga-version 和 data-gaga-release.version），与 Skill 的 metadata.version 比较；网页版无法读取时直接提供指导，不要求用户额外检查。版本相同直接继续，不向用户汇报“版本一致”或“无需更新”。只有网页对应的 Skill 版本更新时，才显示双方版本、提供更新入口并询问用户是否更新。正式版默认从 [yisi-ai/selfstudy-coach-skill](https://github.com/yisi-ai/selfstudy-coach-skill) 获取与网页操作版本对应的正式内容；用户提供正式目录或明确指定其他来源时优先使用该来源。同意后由 Agent 备份并保留定制，缺少可用版本时保留当前安装，不声称更新完成。版本差异不阻止继续使用，不依据内容哈希限制用户修改。具体见 [更新流程](references/version-update.md)。
 
 只讲解或总结无需浏览器。使用网页功能前先分流：网页版 AI 和只有云端工具的宿主直接使用 [指导与提醒链接](references/browser-handoff.md#网页版指导与提醒链接)，不运行 Node，也不要求用户安装它。电脑上安装且能调用用户本机工具的 Agent 优先使用 [本机连接](references/local-connection.md)，知识测验、问卷和题库检索共用连接；已有可靠页面操作工具时可使用前端命令。桌面应用优先使用自己的侧栏，WorkBuddy 必须使用右栏预览面板；导入和读取都须核验实际可见的答题页，不把另一浏览器的成功操作当作侧栏成功。
 
