@@ -1,5 +1,23 @@
 # 自学辅导 Skill
 
+让 AI 根据你的目标和基础辅导自学，提供知识讲解、答疑，以及网页问卷、测验和错题复盘。
+
+## 一句话让 Agent 安装
+
+把下面这句话发给支持 Skill、能够联网并写入本机文件的 Agent：
+
+> 请从 https://github.com/yisi-ai/selfstudy-coach-skill 安装自学辅导 Skill 到你当前宿主的 Skill 目录，安装目录名为 selfstudy-coach，并验证安装成功；如果已经安装，请先备份并保留我的自定义内容。
+
+Agent 根据当前宿主识别实际安装位置，获取本仓库的完整 Skill 文件，放入 `selfstudy-coach/` 目录。仓库名是 `selfstudy-coach-skill`，Skill 的安装目录与调用名是 `selfstudy-coach`；仓库根目录就是正式内容，包含 `SKILL.md`、`release.json`、说明文档以及 `agents/`、`references/`、`scripts/`，安装时排除 `.git/`。脚本已编译，可直接使用。
+
+安装后，Agent 应核对实际目录中的入口、版本和引用文件，并按宿主要求重新加载 Skill；需要开启新会话时告知用户。已有安装按 [更新流程](references/version-update.md) 备份并保留定制。无法写入本机文件的网页版 AI 不适用这种自动安装方式。
+
+安装完成后，可以说：
+
+> 使用 $selfstudy-coach 帮我学习一个主题，先了解我的目标和基础，再从适合我的内容开始。
+
+## 使用说明
+
 供网页版 AI 和桌面 Agent 使用：根据当前目标和已有理解提供知识入门、分步讲解、会话总结、答疑和复盘。首次学习某个主题时，可以先邀请用户做一份简短的网页选择题问卷，同意后再出题，根据实际回答确定学习起点；用户可以跳过。需要网页验证时，网页版 AI 提供完整导入内容和带操作提醒的网址，桌面 Agent 在用户电脑上自动连接并导入。问卷确认导入后直接进入第一题；知识测验自动导入默认中等难度，手动导入由用户选择难度并开始。闪卡、简答题的 Web 功能尚未实现。
 
 将正式发布目录或独立仓库中的 Skill 内容放入 Agent 的 `selfstudy-coach` Skill 目录，入口为 [SKILL.md](SKILL.md)，调用 `$selfstudy-coach`。英文 name 与目录保持固定；显示名独立配置在 SKILL.md 的 metadata.display_name（自学辅导）和 metadata.display_name_en（Self-Study Tutor）。agents/openai.yaml 同步中文界面名；实际呈现取决于宿主支持的显示字段。
