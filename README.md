@@ -6,7 +6,9 @@
 
 把下面这句话发给支持 Skill、能够联网并写入本机文件的 Agent：
 
-> 请从 https://github.com/yisi-ai/selfstudy-coach-skill 安装自学辅导 Skill 到你当前宿主的 Skill 目录，安装目录名为 selfstudy-coach，并验证安装成功；如果已经安装，请先备份并保留我的自定义内容。
+```text
+请从 https://github.com/yisi-ai/selfstudy-coach-skill 安装自学辅导 Skill 到你当前宿主的 Skill 目录，安装目录名为 selfstudy-coach，并验证安装成功；如果已经安装，请先备份并保留我的自定义内容。
+```
 
 Agent 根据当前宿主识别实际安装位置，获取本仓库的完整 Skill 文件，放入 `selfstudy-coach/` 目录。仓库名是 `selfstudy-coach-skill`，Skill 的安装目录与调用名是 `selfstudy-coach`；仓库根目录就是正式内容，包含 `SKILL.md`、`release.json`、说明文档以及 `agents/`、`references/`、`scripts/`，安装时排除 `.git/`。脚本已编译，可直接使用。
 
@@ -14,7 +16,9 @@ Agent 根据当前宿主识别实际安装位置，获取本仓库的完整 Skil
 
 安装完成后，可以说：
 
-> 使用 $selfstudy-coach 帮我学习一个主题，先了解我的目标和基础，再从适合我的内容开始。
+```text
+使用 $selfstudy-coach 帮我学习一个主题，先了解我的目标和基础，再从适合我的内容开始。
+```
 
 ## 使用说明
 
