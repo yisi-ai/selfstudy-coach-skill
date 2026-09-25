@@ -546,7 +546,16 @@ var common_default = {
     questionnaireConnecting: "Opening your questionnaire\u2026",
     questionnaireConnectionError: "The connection to your AI is unavailable. Keep this page open and ask your AI to reconnect. Any saved responses remain on this page.",
     studyConnectionTitle: "AI learning",
-    studyConnecting: "Connecting to your learning page\u2026"
+    studyConnecting: "Connecting to your learning page\u2026",
+    storageFull: "Storage is full. This change could not be saved. Back up quiz sets you want to keep, then remove unneeded sets or mixed practice records, or free some device storage.",
+    recordStorageFull: "Storage for this quiz set is full. Its content and attempt history exceed the per-set limit. Export a backup, then re-import the quiz to start a new attempt.",
+    ordinaryStorage: "Quiz library",
+    storageAtLimit: "Storage full",
+    storageNearLimit: "Nearly full",
+    storageUsage: "{{library}} {{used}} / {{limit}} MiB \xB7 {{state}}",
+    storageExplanation: "Using {{used}} / {{limit}} MiB for questions, original quiz data and attempt history. Each library has its own budget, with a warning at 80%; the number of sets is not limited. Each set and its history can use up to {{recordLimit}} KiB. Low device storage can also prevent saving.",
+    ordinaryStorageCleanup: "Export a backup before deleting quiz sets you no longer need.",
+    practiceStorageCleanup: "Quiz library backups do not include mixed practice records. Only delete mixed records you no longer need."
   },
   legalUi: {
     privacyIntro: "GAGA learn\u2019s website and the AI Chat to Quiz (AI\u4F1A\u8BDD\u8F6C\u6D4B\u9A8C) Chrome extension help you turn AI conversations into personal practice quizzes. This policy covers both products. Neither requires an account.",
@@ -875,7 +884,16 @@ var common_default2 = {
     questionnaireConnecting: "\u6B63\u5728\u6253\u5F00\u95EE\u5377\u2026",
     questionnaireConnectionError: "\u6682\u65F6\u65E0\u6CD5\u8FDE\u63A5 AI\u3002\u8BF7\u4FDD\u7559\u6B64\u9875\u9762\uFF0C\u8BA9 AI \u91CD\u65B0\u8FDE\u63A5\uFF1B\u5DF2\u4FDD\u5B58\u7684\u56DE\u7B54\u4ECD\u4FDD\u7559\u5728\u7F51\u9875\u4E2D\u3002",
     studyConnectionTitle: "AI \u5B66\u4E60",
-    studyConnecting: "\u6B63\u5728\u8FDE\u63A5\u5B66\u4E60\u9875\u9762\u2026"
+    studyConnecting: "\u6B63\u5728\u8FDE\u63A5\u5B66\u4E60\u9875\u9762\u2026",
+    storageFull: "\u5B58\u50A8\u5DF2\u6EE1\uFF0C\u65E0\u6CD5\u4FDD\u5B58\u672C\u6B21\u66F4\u6539\u3002\u8BF7\u5148\u5907\u4EFD\u9700\u8981\u4FDD\u7559\u7684\u666E\u901A\u9898\u96C6\uFF0C\u518D\u6E05\u7406\u4E0D\u9700\u8981\u7684\u9898\u96C6\u6216\u6DF7\u5408\u8BB0\u5F55\uFF0C\u6216\u91CA\u653E\u8BBE\u5907\u5B58\u50A8\u7A7A\u95F4\u3002",
+    recordStorageFull: "\u6B64\u9898\u96C6\u5B58\u50A8\u5DF2\u6EE1\uFF0C\u9898\u76EE\u548C\u4F5C\u7B54\u5386\u53F2\u8D85\u8FC7\u5355\u4EFD\u5BB9\u91CF\u4E0A\u9650\u3002\u8BF7\u5148\u5BFC\u51FA\u5907\u4EFD\uFF0C\u518D\u91CD\u65B0\u5BFC\u5165\u9898\u96C6\u5F00\u59CB\u6D4B\u9A8C\u3002",
+    ordinaryStorage: "\u666E\u901A\u9898\u5E93",
+    storageAtLimit: "\u5B58\u50A8\u5DF2\u6EE1",
+    storageNearLimit: "\u63A5\u8FD1\u4E0A\u9650",
+    storageUsage: "{{library}} {{used}} / {{limit}} MiB \xB7 {{state}}",
+    storageExplanation: "\u5DF2\u7528 {{used}} / {{limit}} MiB\uFF0C\u5305\u542B\u9898\u76EE\u3001\u539F\u59CB\u9898\u96C6\u548C\u4F5C\u7B54\u8BB0\u5F55\u3002\u4E24\u7C7B\u9898\u5E93\u5206\u522B\u8BA1\u7B97\uFF0C\u8FBE\u5230 80% \u65F6\u63D0\u9192\uFF0C\u4E0D\u6309\u9898\u96C6\u4EFD\u6570\u9650\u5236\u3002\u5355\u4EFD\u9898\u96C6\u53CA\u5386\u53F2\u6700\u591A {{recordLimit}} KiB\u3002\u8BBE\u5907\u53EF\u7528\u7A7A\u95F4\u4E0D\u8DB3\u65F6\u4E5F\u53EF\u80FD\u65E0\u6CD5\u4FDD\u5B58\u3002",
+    ordinaryStorageCleanup: "\u8BF7\u5148\u5BFC\u51FA\u5907\u4EFD\uFF0C\u518D\u5220\u9664\u4E0D\u9700\u8981\u7684\u9898\u96C6\u3002",
+    practiceStorageCleanup: "\u666E\u901A\u9898\u5E93\u5907\u4EFD\u4E0D\u5305\u542B\u6DF7\u5408\u8BB0\u5F55\uFF0C\u8BF7\u4EC5\u5220\u9664\u786E\u8BA4\u4E0D\u518D\u9700\u8981\u7684\u6DF7\u5408\u8BB0\u5F55\u3002"
   },
   legalUi: {
     privacyIntro: "\u560E\u560E\u5B66\u4E60\u7F51\u7AD9\u4E0E AI\u4F1A\u8BDD\u8F6C\u6D4B\u9A8C\uFF08AI Chat to Quiz\uFF09Chrome \u6269\u5C55\u5E2E\u52A9\u4F60\u628A AI \u4F1A\u8BDD\u53D8\u6210\u4E2A\u4EBA\u7EC3\u4E60\u9898\u96C6\u3002\u672C\u9690\u79C1\u8BF4\u660E\u540C\u65F6\u9002\u7528\u4E8E\u8FD9\u4E24\u4E2A\u4EA7\u54C1\uFF0C\u4F7F\u7528\u5747\u65E0\u9700\u6CE8\u518C\u8D26\u53F7\u3002",
