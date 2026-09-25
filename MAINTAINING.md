@@ -4,7 +4,7 @@
 
 ## Skill 操作版本
 
-Skill 的 `SKILL.md metadata.version` 是版本来源。Web 的 `platform/skill-operations.json` 声明支持的 `skillOperationVersion`，页面通过 `data-skill-operation-version` 暴露，前端 `version` 和 `help` 命令也返回它。旧 `data-gaga-version`、`data-gaga-release.version` 和 `webVersion` 仅为兼容别名，均表示同一个 Skill 操作版本。Web 不再从 package.json 读取或独立递增版本。
+Skill 的 `SKILL.md metadata.version` 是版本来源。`web:skill:sync` 同步 Web 的 `platform/skill-operations.json`、Chrome 的 `src/platform/skill-operations.json` 和 Weapp 的 `lib/study-operations.generated.json`，三者声明同一 `skillOperationVersion`；页面通过 `data-skill-operation-version` 暴露，前端 `version` 和 `help` 命令也返回它。旧 `data-gaga-version`、`data-gaga-release.version` 和 `webVersion` 仅为兼容别名，均表示同一个 Skill 操作版本。Web 不再从 package.json 读取或独立递增版本。
 
 只有变更影响 Skill 指导或执行的用户操作时，才同步更新功能说明、命令、入口、数据格式和脚本；两边对齐后使用新的 Skill 操作版本。新增学习功能、修改导入流程或存档协议属于此范围。纯视觉、性能优化、部署和不改变操作的内部重构保持版本不变。拼写修正和维护工具调整也不表示操作能力变化。
 
