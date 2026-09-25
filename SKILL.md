@@ -2,7 +2,7 @@
 name: selfstudy-coach
 description: 辅导用户学习知识，首次学习某个主题时可经同意用网页选择题问卷了解目标、经验和学习安排，再按回答提供入门讲解、会话总结、答疑、练习与复盘；需要网页验证时，桌面 Agent 自动导入测验，网页版 AI 提供完整题集和带操作提醒的网址。适用于从零学习、中途补弱和当前会话知识整理，不预设学习阶段。
 metadata:
-  version: "0.4.20"
+  version: "0.4.21"
   display_name: "自学辅导"
   display_name_en: "Self-Study Tutor"
 ---
@@ -56,7 +56,7 @@ Chrome 扩展与微信小程序也提供相同的本地测验、问卷和 Agent 
 
 问卷提交后，网页提醒用户告诉 AI「我已回答完毕」。自动连接中，用户告知后通过本机连接 `call` 或页面求值执行 `questionnaire.read`，传入本次 `questionnaireId`，确认 `completedAt` 非空；按 `questionnaire.questions` 与 `answers` 的 ID 还原实际选择，再继续学习。
 
-知识测验使用 `quiz.attempts` 查找作答记录，再用 `quiz.result` 读取本次 `quizId` / `attemptId` 的真实选择、成绩和解析。未指定次数时默认最新一轮；最新一轮尚未完成则说明状态，不把旧成绩当作本次结果。用户明确复盘历史时再选对应已完成记录。按 questionId 和 optionId 关联，区分错题、未答和未判分；正在作答时不主动披露答案，也不改写成绩。
+知识测验使用 `quiz.result` 读取当前会话的完成结果；完整选择和成绩只在本次页面进程内保留，刷新或重开后不提供历史轮次。持久数据是题集内每道题最近一次的 `correct` 与 `answeredAt`（Unix 毫秒）；用 `question.search` 的 `correct: false` 找出最近答错的题，或用 `question.read` 读取 `latestResult`。没有记录表示尚未判定，不能当作答错。混合练习按原题集 ID 和题目 ID 回写相同字段；删除题集一并删除记录。未完成进度用于继续答题，不主动披露答案或改写成绩。
 
 用户想找已有题集或某道题时，先用 `quiz.search` / `question.search` 做关键词查询，再用 `question.read` 根据返回的题集 ID 和题目 ID 读取详情。支持限定题集和分页；检索不改变页面或作答，不默认导出整个题库，不声称已具备语义搜索或跨设备同步。
 

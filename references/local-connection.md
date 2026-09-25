@@ -57,7 +57,7 @@ node "<Skill目录>/scripts/study-bridge.mjs" call "<directory>" "<请求.json>"
 
 `quiz.import`、`quiz.start`、`questionnaire.import` 都必须带 requestId。查询默认每页 20 条，limit 为 1–50；使用 nextOffset 继续查询。先读摘要，再按 ID 读详情，不以相似标题猜测题目身份。读命令每次调用获取当前数据；不要为多次独立查询复用同一个 requestId。
 
-用户告知答完后，问卷用 questionnaire.read 并核对 completedAt；知识测验用 quiz.result，核对题集和作答 ID。QUIZ_NOT_COMPLETED 表示最新一轮仍未提交，不能改读上一轮并当作本次成绩。用户选择历史复盘时才明确传历史 attemptId。Agent 不选择、提交答案或修改成绩。
+用户告知答完后，问卷用 questionnaire.read 并核对 completedAt；知识测验用 quiz.result，核对题集和作答 ID。QUIZ_NOT_COMPLETED 表示最新一轮仍未提交，不能改读上一轮并当作本次成绩。页面进程结束后完整轮次不再保留，改读每题最近 correct / answeredAt；不要捏造历史选项。Agent 不选择、提交答案或修改成绩。
 
 ## 快照、重连与错误
 

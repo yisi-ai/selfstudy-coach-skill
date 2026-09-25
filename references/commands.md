@@ -41,14 +41,16 @@ Skill 操作版本 0.4.0 起提供 `window.studyWeb.execute(request)`。Skill �
 
 0.4.17 增加以下命令，同样可从页面求值或本机连接调用：
 
-| command           | args                                              | 结果                                                    |
-| ----------------- | ------------------------------------------------- | ------------------------------------------------------- |
-| `quiz.start`      | `{ quizId, mode?, practice? }`，requestId 必填    | 开始一轮或继续未完成进度，不清空答案，不延长时间        |
-| `quiz.search`     | `{ query?, offset?, limit?, practice? }`          | 按标题、说明搜索题集，返回分页概要                      |
-| `question.search` | `{ query?, quizId?, offset?, limit?, practice? }` | 按题干、选项、解析、题集名检索，返回 ID、题号和命中摘要 |
-| `question.read`   | `{ quizId, questionId, practice? }`               | 单题完整内容及历史记录中的选择                          |
-| `quiz.attempts`   | `{ quizId, practice? }`                           | 作答 ID、难度、时间与完成状态，已完成记录附成绩         |
-| `quiz.result`     | `{ quizId, attemptId?, practice? }`               | 指定或最新一轮的已完成结果、题目与实际选择              |
+| command           | args                                                        | 结果                                                    |
+| ----------------- | ----------------------------------------------------------- | ------------------------------------------------------- |
+| `quiz.start`      | `{ quizId, mode?, practice? }`，requestId 必填              | 开始一轮或继续未完成进度，不清空答案，不延长时间        |
+| `quiz.search`     | `{ query?, offset?, limit?, practice? }`                    | 按标题、说明搜索题集，返回分页概要                      |
+| `question.search` | `{ query?, quizId?, correct?, offset?, limit?, practice? }` | 按题干、选项、解析、题集名检索，返回 ID、题号和命中摘要 |
+| `question.read`   | `{ quizId, questionId, practice? }`                         | 单题完整内容、latestResult 和当前未完成进度             |
+| `quiz.attempts`   | `{ quizId, practice? }`                                     | 当前未完成进度的 ID、难度和时间，不包含完成历史         |
+| `quiz.result`     | `{ quizId, attemptId?, practice? }`                         | 当前会话完成详情；会话结束后返回每题最近结果            |
+
+0.4.21 起，question.search 支持 correct 布尔筛选；false 仅返回最近答错的题，不包含未作答。返回 latestResult 含 correct 和 answeredAt。没有新增错题集页面。
 
 搜索 query 是最长 200 字符的关键词，大小写及全半角规范化，空白分词后全部匹配；不是语义搜索。offset 为非负整数，limit 为 1–50，默认 20，返回 total/items/nextOffset。限定不存在的题集报 QUIZ_NOT_FOUND；同名题或重复题目 ID 仍须以 quizId＋questionId 区分。
 

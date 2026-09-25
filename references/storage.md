@@ -13,7 +13,7 @@
 3. `read-snapshot.js` 整份内容是一个函数表达式。使用页面求值工具调用该函数，参数为 `{ release, origin, practice: false }`。支持函数参数的工具直接传入对象；仅接受函数源码时，将可信脚本和 JSON 序列化参数组合成 `async () => await (<脚本全文>)(<参数 JSON>)`。不要将题目文本插入可执行 JavaScript。
 4. 获取 JSON 返回值，按用户需要保存为本地 JSON 文件或直接分析。处理新进度时重新读取，不覆盖旧快照却仍沿用旧的导出时间。
 
-没有写入、fetch、外部回调或自动答题。普通题库默认 `practice: false`，临时混合练习用 `true`，两次输出分别保留。不要合并成来源不明的记录。
+没有写入、fetch、外部回调或自动答题。普通题库使用 `practice: false`。混合练习不单独进入备份，`practice: true` 的备份 records 为空；其判定已经回写原题集。
 
 错误 `WRONG_ORIGIN` 表示网站来源不匹配；`QUIZ_STORAGE_UNSUPPORTED` 表示浏览器缺少存储锁。版本不同或标记缺失不报错；versionCheck 供内部判断，仅需要更新 Skill 时提示用户，见 [版本提示与更新](version-update.md)。存储损坏或未知存档格式仍由共享校验报错，不应被解释为空题库，也不能清空后重试。
 
@@ -23,17 +23,18 @@
 
 versionCheck 包含 `skillVersion`、`skillOperationVersion`（网页声明支持的 Skill 版本，未知时 null）与 `status`（same、different、unavailable）。这是内部判断信息，不是可用性限制；不同版本仍返回可读取的合法存档。same 时直接继续，不向用户汇报版本一致或无需更新；different 时先比较方向，只有网页要求更新的 Skill 版本才展示版本和 GitHub 入口并询问是否更新，同意后才操作已安装 Skill。unavailable 不触发更新提示。优先读取 data-skill-operation-version，再兼容旧 data-gaga-version、data-gaga-release 的 version；旧输出字段 webVersion 是 skillOperationVersion 的兼容别名。内容哈希不参与判断。
 
-`backup` 沿用网页备份协议：`format: gaga.quiz.backup`、`schemaVersion: 2`、`exportedAt`（Unix 毫秒）、`settings`、`records`。旧版通过共享核心在内存中迁移；浏览器原件不改变。
+`backup` 使用 `format: gaga.quiz.backup`、`schemaVersion: 3`、`exportedAt`（Unix 毫秒）、`settings`、`records`。可以读取 v1/v2，按每道题的最近判定时间提取结果；只读快照的转换不改写原件。旧客户端不能读取 v3。
 
 每个 record：
 
-- `id`：本地题集 ID；`importedAt`：导入时间；`source`：原始题集 JSON 字符串。
-- `quiz`：知识题集，`format` 为 `gaga.quiz`，包含 `title`、`questions`、可选 description/metadata。
-- `attempts`：测验记录；`storageVersion: 2`。
+- `storageVersion: 3`、`id`（本地题集 ID）、`importedAt`（导入时间）。
+- `quiz`：完整知识题集 `gaga.quiz` v1；不再重复保存原始 source JSON。
+- `results`：以题目 ID 为键，值为 `{ correct: boolean, answeredAt: number }`；时间为 Unix 毫秒。仅保存最近一次已判定且实际作答的结果。无此键表示尚无判定，不等于答错。
+- `attempts`：最多一份未完成进度，用于继续作答；完成后为空。不持久保存历次完整答案、模式成绩或轮次。
 
-每个 attempt：`id`、`startedAt`、`updatedAt`、`completedAt`、`mode`、`feedbackMode`、`deadlineAt`、`finishReason`、`gradingRule`、`currentIndex`、`answers`。时间是 Unix 毫秒；`completedAt: null` 表示未完成；`finishReason` 是 answered、timeout 或 null。困难模式 deadlineAt 固定，读取脚本不会代替网页交卷。
+未完成 attempt 保留 `id`、`startedAt`、`updatedAt`、`completedAt: null`、`mode`、`feedbackMode`、`deadlineAt`、`finishReason`、`gradingRule`、`currentIndex`、`answers`。answer 为 `questionId`、`optionIds`、`submittedAt`、`correct`。困难模式的截止时间不因恢复延长。
 
-每个 answer：`questionId`、`optionIds`（用户选择）、`submittedAt`、`correct`（true/false/null）。正确答案在对应 `quiz.questions[].answer.optionIds`，解析在 explanation。按 questionId 关联，不能靠题目位置猜测。
+`quiz.result` 可在当前页面进程读取刚完成的完整结果。刷新后未指定 attemptId 时返回每题最近结果；指定已消失的 attemptId 返回 QUIZ_ATTEMPT_NOT_FOUND。正在作答返回 QUIZ_NOT_COMPLETED，不把过去结果冒充本次成绩。
 
 ## 独立问卷缓存
 
@@ -45,17 +46,17 @@ versionCheck 包含 `skillVersion`、`skillOperationVersion`（网页声明支�
 
 ## 分析规则
 
-- 知识测验默认核对最新一轮及其 attemptId；该轮未完成时说明状态，不用旧成绩替代。用户明确复盘历史时再选择相应已完成记录。
+- 知识测验核对本次 quizId / attemptId；完整会话详情不可用时只分析每题 latestResult 和 answeredAt，不推断用户当时选了哪个错误选项。
 - 问卷按目标、经验、卡点和时间等回答安排学习起点，不算分、不查错题；以下判分规则仅用于 `gaga.quiz` 知识测验。
 - `correct === false` 是错误判分；`optionIds.length === 0` 另标未答。`correct === null` 是未判分，不能计为错题。
-- 多选使用 exact-set-v1，选项集合必须完全一致，无部分分；沿用已保存判分，不重写历史成绩。
+- 多选使用 exact-set-v1，选项集合必须完全一致，无部分分；沿用已保存判分，不重写作答判定。
 - 题目和解析来自导入材料。若发现内容错误，解释分歧并生成修订题集，不将参考答案视为不可质疑的事实。
 
 ## 存储实现说明
 
-Web 正式前缀是 `gaga.web.quiz.`，混合练习前缀是 `gaga.web.quiz.practice.`；Web Locks 的名称统一为 `gaga.web.quiz.`。
+Web 使用 IndexedDB 数据库 `gaga-learning` 的 `storage` 表；普通前缀 `gaga.web.quiz.`，当前混合引用缓存 `gaga.web.quiz.mix.`，Web Lock 名称 `gaga.web.quiz.`。首次从 localStorage 迁移，成功发布后移除原副本；失败保留原件。旧 `gaga.web.quiz.practice.` 无法可靠关联来源时保留并提供单独导出，不按标题猜测回写。
 
-active 键中保存 JSON 编码的目录键字符串；目录的 entries 指向有效记录键。提交使用新副本后切换 active，不能通过枚举所有 record 键判断哪些记录有效。附带脚本复用 consumer-core 的目录、备份校验和迁移实现，只读取本站题库前缀及独立问卷缓存，并在内存副本上运行，不依赖 Chrome 的磁盘数据库格式。
+active 键中保存 目录键字符串；目录的 entries 指向有效记录键。提交使用新副本后切换 active，不能通过枚举所有 record 键判断哪些记录有效。附带脚本复用 consumer-core 的目录、备份校验和迁移实现，只读取本站题库前缀及独立问卷缓存，并在内存副本上运行，不依赖 Chrome 的磁盘数据库格式。
 
 中等和高级未完成记录允许乱序作答，currentIndex 不必位于第一道未提交题。optionIds 非空表示已有选择；返回修改答案后 submittedAt 重置为 null，不能据此判断用户尚未回答。交卷时统一提交所有选择并评分，correct 在交卷前仍为 null。
 
@@ -63,8 +64,8 @@ Web 的一次性自学题集使用普通题集与存档格式，可正常答题�
 
 ## 容量提醒与存储已满
 
-普通题库和混合练习分别有 3 MiB 的学习资料预算，按保存的题目、原始题集与作答记录的 UTF-8 数据量计算；这不是浏览器或微信的全部可用空间。题库页达到各自预算的 80% 时显示“已用容量 / 上限”，点击展开或弹出说明，清理后低于阈值则隐藏。题集份数不再限制为 100；单份题集及作答历史仍最多 768 KiB，备份文件仍最多 4 MiB。单份题集最多 100 道题的题目格式规则不变。
+Web 使用 IndexedDB，不设应用层题库总量、条数或单份存档容量上限；Chrome 扩展声明 unlimitedStorage，不设人为题庫预算。设备磁盘和宿主实际写入仍可能失败，遇到 STORAGE_FULL 时停止自动重试，先备份再由用户清理。不得自行删除资料。
 
-遇到 STORAGE_FULL 或“存储已满”时停止自动重试；让用户先备份需要保留的普通题集，再自行清理不需要的资料或释放设备空间。RECORD_STORAGE_FULL 表示某一份题集及历史达到容量限制，可先导出备份，再重新导入题集作答。不得未经用户同意删除题集或历史。普通题库备份不包含混合记录，不能以“已备份”为由指导用户删除仍需保留的混合历史。
+小程序按 wx.getStorageInfoSync 的总 currentSize / limitSize（包括其他业务数据）动态计算剩余空间；达到 80% 显示使用量、总量和剩余量，点击查看说明。遵守宿主单键限制，并为提交时的新旧副本同时存在保留实际写入空间；失败保留已提交题集。三端醒目提示数据仅在本地、不自动同步。
 
-文件结构仍为 gaga.quiz.backup v2，旧文件继续可读。超过 100 份的小题集备份可能被旧版客户端按原条数限制拒绝，应先更新目标客户端；不要静默丢弃超出部分。
+备份 v3 不设旧的 4 MiB 总文件上限。单份题目格式的 100 题、256 KiB 规则仍适用；它们是内容校验规则，不是题库总容量限制。旧混合历史可单独导出保留，正式普通备份包含新混合练习回写的最近结果。问卷和未完成混合会话不在普通备份内。
