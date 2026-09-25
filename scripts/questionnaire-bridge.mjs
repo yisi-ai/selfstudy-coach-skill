@@ -416,7 +416,7 @@ var common_default = {
     dashboardTitle: "A little practice\ngoes a long way.",
     dashboardIntro: "Bring a conversation. Take a quiz. Make what you learn your own.",
     answered: "Answers submitted",
-    localNote: "Data stays on this device. No automatic sync \u2014 back up regularly.",
+    localNote: "Quiz sets are saved only on this device. Please back them up regularly.",
     loading: "Opening your library\u2026",
     retry: "Try reading again",
     importTitle: "Bring your conversation to life.",
@@ -558,7 +558,12 @@ var common_default = {
     practiceStorageCleanup: "Mixed practice updates the source quizzes; it does not keep a separate history.",
     questionResults: "Latest answer for each question",
     legacyPracticeNotice: "Older mixed-practice records cannot be linked reliably to source quizzes. They remain on this device and can be exported separately.",
-    legacyPracticeExport: "Export older mixed practice"
+    legacyPracticeExport: "Export older mixed practice",
+    localStorageTitle: "About your saved quiz sets",
+    localStorageDescription: "Your quiz sets and answer records stay on this device and do not automatically sync to other devices. Before switching devices or clearing local data, save a backup. You can also back up regularly from the Backup / Restore section to keep your learning records safe.",
+    localStorageConfirm: "Got it",
+    libraryTitle: "My quiz library",
+    mediaUnsupported: "This quiz or backup contains visual content. Please open it in the WeChat mini program; the website and Chrome extension do not support it yet."
   },
   legalUi: {
     privacyIntro: "GAGA learn\u2019s website and the AI Chat to Quiz (AI\u4F1A\u8BDD\u8F6C\u6D4B\u9A8C) Chrome extension help you turn AI conversations into personal practice quizzes. This policy covers both products. Neither requires an account.",
@@ -757,7 +762,7 @@ var common_default2 = {
     dashboardTitle: "\u804A\u8FC7\u7684\u77E5\u8BC6\uFF0C\n\u503C\u5F97\u518D\u6D4B\u4E00\u6D4B\u3002",
     dashboardIntro: "\u628A\u5BF9\u8BDD\u53D8\u6210\u9898\u96C6\uFF0C\u7528\u4E00\u6B21\u6D4B\u9A8C\uFF0C\u5DE9\u56FA\u771F\u6B63\u7406\u89E3\u7684\u77E5\u8BC6\u3002",
     answered: "\u7D2F\u8BA1\u7B54\u9898",
-    localNote: "\u6570\u636E\u4EC5\u4FDD\u5B58\u5728\u6B64\u8BBE\u5907\uFF0C\u4E0D\u81EA\u52A8\u540C\u6B65\uFF0C\u8BF7\u5B9A\u671F\u5907\u4EFD\u3002",
+    localNote: "\u9898\u96C6\u4EC5\u4FDD\u5B58\u5728\u672C\u5730\u8BBE\u5907\uFF0C\u8BF7\u5B9A\u671F\u5907\u4EFD",
     loading: "\u6B63\u5728\u6253\u5F00\u9898\u96C6\u5E93\u2026",
     retry: "\u91CD\u65B0\u8BFB\u53D6",
     importTitle: "\u628A\u5BF9\u8BDD\uFF0C\u53D8\u6210\u9898\u96C6\u3002",
@@ -899,7 +904,12 @@ var common_default2 = {
     practiceStorageCleanup: "\u6DF7\u5408\u7EC3\u4E60\u56DE\u5199\u6765\u6E90\u9898\u96C6\uFF0C\u4E0D\u518D\u5355\u72EC\u79EF\u7D2F\u5386\u53F2\u8BB0\u5F55\u3002",
     questionResults: "\u6BCF\u9053\u9898\u6700\u8FD1\u7684\u4F5C\u7B54\u60C5\u51B5",
     legacyPracticeNotice: "\u65E7\u7248\u6DF7\u5408\u7EC3\u4E60\u65E0\u6CD5\u53EF\u9760\u5173\u8054\u5230\u539F\u9898\u96C6\uFF0C\u5DF2\u4FDD\u7559\u5728\u6B64\u8BBE\u5907\uFF0C\u53EF\u5355\u72EC\u5BFC\u51FA\u3002",
-    legacyPracticeExport: "\u5BFC\u51FA\u65E7\u7248\u6DF7\u5408\u7EC3\u4E60"
+    legacyPracticeExport: "\u5BFC\u51FA\u65E7\u7248\u6DF7\u5408\u7EC3\u4E60",
+    localStorageTitle: "\u5173\u4E8E\u9898\u96C6\u7684\u4FDD\u5B58",
+    localStorageDescription: "\u4F60\u7684\u9898\u96C6\u548C\u7B54\u9898\u8BB0\u5F55\u90FD\u7559\u5728\u8FD9\u53F0\u8BBE\u5907\u4E0A\uFF0C\u4E0D\u4F1A\u81EA\u52A8\u540C\u6B65\u5230\u5176\u4ED6\u8BBE\u5907\u3002\u6362\u8BBE\u5907\u6216\u6E05\u9664\u672C\u5730\u6570\u636E\u524D\uFF0C\u8BB0\u5F97\u5148\u5907\u4EFD\u4E00\u4EFD\u3002\u5E73\u65F6\u4E5F\u53EF\u4EE5\u5728\u201C\u5907\u4EFD/\u5BFC\u5165\u201D\u91CC\u4FDD\u5B58\u5907\u4EFD\uFF0C\u8BA9\u5B66\u4E60\u8BB0\u5F55\u5B89\u5FC3\u7559\u5B58\u3002",
+    localStorageConfirm: "\u6211\u77E5\u9053\u4E86",
+    libraryTitle: "\u6211\u7684\u9898\u96C6\u5E93",
+    mediaUnsupported: "\u8FD9\u4EFD\u9898\u96C6\u6216\u5907\u4EFD\u5305\u542B\u56FE\u6587\u5185\u5BB9\uFF0C\u8BF7\u5728\u5FAE\u4FE1\u5C0F\u7A0B\u5E8F\u4E2D\u6253\u5F00\u3002\u76EE\u524D\u7F51\u9875\u7248\u548C Chrome \u6269\u5C55\u8FD8\u4E0D\u80FD\u663E\u793A\u8FD9\u4E9B\u5185\u5BB9\u3002"
   },
   legalUi: {
     privacyIntro: "\u560E\u560E\u5B66\u4E60\u7F51\u7AD9\u4E0E AI\u4F1A\u8BDD\u8F6C\u6D4B\u9A8C\uFF08AI Chat to Quiz\uFF09Chrome \u6269\u5C55\u5E2E\u52A9\u4F60\u628A AI \u4F1A\u8BDD\u53D8\u6210\u4E2A\u4EBA\u7EC3\u4E60\u9898\u96C6\u3002\u672C\u9690\u79C1\u8BF4\u660E\u540C\u65F6\u9002\u7528\u4E8E\u8FD9\u4E24\u4E2A\u4EA7\u54C1\uFF0C\u4F7F\u7528\u5747\u65E0\u9700\u6CE8\u518C\u8D26\u53F7\u3002",

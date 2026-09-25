@@ -56,3 +56,21 @@
 ```
 
 通过独立 `questionnaire.import` 命令传入 `{ questionnaire }`，或在导入页粘贴，确认后直接打开 `/app/questionnaires/<questionnaireId>` 第一题。它只有当前一份临时缓存，没有难度、时限、分数、题集条目、备份或历史；新问卷替换当前缓存。提交后提示用户告知 AI，再用 `questionnaire.read` 读取 `answers` 和 `completedAt` 继续学习，详见 [读取方法](storage.md#独立问卷缓存)。知识诊断另建 `gaga.quiz`。旧网页没有独立问卷能力时保留 JSON 并说明限制，不能伪造正确答案或使用 quiz.import 绕过。
+
+## 微信小程序图文题集
+
+仅在用户使用已支持图文的小程序时生成；Web 和 Chrome 仍使用上述纯文本格式。图文 v2 沿用 v1 的题目、答案和长度限制，不适用于问卷。导入提示词也会给出相同能力范围。
+
+图文规则（仅适用于微信小程序）：
+
+- 有图文时 schemaVersion 使用 2；纯文本题集继续使用 1 并省略所有图文字段。
+- 题目可以增加 visuals（题干图文）、explanationVisuals（解析图文）；选项可以增加 visuals。每个数组最多 4 项。题干和选项仍须有可独立理解的文字。
+- 每个节点须有非空 alt（最多 500 字符），准确描述图中信息；题干与选项的 alt 不得泄露解题结论。不要在 stem、text 或 explanation 中内嵌 LaTeX/Markdown 图片，公式放入对应图文数组。
+- 公式：{"kind":"formula","capabilityVersion":1,"latex":"\\frac{1}{2}","alt":"二分之一"}。latex 保存原文，最多 2000 字符、24 层花括号，不加美元分隔符；JSON 中反斜杠须转义。支持 frac/dfrac/tfrac、sqrt、上下标、left/right、sum/prod、int、lim、三角函数、希腊字母、binom、vec/hat/bar/overline，以及 aligned/gathered/cases/matrix/pmatrix/bmatrix/vmatrix/Vmatrix/array 环境。中文放在文字或 alt，不放进公式；不使用自定义宏、外部包、HTML 或脚本。
+- 直角三角形：{"kind":"math_scene","templateVersion":1,"template":"right_triangle","params":{"base":3,"height":4},"alt":"两条直角边为三和四的直角三角形"}。base、height 在 1～10 之间。
+- 二次函数：{"kind":"math_scene","templateVersion":1,"template":"quadratic","params":{"a":1,"b":0,"c":-1},"alt":"开口向上、顶点为零负一的抛物线"}。a、b、c 在 -4～4 之间，a 不为零；视野横轴 -3～3、纵轴 -5～5，关键特征应位于视野内。
+- 平行四边形：{"kind":"math_scene","templateVersion":1,"template":"parallelogram_shear","params":{"base":4,"height":3,"offset":0},"alt":"底四高三的平行四边形"}。底、高在 1～10 之间，offset 在 -2～2 之间。可添加 animation:{"parameter":"offset","from":0,"to":2,"durationMs":4000}，from 必须等于 offset，from/to 在 -2～2 之间，时长在 500～20000 毫秒之间。动画需用户手动播放。
+- 普通图片：{"kind":"image","url":"https://example.com/diagram.png","alt":"图中内容说明"}。这只是网址格式示例，不能把示例地址用于出题。只使用用户或本次会话实际提供的完整 HTTPS 图片网址，不能编造网址。仅保存网址和说明，不下载持久保存图片，不使用 Base64、文件路径、SVG 源码或 assetId。图片显示需要网络；重要题目条件同时写入文字。
+- 所有参数须为有限数值，不接受表达式、任意绘图源码、事件处理器或自造模板。超出支持能力时先说明缺口，不删除必需数学条件来强行通过校验。
+
+示例：在上述题目的 `visuals` 数组中放入公式或图形节点，同时把题集的 `schemaVersion` 改为 2。几何保存模板和数值参数，不执行用户绘图脚本。公式与几何离线绘制，普通图片需要网络。备份为原有 v3 JSON，完整保留图文字段和最近作答结果。
