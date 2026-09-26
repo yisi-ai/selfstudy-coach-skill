@@ -1,63 +1,30 @@
-# Web 功能范围
+# Web feature scope
 
-Skill 主能力是按当前情况辅导学习：知识入门、分步讲解、当前会话总结、答疑与针对性复盘。Web 测验是按需使用的特色能力，覆盖出题 JSON、网页校验导入、用户自主作答、只读快照与错题分析。
+This reference describes the companion Web app. Use the operation route already prepared in SKILL.md; this is not another host-selection guide. Current `help` and actual page behavior define available compatible capabilities.
 
-首次学习某个主题时，Skill 可邀请用户先做一份网页选择题问卷；用户同意后，用 `gaga.questionnaire` 收集目标、经验和时间安排等信息，读取实际回答再确定学习起点并开始指导。问卷可跳过，只用单选、多选，不计分、无难度和时限。使用独立模型、路由、单份临时缓存和命令，仅复用选项选择、题号导航及下一道未答逻辑；不进入题集库、备份、成绩或历史。完成页只展示选中项，并提醒用户告知 AI 已回答。知识诊断继续使用有标准答案的 `gaga.quiz`。
+## Learning activities
 
-首次引导仅用于首页。导入、题库和具体题集/结果地址直接进入对应功能；题集不在当前浏览器时显示缺失提示，不显示示例来代替。Agent 自动导入的知识测验默认直接以中等难度开始，不计分问卷也直接打开第一题，由用户选择答案；知识测验手动导入仍有准备页，问卷导入后直接进入第一题。全流程保持同一浏览器上下文。网页版 AI 交付完整内容和带操作提醒的网址，用户导入后带回答案；电脑上安装、能调用用户本机工具的 Agent 使用本机连接，优先在自己的侧边栏展示。WorkBuddy 桌面端必须使用右栏预览面板，禁止使用 `agent-browser` 另开独立窗口。具体见 [网页打开与答题交接](browser-handoff.md)。
+- Knowledge quizzes: single and multiple choice, reference answers and explanations, formulas, parameterized geometry, HTTPS images, three difficulty modes, and saved unfinished progress.
+- Background questionnaires: unscored single and multiple choice, one current questionnaire and its answers, no timer, quiz-library entry, or quiz backup. The next import replaces the current cache.
+- Teaching whiteboards: one topic, independent buttons for cases or stages, intermediate animation and explanatory text. Web saves boards locally; the **Whiteboards** navigation opens `/app/whiteboards`, where **Add whiteboard** opens the universal importer at `/app/open`. No voice narration, global progress slider, or inclusion in quiz backups.
+- Review: completed test histories with saved selections, current results, per-question latest correctness/time, library searches and backups. Retention details are in [storage](storage.md); do not infer unrecorded history or cumulative counts.
 
-用户完成一次普通或混合测验并保存成绩后，Web 自动标记新手引导已完成；首页也会识别当前浏览器内已有的完成记录。仅导入、打开准备页或尚未答完不计入。该标记保存在实际答题浏览器中，Agent 无需手动写入。
+The user chooses all answers. Quiz commands default to medium and open the first question; questionnaires also open their first question directly. A whiteboard demonstration ending is not an assessment. Flashcards and free-response Web exercises are not implemented; short recall questions may remain in the conversation.
 
-Web 现有能力包括：LaTeX 公式、参数化几何与手动动画、HTTPS 网址图片，中英文界面，桌面与手机布局，题集库、剪贴板题集导入与 JSON/TXT 备份恢复、三种测验模式、进度恢复、每题最近对错和时间、题库备份与追加恢复、随机/混合练习，以及多语言文章阅读。首页以测验为入口，技能配置页面暂不作为公开主入口。
+Easy mode gives feedback after each submitted answer and locks it. Medium gives feedback at completion. Hard has a fixed total limit of question count × 30 seconds and submits at its deadline. Medium and Hard allow changing selections and navigating through numbered question controls before submission; resumption and refresh never extend the hard-mode deadline.
 
-Skill 操作版本 0.4.26：Web/Chrome 将随机与混合练习入口移到练习首页 `/app`，以不同颜色的大按钮和小字说明呈现，位于「新增题集」上方。随机模式挑选一份已有题集，混合模式从题库抽取最多 20 道题；我的题集页下方改为新增题集入口。题集卡片仍可打开指定题集，答题难度、存储与前端命令协议保持不变；小程序页面布局不变。
+## Pages and storage
 
-Skill 操作版本 0.4.27：Web/Chrome 我的题集页把备份和恢复入口移到排序右侧，显示浅色「备份」「导入」按钮，移除排序旁的题集总量数字和底部备份折叠区。「备份」弹窗保留下载与复制文本两种方式，「导入」进入现有备份恢复页；空题库仍能导入。`#guide=export` 高亮上方备份入口，提示先打开再复制；数据协议、前端命令与小程序布局不变。
+`/app` is the learning home; random practice chooses an existing quiz and mixed practice combines up to 20 questions with source-result writeback. `/app/library` manages local quizzes. `/app/open` is the universal **Import learning content** page: **Read clipboard** and **Upload file** identify existing AI content as a quiz, questionnaire or whiteboard; `/app/import` remains a separate prompt-generation/legacy import page. Use the selected route to operate these pages; merely opening an import page does not complete an automatic handoff.
 
-Skill 操作版本 0.4.28：Web/Chrome 我的题集页缩小备份与导入按钮的上下留白，移除卡片删除按钮和混合练习记录区。普通题集详情页继续提供练习历史和删除入口；存档、进度、混合练习功能及命令读取保持不变。
+The library can back up and restore quizzes. It retains compact completed test histories, each question's latest correctness/time and unfinished progress. Completed mixed tests are stored once in the ordinary backup and linked to every contributing source quiz; `practice: true` addresses only the active mixed session. History details show all questions and correctness, marking those from the current source quiz. Deletion and restarting require the user's intent; preserving progress is the default.
 
-Skill 操作版本 0.4.29：Web/Chrome 移除练习首页下方的「新增题集」，保留随机与混合模式及说明。新增题集可从「我的题集」页底部进入，原导入地址与命令保持不变。
+Web uses browser-local IndexedDB, with no account or automatic cross-device synchronization. Different sidebar/browser storage contexts may have different libraries even at the same origin. Normal page resources load from the website; learning commands and the Node connection do not upload library data to its backend. The local connection retains delivered completion receipts independently of ordinary quiz history.
 
-文章总目录 `/articles` 按网站当前所选语言展示，仅列出具有该语言已发布版本的文章；缺少对应版本时不显示，也不回退到另一语言。文章没有默认语言，中文或英文任一种均可独立发布。切换目录语言回到第一页，阅读页语言由 `/en/articles/<id>` 或 `/zh-CN/articles/<id>` 的固定网址决定。
+The English and Chinese UI adapts to narrow right-side panels without changing the browser identity or URLs. Direct activity URLs enter the requested feature. Home-page onboarding and the optional starter quiz are not substitutes for requested content; verify the actual activity's ID and title.
 
-手机访问始终使用手机布局，包括横屏。电脑访问首页及测验页面时，可用宽度小于 768 CSS px 自动使用手机布局，恢复至 768px 及以上则使用桌面布局，适配 Agent 内置网页的窄面板。切换不跳转网址、不重置导入操作或答题状态；Agent 无需修改 User-Agent、存储或附加布局参数。
+## Discovery and maintenance
 
-Easy 提交后显示反馈；Medium 完成后反馈；Hard 在题数 × 30 秒的固定总时限后交卷。备份不包含混合练习存档，读取混合记录需单独指定 practice。
+Commands and compatible additions are discovered through `help` or public `/agent/commands`, not a fixed list in this file. Whiteboard format documentation is also available at `/agent/whiteboard`. Public metadata has no access to the user's saved content.
 
-目前 Web 仅支持 single_choice 与 multiple_choice；闪卡、简答题尚未实现。后续增加能力时补充对应的适用学习场景、格式、操作步骤和验证方法，再让学习主流程按需调用，不能提前声称已支持。
-
-Web 声明支持的 Skill 操作版本，网页 data-skill-operation-version 可直接读取，与官方 Skill 的 metadata.version 对齐。Agent 静默核对版本，同版本直接继续；仅网页对应版本更新、需要更新 Skill 时提示，不检查用户内容哈希、不强制更新。用户同意后使用其提供的对应正式目录或明确指定的发布来源更新并保留定制，见 [更新流程](version-update.md)。
-
-维护源在主项目 apps/web/skills/selfstudy-coach/，正式内容导出到 ~/project/skills/selfstudy-coach-skill/ 独立 Git 仓库。影响本 Skill 用户操作、命令或数据协议的变更，必须审查功能说明、选择器、题集格式和读取脚本，再完成两边同步、更新 Skill 操作版本。纯视觉、性能优化与操作不变的内部重构无需改版本。校验不扫描整个 Web 源码，自动检查不能替代操作说明的语义审查。详见 [维护规则](../MAINTAINING.md)。
-
-## 前端命令与手动引导
-
-Skill 操作版本 0.4.0 提供 `window.studyWeb.execute`，Skill 配套 `scripts/command.js`。`help` / `version` / `quiz.import` / `quiz.list` / `quiz.open` / `questionnaire.import` / `questionnaire.read` / `questionnaire.open` / `snapshot.read` 由浏览器本地执行；导入和读取不上传题集。路由与网页资源加载仍可能正常请求服务器。仅文字 AI 使用 JSON + `/app/import#guide=import`，复盘使用 `/app/library#guide=export`；网页高亮区域并显示浮动操作说明。具体参数见 [前端命令](commands.md)。
-
-## 答题导航与改答
-
-Skill 操作版本 0.4.11：答题进度使用可点击的数字圆标，已有选择亮底、无选择空心。中等与高级难度不显示“上一题”，交卷前可通过圆标自由切题并修改答案；“下一题”从当前题向后查找未回答题，到末尾后从头查找，跳过已有选择的题。全部题目已有选择时显示“交卷”，点击后统一评分；交卷后不能改答。高级难度切题、修改与刷新均不重置截止时间。简单难度保留提交后的锁定和即时反馈，圆标只能返回已解锁题目。Agent 只解释操作，不替用户选择或修改答案。
-
-## 一次性的自学入门题集
-
-Skill 操作版本 0.4.12：Web 首次读取主页的题库或进入题库页时，会为尚未建立本地题库的浏览器加入一份 8 题的自学入门题集。按初始化当时的网站语言保存中文或英文版本，之后切换界面语言不替换正文；不自动开始作答。已有题集或曾清空过题库的用户跳过，处理标记独立保存，用户删除后不会补回。新手三题引导的题目、流程和临时作答不变。
-
-只读快照和前端命令本身不触发初始化。Agent 读取题库时可能看到这份入门题集，应按真实题集 ID 和目标主题选取数据，不将其误认为本次导入的学习题集，也不因为它存在就跳过当前任务的出题与导入。
-
-Skill 操作版本 0.4.15：问卷独立于题集和测验记录，`questionnaire.import` 直接打开第一题并缓存当前一份数据；`questionnaire.read` 读取真实选择，`questionnaire.open` 恢复当前页。无难度、计时、评分、历史或重答；提交后提醒用户告知 AI，并保留回答缓存供下一步辅导。旧版保存在题集中的问卷自动迁出。
-
-Skill 操作版本 0.4.16：只有终端和网页预览的宿主可使用问卷本机连接；右栏嵌入真实 Web，由网页导入并回传实际作答状态及回答。仅监听本机回环端口，单次连接绑定单份问卷，不读取其他题集、不调用网站服务器同步回答；重复打开和刷新保留选择。
-
-Skill 操作版本 0.4.17：study-bridge.mjs 将本机连接扩展为同一学习会话的通用命令通道，支持知识题集与问卷导入、三种难度开始和继续、按次读取成绩、分页搜索题集与单题、按 ID 读取详情。网页执行原有存档与判分规则，命令不经过网站后端；来源、令牌、当前预览和请求回执负责连接对应及重复写入保护。已删除题集和被替换问卷不会因旧请求重试自动恢复。旧问卷连接保留兼容，新会话统一使用 study-bridge。未增加 MCP、语义搜索、自动唤醒 Agent 或跨设备同步。
-
-Skill 操作版本 0.4.18：先区分网页版 AI 与可调用本机工具的桌面 Agent。网页版直接交付导入内容、`#guide=import` 提醒网址和回答交回步骤，不尝试 Node、云端浏览器或本机连接；测验用 `#guide=export` 提醒复制备份，问卷复制完成页实际选择。桌面端继续使用当前自动连接。复用既有网页提醒，不增加题集存储或连接协议。
-
-Skill 操作版本 0.4.21：题集内保存每题最近判定与时间；混合回写来源，完成详情仅当前会话保留。Web 使用 IndexedDB，无人为题库预算；Chrome 使用 unlimitedStorage；小程序容量提醒依据全部业务数据的总占用。三端醒目提示本地数据，不自动同步。
-
-Skill 操作版本 0.4.22：首次进入题集库时，会弹出“题集仅保存在本地设备，请定期备份”的说明，请用户阅读后点击“我知道了”。确认后在当前设备记住，不随题集备份迁移。之后可点击“我的题集库”标题右侧的说明图标查看；学习页面顶部不再重复显示横幅。带 `#guide=export` 的页面也先由用户确认这条说明，再继续原有备份引导。Agent 不代替用户确认。前端命令、题集格式和存档协议保持不变。
-
-Skill 操作版本 0.4.24：Web 与 Chrome 正式接入和小程序一致的图文题集 v2。当时手动导入校验后可逐题预览题干、选项和解析（0.4.25 已改为自动导入）；正式作答、混合练习、反馈与结果回顾显示相同图文。公式由端内引擎排版绘制，可展开复制 LaTeX 原文；动画手动播放或拖动进度条，减少动态效果时使用滑块。图片直接按 HTTPS 网址显示，失败保留说明；备份仍为 v3，只保存原始公式、模板参数、图片网址和说明，不包含图片文件或 ZIP。
-
-## 手动新增题集
-
-Skill 操作版本 0.4.25：Web 与 Chrome 手动新增页参考小程序的 01/02/03 布局，以“复制出题提示词”和“读取剪贴板”为两个主要按钮。用户把提示词发送到 AI 对话并复制完整回复代码后，点击读取剪贴板；校验、图文预检和保存自动执行，成功进入难度准备页，问卷直接进入第一题。不再显示题集文本框、文件入口、检查或预览确认。复制/读取权限、格式、图文能力及存储失败均以弹窗反馈，可修正的格式错误保留修正提示词。原始题库不因失败受损；重复点击正在执行的操作不会重复导入。备份仍需确认恢复，小程序仍沿用原有确认。Agent 命令与题集/备份协议不变。
+Do not compare Web and Skill versions at startup. Diagnose connection, parameter, and data errors first; [update guidance](version-update.md) applies only to confirmed incompatible basics or explicit requests. Skill source and tools live in `apps/web/skills/selfstudy-coach/`. Follow [maintenance rules](../MAINTAINING.md) when changing connection basics, teaching principles, or host support.

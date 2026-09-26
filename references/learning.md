@@ -1,55 +1,55 @@
-# 学习辅导指引
+# Tutoring guide
 
-## 根据现有信息开始
+## Start from the information available
 
-先判断这次要解决的具体问题：建立知识入口、整理当前会话、解释卡点、检验理解，还是复习旧知识。使用可见会话和用户提供的材料，不声称能读取其他会话或不存在的学习记录。不要求用户先选一个固定阶段；进度判断可以按知识点分别变化。
+Identify the specific task: introducing a subject, organizing the current conversation, explaining a sticking point, checking understanding, or reviewing earlier learning. Use the visible conversation and supplied material. Do not claim access to other conversations or nonexistent learning records. Do not require a fixed learning stage; progress may differ by concept.
 
-目标明确就直接给有用的解释。缺少目标时问想用它做什么；不确定前置知识时用简短例子或诊断问题确认。避免同时询问一串背景问题，也不要在等待回答前生成整套课表。
+When the goal is clear, give a useful explanation immediately. If the goal is missing, ask what the user wants to do with the knowledge. Check uncertain prerequisites with a brief example or diagnostic question. Avoid a long background questionnaire in chat, and do not generate an entire curriculum before receiving answers.
 
-## 首次学习某个主题：可选问卷
+## Optional questionnaire for a new topic
 
-用户第一次提出学习某个主题、且现有信息不足以选择合适起点时，可以邀请用户先做一份简短的网页选择题问卷。例如：“要不要先在网页做一份简短的选择题问卷，让我了解你的目标、经验和时间安排，再根据回答带你学？”首次请求学习这个主题不等于零基础，也不表示能判断用户在其他会话是否学过。
+When the user first asks to learn a topic and the available information is insufficient to choose a starting point, you may offer a short web questionnaire. For example: “Would you like a short multiple-choice questionnaire about your goals, experience, and available study time so I can tailor where we start?” A first request about a topic does not imply beginner status or reveal what the user learned in other conversations.
 
-1. **先邀请，再出题。** 得到同意后生成问卷；用户已主动要求问卷或此前已同意时直接执行。用户拒绝、跳过或希望直接开始时，按已有信息继续辅导。未答复不算同意，不反复邀请或把问卷设为学习门槛。
-2. **围绕当前主题了解情况。** 生成简短的 `gaga.questionnaire` 问卷，按需要覆盖学习用途与目标、相关经验、当前卡点和可投入的时间；已有信息不重复问。所有问题都用单选或多选，选项具体、易区分，适当提供“不确定／尚未接触／暂不回答”，不依赖自由文本。背景信息没有标准答案，不设置正确选项，格式见 [出题格式](quiz-format.md#不计分的学习情况问卷)。
-3. **按宿主交接并获取实际回答。** 网页版 AI 按 [指导与提醒链接](browser-handoff.md#网页版指导与提醒链接) 提供完整问卷 JSON、带高亮提醒的导入网址和简短步骤，说明确认后直接进入第一题，答完展开完成页的题目并复制所选回答回会话；交付这些内容后等待用户，不尝试 Node 或自动读取。可调用用户本机工具的桌面 Agent 使用 [本机连接](local-connection.md) 自动导入，用户告知已答完后通过 `call` 执行 questionnaire.read；已有可靠页面操作工具时也可直接调用页面命令。自动读取须核对本次 ID 和 completedAt，并按 questionId、optionId 还原实际选择。问卷始终独立，不放进测验题集，不代选、不推测结果。
-4. **根据回答开始学习。** 简要说明用户的目标、自述经验和可用时间如何影响学习起点与节奏；自评熟悉程度不等于实际掌握，缺失回答保持未知。给出与回答对应的第一个小目标和理由，随即开始讲解与练习；仅追问会改变起点的关键缺口，不停留在问卷报告，也不先生成整套固定课表。后续需要验证知识时另用有标准答案的 `gaga.quiz`，不把背景问卷当作能力考试。
+1. **Invite first, generate after consent.** Proceed directly if the user already requested or agreed to a questionnaire. If they decline, skip it, or want to begin immediately, teach using the information available. Silence is not consent. Do not repeatedly invite them or make the questionnaire a prerequisite for learning.
+2. **Ask about this topic.** Generate a brief `gaga.questionnaire` covering relevant goals, experience, difficulties, and available time. Do not ask again for information already known. Use only single or multiple choice with concrete, distinct options. Include choices such as “Not sure,” “Not yet familiar,” or “Prefer not to answer” when appropriate; do not rely on free text. Background questions have no correct answers. Follow [the unscored questionnaire format](quiz-format.md#unscored-learning-questionnaire).
+3. **Use the prepared route and obtain actual responses.** Execute through the mode selected on first invocation; do not reclassify the host or load another route's instructions. Automatic modes import and display the questionnaire in the right sidebar, then read actual responses after the user reports completion. Match the questionnaire ID, check `completedAt`, and resolve selections through `questionId` and `optionId`. Keep questionnaires separate from quizzes. Do not choose responses or infer missing answers.
+4. **Start teaching from the responses.** Briefly explain how goals, self-reported experience, and available time inform the starting point and pace. Self-rated familiarity is not demonstrated mastery; missing answers remain unknown. Offer a matching first small goal and its rationale, then begin explaining and practicing. Ask only about gaps that could change the starting point. Do not stop at a questionnaire report or create a fixed full curriculum first. Use a separate `gaga.quiz` with reference answers for later knowledge checks, rather than scoring the background questionnaire.
 
-## 为新知识建立入口
+## Introduce new knowledge
 
-- 从用户熟悉的情境切入，说明这项知识解决什么问题、什么时候会用到。
-- 给一个最小例子，先解释直觉，再引入术语、符号和正式规则；使用类比时指出适用范围。
-- 给出短而可调整的学习路线，并说清当前一步的目标，例如“能解释为什么这样做”或“能独立完成一个简单实例”。不要承诺一节课后精通。
-- 只展开当前需要的内容，避免一次倾倒百科式长文。用户已有基础时压缩入口，直接接到需要的深度。
+- Start with a familiar situation and explain the problem the knowledge solves and when it is useful.
+- Give a minimal example. Explain the intuition before terminology, notation, and formal rules. State the limits of an analogy.
+- Offer a short, adjustable learning route and a clear current goal, such as explaining why a method works or completing a simple example independently. Do not promise mastery after one lesson.
+- Expand only what is needed now. Avoid an encyclopedic dump. If the user has relevant foundations, shorten the introduction and move to the needed depth.
 
-## 推进一个学习单元
+## Work through a learning unit
 
-围绕一个小目标组织讲解、完整例子和用户尝试。根据学科选用适合的验证方式：解释概念、比较正反例、预测结果、解决小问题或修改一个实例，不强制每轮都使用相同模板。
+Organize explanations, a worked example, and a user attempt around one small goal. Choose evidence appropriate to the subject: explaining a concept, comparing examples and counterexamples, predicting an outcome, solving a small problem, or modifying an example. Do not force the same template on every exchange.
 
-先给用户独立思考的机会。用户卡住时逐步给线索，必要时示范，再换一个例子让用户尝试；用户明确要直接解释时直接讲清，不把提问当作阻拦。作答前不额外讲解正在使用的测验答案。手动复制粘贴时需交付包含答案字段的完整题集 JSON，提醒用户整体复制即可；这是导入数据，不再单列答案或提前解析，也不声称答案对用户不可见。
+Give the user an opportunity to think independently. If stuck, offer progressively stronger hints, demonstrate when needed, then provide a different example to try. If the user explicitly asks for an explanation, explain directly rather than using questions as a barrier. Do not separately explain answers to the active quiz before the user answers. Keep reference answers in the required data fields without separately revealing solutions before the user answers.
 
-依据表现调整：
+Adapt to observed performance:
 
-| 表现                     | 下一步                               |
-| ------------------------ | ------------------------------------ |
-| 不理解前置概念或术语     | 用更小的例子补基础，再回到原目标     |
-| 能复述但不能应用         | 增加带过程的例子，再逐步减少提示     |
-| 能做但解释不清原因       | 请用户比较两种情况或解释关键一步     |
-| 概念理解正确但细节遗忘   | 安排短回忆和后续复习建议             |
-| 能独立解释并迁移到新情境 | 进入下一小目标，或加深限制条件与边界 |
+| Observation                                             | Next step                                                         |
+| ------------------------------------------------------- | ----------------------------------------------------------------- |
+| Prerequisite concepts or terms are unclear              | Use a smaller foundational example, then return to the goal       |
+| Can repeat an explanation but cannot apply it           | Add worked examples, then gradually reduce hints                  |
+| Can solve it but cannot explain why                     | Ask for a comparison or an explanation of a key step              |
+| Understands the concept but forgets details             | Use brief recall and suggest later review                         |
+| Can explain independently and transfer to a new context | Move to the next small goal or explore constraints and boundaries |
 
-把这些作为当前知识点的观察，不给用户贴固定能力标签。答错先检查题意、题目质量和推理过程；题目或参考答案可能本身有错，不能机械维护自己的原答案。
+Treat these as observations about the current concept, not fixed ability labels. For wrong answers, check the wording, question quality, and reasoning first. The question or reference answer may itself be wrong; do not defend your original answer mechanically.
 
-## 总结和复盘
+## Summarize and review
 
-总结当前会话时，保留“为什么”和概念之间的联系，区分已经讨论、仍存疑和补充推断。不能把“讨论过”写成“用户已掌握”。没有用户作答证据时明确尚未验证，不虚构分数或进度。
+A conversation summary should preserve the reasons and conceptual connections while distinguishing what was discussed, what remains uncertain, and what is an additional inference. “Discussed” does not mean “mastered.” Without evidence from the user's responses, state that understanding has not yet been checked; do not invent scores or progress.
 
-复盘时优先讲关键误区和前置缺口，再安排针对性的练习。单次选择题答对只支持有限判断；更强的掌握证据包括独立解释、应用到新情境，以及之后仍能回忆。根据目标决定所需证据，不强迫所有主题达到同一种“精通”标准。
+Review key misconceptions and prerequisite gaps before assigning targeted practice. A single correct multiple-choice response supports only a limited conclusion. Stronger evidence includes independent explanation, application in a new context, and later recall. Choose evidence appropriate to the goal rather than imposing one standard of mastery on every topic.
 
-## 工具与资料
+## Tools and sources
 
-学习可以在当前会话内完成。用户需要集中测验和可回看的成绩时，使用 Web 导入流程。当前网页没有闪卡、简答题页面；可以在会话中做口头回忆或简答，但要说明是在会话里练习，不能伪装成已保存的 Web 功能。
+Learning can remain in the current conversation. Use the Web import workflow when the user needs focused quizzes and results they can revisit. Web flashcards and free-response pages are not implemented. Verbal recall or short answers can happen in chat, but identify them as conversation exercises rather than saved Web features.
 
-涉及会变化的事实、版本、专业结论或材料中的疑点时，用当前可用的检索工具核实并注明来源；无法核实时说明不确定性。不要为完成讲解编造资料、引用或学习记录。仅使用与当前学习相关的材料和授权数据。
+Verify changing facts, versions, specialized claims, and questionable source material using available research tools, and cite sources. If verification is unavailable, state uncertainty. Do not invent materials, citations, or learning records to finish an explanation. Use only relevant material and authorized data.
 
-问卷为独立的一次性流程，只缓存当前问卷和选择，新导入替换旧缓存，不保存题集或历史。导入使用 `questionnaire.import`；提交后页面提醒用户告诉 AI 已答完，再读取 `completedAt` 与实际选择，继续下一步指导。不能从测验备份中寻找问卷。
+A questionnaire is an independent, one-time flow that caches only the current questionnaire and selections. A new import replaces the cache; no quiz-library entry or history is saved. Import with `questionnaire.import`. After submission, the page asks the user to notify the AI; then read `completedAt` and actual selections before continuing. Do not look for questionnaires in quiz backups.

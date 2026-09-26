@@ -1,77 +1,56 @@
 ---
 name: selfstudy-coach
-description: 辅导用户学习知识，首次学习某个主题时可经同意用网页选择题问卷了解目标、经验和学习安排，再按回答提供入门讲解、会话总结、答疑、练习与复盘；需要网页验证时，桌面 Agent 自动导入测验，网页版 AI 提供完整题集和带操作提醒的网址。适用于从零学习、中途补弱和当前会话知识整理，不预设学习阶段。
+description: Tutor users through explanations, conversation summaries, questions, single-topic teaching whiteboards, Web practice, and review. Prepare one reusable Web connection on first use, preferring local Node.js and the user's right sidebar, then browser tools controlling that same sidebar. Use file or code delivery only when automation is unavailable or explicitly requested. Adapt to the user's goals and understanding without assuming a learning stage.
 metadata:
-  version: "0.4.29"
-  display_name: "自学辅导"
+  version: "0.4.34"
+  display_name: "Self-Study Tutor"
   display_name_en: "Self-Study Tutor"
 ---
 
-# 自学辅导
+# Self-Study Tutor
 
-帮助用户学习，不表示 Agent 自主学习。`name`、目录与调用标识保持英文；`metadata.display_name` 和 `metadata.display_name_en` 是独立显示名称。用户可以修改自己的 Skill，内容修改不影响使用资格。
+Help the user learn. This skill operates the companion Web app; it does not operate browser extensions or native mini programs. Instructions are in English; teach, generate content, and give feedback in the user's preferred language. Keep the skill name and installation directory `selfstudy-coach` unchanged.
 
-配套网站：<https://www.aiskillonline.com>。用户题库保存在实际答题浏览器的本站存储中。正式版默认更新来源：[yisi-ai/selfstudy-coach-skill](https://github.com/yisi-ai/selfstudy-coach-skill)。用户提供对应正式目录或明确指定其他来源时，优先核验该来源；完整流程见 [版本提示与更新](references/version-update.md)。
+Companion website: <https://www.aiskillonline.com>. Use this origin unless the user specifies another. The learning data belongs to the actual right-sidebar browser where the user answers.
 
-## 先定位当前任务
+## Prepare once on first use
 
-先读可见会话、用户提供的材料与已知目标，不假设用户是零基础或已经学完。没有记录不代表不会；单个知识点的表现不能代表整门知识的进度。信息足够就开始，影响讲解深度时只问关键缺口，或用一个简短问题定位理解。不把用户的总结、答疑请求强行变成完整课程。
+Reuse the current learning session's preparation record if it exists. Otherwise inspect the available tools once, select the first usable route below, and read **only that route's reference**. Prepare it as part of the first invocation, without asking the user to detect tools, copy content, or install a runtime. Do not repeat route selection for each turn, questionnaire, quiz, or whiteboard.
 
-用户首次提出学习某个主题时，可以先询问是否愿意做一份简短的网页选择题问卷，了解学习目标、相关经验和时间安排。用户同意后再生成不计分问卷，按下方宿主分流自动导入或指导用户导入；问卷导入后直接打开第一题，无需再点击开始。收到实际回答后据此确定学习起点、节奏和第一个小目标，并开始指导。问卷是可选入口，用户跳过时按现有信息开始；具体流程见 [学习辅导指引](references/learning.md#首次学习某个主题可选问卷)。
+| Priority                   | Required capability                                                                                                         | Read when selected                                 |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| 1. Local Node connection   | Node.js 22+ on the user's computer and a tool that displays the connected Web app in the right sidebar                      | [Local connection](references/local-connection.md) |
+| 2. Sidebar browser control | An available browser MCP, browser-operation skill, or host tool that controls the **same right-sidebar page** the user sees | [Browser control](references/browser-control.md)   |
+| 3. File or code delivery   | Neither automatic route is usable                                                                                           | [Manual handoff](references/manual-handoff.md)     |
 
-- **从零学习：** 说明知识解决的问题、用途和直观例子，给出简短路线，从一个可完成的小目标开始。
-- **总结当前会话：** 提炼核心概念、联系、已讨论结论和未解决问题，区分会话依据与补充知识；用户只要总结时就交付总结。
-- **中途答疑或补弱：** 定位卡点，必要时补前置概念，再接回原来的问题，不从头重讲整门课。
-- **练习或复盘：** 围绕已学内容和当前目标获取理解证据；用户已有题集或 JSON 时直接复用，不重新生成。
+Local Node has priority even when browser tools are available; it does not require page evaluation or clicking tools. A cloud terminal is not the user's computer. Classify by actual capabilities, not an AI product's name or whether its chat UI runs in a browser. Control of a separate external, isolated, or headless browser does not qualify as control of the right sidebar.
 
-开始讲解、规划路线或复盘前，按 [学习辅导指引](references/learning.md) 选择推进方式。主线是「小目标 → 讲解和例子 → 用户解释或应用 → 反馈 → 调整下一步」，允许随时跳到用户需要的环节。只讲解或总结时，不必先打开网站、读取浏览器存储或检查更新。
+Record the selected mode, site origin, and right-panel identity in the current task context. For Node, also retain the existing session directory, session ID, and complete preview URL; for browser control, retain the verified page handle and tool or skill used. Add actual activity IDs after creation and remember which capabilities have been discovered. Use existing Node session files for recovery; do not invent a second connection manager. Keep connection tokens local. Restore this record after context compaction rather than preparing a new session.
 
-## 按需使用 Web 问卷与测验
+Prepare the selected route once: establish the Node connection or bind the sidebar page, then discover `help` when commands are available. If the first activity is already known, create and display it during preparation. Otherwise prepare the learning page without generating a placeholder activity. Keep preparation bounded so teaching can continue if a capability is unavailable. A user request for only a file or code is honored directly without forcing a Web session.
 
-用户同意首次学习问卷，或要求测验、在网页作答、用测验验证本阶段学习时，执行下面的完整流程。背景问卷使用不计分的 `gaga.questionnaire`，知识测验使用有标准答案的 `gaga.quiz`，均只使用单选、多选，格式见 [出题格式](references/quiz-format.md)。明确只要 JSON/文件时按要求交付文件。短小理解检查可以在会话里完成；不能把每次调用都变成出题。闪卡、简答题的 Web 功能尚未实现，不生成自造格式或声称已打开这些页面。
+## Reuse the prepared route
 
-Web、Chrome 扩展和微信小程序支持同一公式、参数化几何和图片网址的图文题集，按 [图文格式](references/quiz-format.md#三端图文题集) 生成。图片仅保存 HTTPS 网址和说明，不下载持久保存文件；离线时公式与几何仍可显示，网址图片需要网络。
+For each Web task, **operate → verify the right-sidebar result → let the user learn**. The agent prepares, imports, starts, displays, and reads the content. With a working automatic route, generating JSON is an intermediate step; do not ask the user to copy, upload, click an import button, or start a quiz. All automatic operations and reads use the displayed right-side page and its storage.
 
-Web/Chrome 手动新增页只保留三段指引：复制提示词、到 AI 对话发送并复制回复代码、读取剪贴板；读取后自动校验并保存，无文本框和题集预览确认，错误弹窗可复制修正提示词。知识题集保存后进入难度准备页，问卷直接进入第一题。备份恢复仍需确认；小程序仍沿用原有导入确认。
+Use the recorded route directly. Keep Node connected while the user is away; do not stop it after handing over a page or reading one result. On a connection failure, first make one recovery attempt using the original session or page binding. If that fails, try the next usable route in priority order and update the record. Avoid loops of tool discovery, new sessions, and repeated imports. Content or parameter errors are corrected on the current route, not treated as loss of automation. Reselect only after a real failure or a change of host or panel; do not rerun environment checks before normal commands.
 
-Web/Chrome 的练习首页 `/app` 提供「随机模式」和「混合模式」：前者随机打开一份已有题集，后者从题库抽取最多 20 道题。已有普通题集继续保留未完成进度；新混合练习会替换当前未完成的混合练习。练习首页不再显示「新增题集」，新增从「我的题集」页底部按钮进入；这些练习入口与简单、中等、困难三种答题难度不同。
+Both automatic routes must verify the actual visible activity ID, title, and state. Quizzes and questionnaires must be answering or correctly resumed; whiteboards must be displayed and renderable. A saved-but-pending operation needs inspection, not another import. Do not select answers, submit on the user's behalf, change grades, or restart unfinished progress. Preserve mode and hard-mode deadlines. Keep the prepared panel visible without stealing focus while the user answers.
 
-Web/Chrome 我的题集页在排序下拉框右侧提供「备份」「导入」。「备份」打开选择框，可下载文件或复制备份文本；「导入」进入 `/app/import?restore=1`，校验后确认追加恢复。页面下方不再提供备份折叠区，空题库仍可导入。用于网页版 AI 复盘的 `#guide=export` 高亮上方「备份」，再由用户选择复制备份文本。
+## Teach for the current task
 
-Web/Chrome 我的题集页不再展示混合练习记录，题集卡片不提供删除按钮。普通题集的练习历史与删除入口仍在题集详情页；已有存档和进度保留，混合记录仍可通过指定 practice 的读取命令查看。
+Read the visible conversation, supplied material, and known goals. Do not assume a beginner, an entire course, or access to other conversations. Use [the tutoring guide](references/learning.md) when choosing explanations, practice, or review. A summary request should receive a summary; a sticking point should receive the missing explanation. Brief comprehension checks may remain in chat. Preparing a Web connection does not require generating a quiz or using Web for every explanation.
 
-Chrome 扩展与微信小程序也提供相同的本地测验、问卷和 Agent 命令。用户指定这些端时先按 [三端入口与数据范围](references/platforms.md) 选择对应连接，不能把 Web 本机连接地址用于其他端。
+For a new topic with unclear goals or experience, optionally offer a short unscored questionnaire. Generate it after consent, or immediately if already requested. If skipped, start teaching from available information. Use its actual answers to choose a starting point; self-rated familiarity is not demonstrated mastery.
 
-### 先按宿主分流
+Use [quiz formats](references/quiz-format.md) for `gaga.quiz` knowledge tests and `gaga.questionnaire` background questions. Knowledge quizzes default to medium difficulty; questionnaires have no score or timer and open their first question directly. Use [whiteboards](references/whiteboards.md) when intermediate visual changes clarify one topic. Each board's buttons explain cases or stages within that topic, using animation and text without speech or a global playback bar. Deliver all of these through the already selected route.
 
-从当前宿主信息和工具定义判断，不让用户先跑命令检测。网页版 AI（包括电脑浏览器中的聊天网页）以及只有云端代码执行、没有用户本机执行能力的宿主，直接按 [网页版：指导与提醒链接](references/browser-handoff.md#网页版指导与提醒链接) 交付完整 JSON／文件、配套网站的 `/app/import#guide=import` 完整链接和简短操作步骤，并说明答完如何交回回答。到这里等待用户操作，跳过下面的自动导入与自动读取流程；不尝试 Node、本机连接、CDP 或云端浏览器代替用户作答，不要求用户安装 Node。
+## Discover capabilities and read evidence
 
-电脑上安装的 Agent 能在用户电脑执行命令时，使用 [本机连接](references/local-connection.md) 自动导入、打开作答页并读取结果。WorkBuddy 使用右栏；其他桌面 Agent 优先用自身交互预览，缺少侧栏时可用用户实际答题的外部浏览器。终端运行在云端容器不算用户本机，不能把云端 localhost 发给用户。仅有桌面应用名称不足以证明本机工具可用；缺少该能力时，有已核验的页面操作工具可走下面的页面命令路径，否则也使用指导链接。
+Use [commands](references/commands.md) for command semantics and composition when the selected route supports commands. Query `help` once after connection; use a specific command's current help when its arguments are unclear or an operation reports an unsupported command. Compatible new capabilities do not require a Skill update. Public `/agent/commands` documents capabilities but contains no user library. Use real returned fields; do not invent commands or infer cumulative error counts from a question's latest result.
 
-### 可自动操作时：导入并核对实际页面
+After the user reports completion, read through the same prepared route. Verify questionnaire ID and `completedAt`, or quiz ID and attempt ID, before reviewing. Node can recover a delivered completion receipt after a page reload; its reference explains how. If full answers are unavailable, use only the actual retained results. Never substitute an older completed attempt for unfinished work. The file-delivery route explains how users return evidence when automatic reading is unavailable; do not load those instructions during automatic operation.
 
-**你必须自行核验操作页与展示页一致。** 以宿主工具返回的页面句柄、CDP target、工具明确说明的当前面板上下文，或本机连接从实际网页收到的回执为依据，确认你控制的正是用户可见的答题页面；仅网址相同、标题相同或另一个 Chrome 导入成功都不算证明。确认后，导入、点击、结果核对和回答读取必须沿用这个页面。交接前，必须在用户看到的页面核对本次题集 ID、标题、题数和准备／作答状态；另开侧边栏或更换工具后重新核验。无法确认控制关系或目标页缺题时，不得声称“已在侧边栏打开，可以作答”，必须在目标页正常导入，或提供完整 JSON 与导入指引。页面归属与交接检查由你完成，不把排查工作交给用户，也不额外要求用户批准这些常规检查。
+Read [storage](references/storage.md) only for retention, backups, or a legacy snapshot, and [Web feature scope](references/web-features.md) for current boundaries. Do not compare Web and Skill versions at startup or before routine operations. Only confirmed blocking incompatibility or an explicit update request leads to [compatibility and updates](references/version-update.md). Installation requires consent and preservation of customizations.
 
-1. **确认交接方式与实际答题页面。** 桌面 Agent 有用户本机终端时优先使用第 4 步的本机连接，以实际网页回执核验，无需先建立 CDP 控制关系；直接页面命令是已有可靠页面操作工具时的备用路径。桌面端应用优先使用自己的侧边栏。CDP / Chrome DevTools 连接的 Chrome 不一定是这个侧边栏；先确认工具控制的具体页面，不能在 Chrome 导入后仅把链接交给侧边栏。WorkBuddy 桌面端必须使用右栏预览面板，禁止使用 `agent-browser` 另开独立窗口。`present_files` 的预览成功只证明打开了网址；长期记忆或辅助脚本声称“9222 就是右栏”也不能证明控制关系。导入、展示与读取必须使用用户实际答题的同一浏览器存储，具体见 [网页打开与答题交接](references/browser-handoff.md)。
-2. **静默检查版本，仅在需要更新时提示。** 按 [版本与用户确认更新](references/version-update.md) 比较已安装 Skill 版本与网页声明的 Skill 操作版本。版本相同直接继续，不说“版本一致”“无需更新”或汇报检查过程；只有网页要求更新的 Skill 版本时才提示差异并询问是否更新。正式版默认提供官方仓库入口，无需用户另行提供地址；用户另有指定或使用本地测试版时按更新流程核验对应来源。用户明确同意后才更新且保留定制，不比较内容哈希。
-3. **使用同一套网页命令。** 本机连接按第 4 步调用；其他已核验的页面 JavaScript 求值工具可按 [前端命令](references/commands.md) 使用 `scripts/command.js`，先查询 `help`，知识测验发送 `quiz.import`，问卷发送 `questionnaire.import`。题集按 [格式](references/quiz-format.md) 生成；已有文件则读取全文作为参数。知识测验保存题集与初始作答，默认中等难度；问卷写入独立临时缓存，不进入题集库、备份或历史，没有难度、计时、评分或标准答案。两者均直接打开第一题。问卷只保留当前一份及其回答，新的问卷替换旧缓存。生成文件只是中间步骤，不手工改写存储。这个脚本在目标网页运行，不能直接用 Node/Python 执行来控制浏览器。
-4. **通过本机连接完成学习操作。** 宿主有本机终端和交互网页预览能力时，按 [学习本机连接](references/local-connection.md) 执行 `scripts/study-bridge.mjs start`，用返回的 `previewUrl` 在右栏嵌入真实 Web。问卷、知识题集导入、继续测验、题库和单题搜索、作答结果读取都通过同一连接的 `call` 调用网页命令，再用 `status` 核对实际页面回执。WorkBuddy 固定优先使用此连接，不运行旧 CDP 辅助脚本。它是独立的 Node CLI，不需要 CDP 或页面求值。不要仅因没有求值/输入/点击工具就退回手动交付。其他情况下，有可靠输入/点击工具时按 [浏览器步骤](references/browser.md) 完成导入；仅有打开网页和输出文字能力时，提供完整 JSON 与 `/app/import#guide=import`，让用户依照网页指引导入。无需反复尝试不存在的浏览器能力，也不要求用户粘贴 JavaScript 或打开开发者工具。仅手动方式标注「等待你复制后点击读取剪贴板」，不能声称已导入；本机连接的自动方式无需用户粘贴。
-5. **在用户实际答题页面核对后交接。** 本机连接必须确认 `status.connected: true` 且 `status.pageState: "running"`；直接页面命令确认 `data.pageState: "running"`，或核对本次知识测验的 `#quiz-run` / 问卷的 `#questionnaire-run` 后交给用户作答。新问卷直接显示第一题，不停在准备页，也不要求用户再点击开始。知识测验按钮导入出现 `#quiz-ready` 时，选择 medium（用户指定其他难度时遵从要求），有命令时使用 `quiz.start`，按钮方式由 Agent 点击 `#quiz-start`，随后确认作答区。问卷的命令和按钮导入均直接进入第一题，不使用测验准备页。旧 Web 缺少独立问卷能力时说明实际限制，不能把问卷导入题集来绕过。已有未完成记录沿用原模式和进度，不重开。`pending` 代表已经保存但页面尚未确认就绪，应在原页面使用返回的真实 URL 继续检查，不重新导入。本机连接只展示脚本返回的 `previewUrl`，以同一 session 的网页回执核验，不把内部问卷或题集 URL 拆出来展示。其他方式若另用工具展示到侧边栏，必须在侧边栏再次执行 `quiz.open` 或 `questionnaire.open` 核对对应 ID；报 `QUIZ_NOT_FOUND` / `QUESTIONNAIRE_NOT_FOUND` 或“当前浏览器没有这份题集”时，按 [跨浏览器恢复](references/browser-handoff.md#保持同一份题库) 将原 JSON 正常导入目标页面。无法操作目标页面时提供完整 JSON 和导入指引，不能只交付失效链接。Agent 不选择答案。网页已在当前工具内部展示时保持可见，说明实际入口；否则提供验证过的完整题集网址。
-
-自动导入的完成依据是 Web 返回的保存结果和实际作答页状态，问卷与知识测验均适用。遇到错误读取具体错误码，保留 JSON；不要虚构题集地址。写命令的重试沿用原 `requestId` 和数据。本机连接保存写入回执，刷新和重连不会自动重复导入；`COMMAND_OUTCOME_UNKNOWN` 表示写入可能已完成，先查询真实题库或问卷，不能换新 ID 盲目重试。直接页面求值的重试记录只在同一页面生命周期内有效，刷新后先核对已有结果。用户自行粘贴时如实交接下一步，不把需要手动操作的流程说成已经自动完成。
-
-## 复盘与继续学习
-
-延续进入网页时的宿主分流。网页版 AI 请用户带回实际数据：问卷展开完成页的题目并复制所选回答；知识测验提供配套网站的 `/app/library#guide=export` 完整链接，让用户复制备份后贴回或上传。只说“答完了”不包含答案，不能推测结果或再次尝试本机命令；具体交接见 [网页版指引](references/browser-handoff.md#网页版指导与提醒链接)。网页版查找旧题也只分析用户提供的题集或备份，不声称已搜索浏览器题库。以下命令用于自动连接或已核验的页面工具。
-
-问卷提交后，网页提醒用户告诉 AI「我已回答完毕」。自动连接中，用户告知后通过本机连接 `call` 或页面求值执行 `questionnaire.read`，传入本次 `questionnaireId`，确认 `completedAt` 非空；按 `questionnaire.questions` 与 `answers` 的 ID 还原实际选择，再继续学习。
-
-知识测验使用 `quiz.result` 读取当前会话的完成结果；完整选择和成绩只在本次页面进程内保留，刷新或重开后不提供历史轮次。持久数据是题集内每道题最近一次的 `correct` 与 `answeredAt`（Unix 毫秒）；用 `question.search` 的 `correct: false` 找出最近答错的题，或用 `question.read` 读取 `latestResult`。没有记录表示尚未判定，不能当作答错。混合练习按原题集 ID 和题目 ID 回写相同字段；删除题集一并删除记录。未完成进度用于继续答题，不主动披露答案或改写成绩。
-
-用户想找已有题集或某道题时，先用 `quiz.search` / `question.search` 做关键词查询，再用 `question.read` 根据返回的题集 ID 和题目 ID 读取详情。支持限定题集和分页；检索不改变页面或作答，不默认导出整个题库，不声称已具备语义搜索或跨设备同步。
-
-本机连接 `read <directory>` 可读取最近回传的已完成活动快照，返回 `receivedAt` 和 `live: false`，需核对其中活动 ID；优先使用在线 `call` 获取当前数据。需要完整备份时才使用 `snapshot.read`，字段见 [读取方法](references/storage.md)。旧 Web 没有命令接口时可使用 `scripts/read-snapshot.js`。没有求值也没有本机连接时，知识测验提供 `/app/library#guide=export` 让用户复制备份；问卷请用户复制完成页实际选择，不能去题库找问卷历史。读取不修改原存档。
-
-交接后不抢焦点、不关闭答题页。用户明确要求自动跟进且工具支持等待时可等结果区出现；Skill 不会在 Agent 结束后自行唤醒它。对话结束时可给出简短的已学内容、理解证据、待解决问题和下一步建议；不声称具有未实现的跨会话进度同步或提醒功能。Web 的已实现能力及维护范围见 [Web 功能范围](references/web-features.md)。
-
-题库按使用容量管理，不按题集份数限制。题库页在普通题库或混合练习使用量达到各自预算的 80% 时显示已用容量/上限，点击可查看说明；遇到“存储已满”时停止自动重试导入，先让用户备份并自行清理。普通备份不含混合记录，不自动删除用户数据。容量与旧客户端兼容说明见 [存档读取](references/storage.md#容量提醒与存储已满)。
+The skill cannot wake the agent after its turn ends. When notified, resume the same session and continue teaching from real results. Summarize learning, evidence, open questions, and next steps when useful, without inventing cross-session progress or reminders.

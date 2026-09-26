@@ -25,7 +25,7 @@ async function body(request, maximum = 8 * 1024 * 1024) {
   }
   return JSON.parse(Buffer.concat(chunks).toString("utf8"));
 }
-async function launch(directory, entry) {
+async function launch(directory, entry, announce = true) {
   const existing = load(filename(directory, "session"));
   const describe = (session) => console.log(
     JSON.stringify({
@@ -42,12 +42,12 @@ async function launch(directory, entry) {
         signal: AbortSignal.timeout(1500)
       });
       if (response.ok) {
-        describe(existing);
-        return;
+        if (announce) describe(existing);
+        return false;
       }
       throw new Error("The local port is occupied by another service");
     } catch (error2) {
-      if (error2 instanceof Error && error2.message.includes("occupied")) throw error2;
+      if (object(object(error2).cause).code !== "ECONNREFUSED") throw error2;
     }
   }
   const ready = filename(directory, "ready");
@@ -68,8 +68,8 @@ async function launch(directory, entry) {
     if (error) throw error;
     const session = load(filename(directory, "session"));
     if (session.port && object(load(ready)).listening === true) {
-      describe(session);
-      return;
+      if (announce) describe(session);
+      return true;
     }
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
@@ -473,9 +473,9 @@ var common_default = {
     restore: "Restore a library backup",
     restoreIntro: "Preview your backup, then restore its quizzes, latest question results and unfinished progress. Existing quizzes are kept.",
     restoreConfirm: "Add backup to library",
-    backupNote: "Backups contain quizzes, each question\u2019s latest result and time, and unfinished quiz progress. Mixed answers are saved in their source quizzes.",
+    backupNote: "Backups include quizzes, completed test selections, latest question results and unfinished progress. Mixed tests are saved once with source references.",
     delete: "Delete quiz",
-    deleteConfirm: "Delete this quiz and its question results? Export a backup first if you want to keep them.",
+    deleteConfirm: "Delete this quiz, its progress and all related test histories, including mixed tests? Export a backup first if you want to keep them.",
     download: "Download quiz file",
     resume: "Continue attempt",
     start: "Start a new attempt",
@@ -514,8 +514,8 @@ var common_default = {
     answerStatus: "Answered",
     unanswered: "Not answered",
     selected: "Your selection",
-    history: "Current session result",
-    noHistory: "Only each question\u2019s latest result and time are kept.",
+    history: "Test history",
+    noHistory: "No completed tests yet.",
     restart: "Practice again",
     backLibrary: "Back to my library",
     backHome: "Back to the website",
@@ -528,7 +528,7 @@ var common_default = {
     changed: "This attempt changed in another tab. The latest progress is now shown; choose your answer again.",
     restartAttempt: "Start over",
     restartConfirm: "Replace the unfinished attempt? Each question\u2019s latest result and time will be kept.",
-    missingResult: "This session result is no longer available. Open the quiz to see each question\u2019s latest result and time.",
+    missingResult: "This test record is unavailable. Return to the quiz to view its history.",
     siteHome: "Home",
     practiceNav: "Practice",
     navLabel: "Main navigation",
@@ -557,10 +557,9 @@ var common_default = {
     storageAtLimit: "Storage full",
     storageNearLimit: "Nearly full",
     storageUsage: "{{library}} {{used}} / {{limit}} MiB \xB7 {{state}}",
-    storageExplanation: "Data uses the available storage on this device. Quiz sets keep each question\u2019s latest result and time; mixed practice updates the source quiz. There is no fixed 3 MiB library limit.",
+    storageExplanation: "Data uses the available storage on this device. Completed tests keep the selected option IDs; mixed tests are stored once and linked to their source quizzes. There is no fixed 3 MiB library limit.",
     ordinaryStorageCleanup: "Export a backup before deleting quiz sets you no longer need.",
-    practiceStorageCleanup: "Mixed practice updates the source quizzes; it does not keep a separate history.",
-    questionResults: "Latest answer for each question",
+    practiceStorageCleanup: "Mixed test histories are stored once and appear in every source quiz used in the test.",
     legacyPracticeNotice: "Older mixed-practice records cannot be linked reliably to source quizzes. They remain on this device and can be exported separately.",
     legacyPracticeExport: "Export older mixed practice",
     localStorageTitle: "About your saved quiz sets",
@@ -568,9 +567,8 @@ var common_default = {
     localStorageConfirm: "Got it",
     libraryTitle: "My quiz library",
     mediaUnsupported: "This quiz uses visual content that this client cannot display. Please update the client.",
-    visualImageFailed: "Image unavailable. Check your connection or the image link.",
+    visualImageFailed: "Image unavailable",
     visualDrawFailed: "This visual could not be displayed.",
-    visualFormulaSource: "Formula source (LaTeX)",
     visualPlay: "Play diagram",
     visualPause: "Pause diagram",
     visualProgress: "Diagram animation progress",
@@ -578,7 +576,16 @@ var common_default = {
     importReplyStep: "Send the prompt in your AI conversation",
     importReplyHint: "Wait for the reply to finish, then copy the code from the AI\u2019s message and return here.",
     importErrorTitle: "Could not complete this action",
-    importErrorDismiss: "Back and try again"
+    importErrorDismiss: "Back and try again",
+    studyConnectionOffline: "AI disconnected. You can keep answering; responses are saved on this device and will sync when the connection returns.",
+    studyConnected: "AI connected. Your learning progress syncs automatically.",
+    historyToday: "Today",
+    historyYesterday: "Yesterday",
+    historyDaysAgo: "{{days}} days ago",
+    normalTest: "Regular test",
+    mixedTest: "Mixed test",
+    currentQuizQuestion: "From this quiz",
+    backToQuiz: "Back to quiz"
   },
   legalUi: {
     privacyIntro: "GAGA learn\u2019s website and the AI Chat to Quiz (AI\u804A\u5929\u8F6C\u5B66\u4E60\u95EE\u7B54) Chrome extension help you turn AI conversations into personal practice quizzes. This policy covers both products. Neither requires an account.",
@@ -658,6 +665,34 @@ var common_default = {
     start: "Review the introduction, choose a mode if available, then start when you are ready.",
     export: "Select Backup beside the sort menu, then Copy backup text, and paste it into your AI conversation for review. You can also download a backup file. Import a quiz first if your library is empty.",
     close: "Close guide"
+  },
+  whiteboardUi: {
+    title: "Import learning content",
+    intro: "Bring your AI-generated quizzes, questionnaires and whiteboards here. Copy the complete content and read your clipboard, or upload a file.",
+    clipboard: "Read clipboard",
+    upload: "Upload file",
+    library: "Whiteboards",
+    saved: "Saved in this browser",
+    empty: "Whiteboards created by your AI will appear here.",
+    choose: "Choose a case or stage.",
+    repeat: "Select it again to repeat the demonstration.",
+    replayStep: "Select an explanation to replay just that step, then pause.",
+    drawingError: "The whiteboard could not be drawn. Ask your AI to check this content.",
+    imageError: "Whiteboard image unavailable",
+    readError: "Unable to read the content. Try again, or upload a file if clipboard access is unavailable.",
+    invalid: "This content could not be opened.",
+    missing: "This whiteboard is unavailable in this browser. Import the AI file again.",
+    loadError: "Could not access saved whiteboards. Please try again.",
+    rename: "Rename whiteboard",
+    delete: "Delete whiteboard",
+    deleteConfirm: "Delete this whiteboard from this browser?",
+    name: "Whiteboard title",
+    save: "Save title",
+    cancel: "Keep current title",
+    view: "View demonstration",
+    loading: "Reading AI content\u2026",
+    actionError: "The whiteboard change was not saved. Please try again.",
+    create: "Add whiteboard"
   }
 };
 
@@ -834,9 +869,9 @@ var common_default2 = {
     restore: "\u6062\u590D\u9898\u96C6\u5E93\u5907\u4EFD",
     restoreIntro: "\u9884\u89C8\u540E\u8FFD\u52A0\u6062\u590D\u9898\u96C6\u3001\u6BCF\u9898\u6700\u8FD1\u7ED3\u679C\u548C\u672A\u5B8C\u6210\u8FDB\u5EA6\uFF0C\u73B0\u6709\u9898\u96C6\u4F1A\u4FDD\u7559\u3002",
     restoreConfirm: "\u8FFD\u52A0\u6062\u590D\u5230\u9898\u96C6\u5E93",
-    backupNote: "\u5907\u4EFD\u5305\u542B\u9898\u96C6\u3001\u6BCF\u9898\u6700\u8FD1\u5BF9\u9519\u4E0E\u65F6\u95F4\u53CA\u672A\u5B8C\u6210\u8FDB\u5EA6\u3002\u6DF7\u5408\u7EC3\u4E60\u7684\u5224\u5B9A\u4FDD\u5B58\u5728\u5BF9\u5E94\u539F\u9898\u96C6\u4E2D\u3002",
+    backupNote: "\u5907\u4EFD\u5305\u542B\u9898\u96C6\u3001\u5B8C\u6210\u6D4B\u9A8C\u7684\u9009\u62E9\u8BB0\u5F55\u3001\u6700\u8FD1\u5224\u5B9A\u4E0E\u672A\u5B8C\u6210\u8FDB\u5EA6\u3002\u6DF7\u5408\u6D4B\u9A8C\u53EA\u5B58\u4E00\u4EFD\uFF0C\u5173\u8054\u6765\u6E90\u9898\u96C6\u3002",
     delete: "\u5220\u9664\u9898\u96C6",
-    deleteConfirm: "\u5220\u9664\u8FD9\u4EFD\u9898\u96C6\u53CA\u5176\u4F5C\u7B54\u8BB0\u5F55\uFF1F\u9700\u8981\u4FDD\u7559\u65F6\u8BF7\u5148\u5BFC\u51FA\u5907\u4EFD\u3002",
+    deleteConfirm: "\u5220\u9664\u8FD9\u4EFD\u9898\u96C6\u3001\u4F5C\u7B54\u8FDB\u5EA6\u53CA\u76F8\u5173\u6D4B\u9A8C\u5386\u53F2\uFF08\u542B\u6DF7\u5408\u6D4B\u9A8C\uFF09\uFF1F\u9700\u8981\u4FDD\u7559\u65F6\u8BF7\u5148\u5BFC\u51FA\u5907\u4EFD\u3002",
     download: "\u4E0B\u8F7D\u9898\u96C6\u6587\u4EF6",
     resume: "\u7EE7\u7EED\u672A\u5B8C\u6210\u6D4B\u9A8C",
     start: "\u5F00\u59CB\u65B0\u7684\u6D4B\u9A8C",
@@ -875,8 +910,8 @@ var common_default2 = {
     answerStatus: "\u5DF2\u56DE\u7B54",
     unanswered: "\u672A\u4F5C\u7B54",
     selected: "\u4F60\u9009\u62E9\u4E86\u6B64\u9879",
-    history: "\u5F53\u524D\u7EC3\u4E60\u7ED3\u679C",
-    noHistory: "\u957F\u671F\u4EC5\u4FDD\u7559\u6BCF\u9053\u9898\u6700\u8FD1\u7684\u5BF9\u9519\u548C\u65F6\u95F4\u3002",
+    history: "\u6D4B\u9A8C\u5386\u53F2",
+    noHistory: "\u8FD8\u6CA1\u6709\u5B8C\u6210\u7684\u6D4B\u9A8C\u3002",
     restart: "\u518D\u7EC3\u4E00\u6B21",
     backLibrary: "\u8FD4\u56DE\u6211\u7684\u9898\u96C6",
     backHome: "\u8FD4\u56DE\u9879\u76EE\u9996\u9875",
@@ -889,7 +924,7 @@ var common_default2 = {
     changed: "\u53E6\u4E00\u6807\u7B7E\u9875\u66F4\u65B0\u4E86\u672C\u6B21\u6D4B\u9A8C\uFF0C\u5DF2\u663E\u793A\u6700\u65B0\u8FDB\u5EA6\uFF0C\u8BF7\u91CD\u65B0\u9009\u62E9\u7B54\u6848\u3002",
     restartAttempt: "\u91CD\u65B0\u5F00\u59CB",
     restartConfirm: "\u66FF\u6362\u672A\u5B8C\u6210\u7684\u4F5C\u7B54\uFF1F\u6BCF\u9053\u9898\u6700\u8FD1\u7684\u5BF9\u9519\u548C\u65F6\u95F4\u4F1A\u4FDD\u7559\u3002",
-    missingResult: "\u672C\u6B21\u7EC3\u4E60\u7684\u4E34\u65F6\u7ED3\u679C\u5DF2\u4E0D\u53EF\u7528\uFF0C\u8BF7\u6253\u5F00\u9898\u96C6\u67E5\u770B\u6BCF\u9053\u9898\u6700\u8FD1\u7684\u5BF9\u9519\u548C\u65F6\u95F4\u3002",
+    missingResult: "\u8FD9\u6761\u6D4B\u9A8C\u8BB0\u5F55\u5DF2\u4E0D\u5B58\u5728\uFF0C\u8BF7\u8FD4\u56DE\u9898\u96C6\u67E5\u770B\u5386\u53F2\u3002",
     siteHome: "\u9996\u9875",
     practiceNav: "\u7EC3\u4E60",
     navLabel: "\u4E3B\u5BFC\u822A",
@@ -918,10 +953,9 @@ var common_default2 = {
     storageAtLimit: "\u5B58\u50A8\u5DF2\u6EE1",
     storageNearLimit: "\u63A5\u8FD1\u4E0A\u9650",
     storageUsage: "{{library}} {{used}} / {{limit}} MiB \xB7 {{state}}",
-    storageExplanation: "\u6570\u636E\u4F7F\u7528\u5F53\u524D\u8BBE\u5907\u7684\u53EF\u7528\u5B58\u50A8\u3002\u9898\u96C6\u4FDD\u5B58\u6BCF\u9053\u9898\u6700\u8FD1\u7684\u5BF9\u9519\u548C\u65F6\u95F4\uFF0C\u6DF7\u5408\u7EC3\u4E60\u56DE\u5199\u6765\u6E90\u9898\u96C6\uFF0C\u4E0D\u518D\u8BBE\u7F6E\u56FA\u5B9A\u7684 3 MiB \u9898\u5E93\u4E0A\u9650\u3002",
+    storageExplanation: "\u6570\u636E\u4F7F\u7528\u5F53\u524D\u8BBE\u5907\u7684\u53EF\u7528\u5B58\u50A8\u3002\u5B8C\u6210\u7684\u6D4B\u9A8C\u4FDD\u5B58\u7528\u6237\u9009\u62E9\u7684\u9009\u9879 ID\uFF1B\u6DF7\u5408\u6D4B\u9A8C\u53EA\u5B58\u4E00\u4EFD\uFF0C\u5173\u8054\u6765\u6E90\u9898\u96C6\uFF0C\u4E0D\u8BBE\u7F6E\u56FA\u5B9A\u7684 3 MiB \u9898\u5E93\u4E0A\u9650\u3002",
     ordinaryStorageCleanup: "\u8BF7\u5148\u5BFC\u51FA\u5907\u4EFD\uFF0C\u518D\u5220\u9664\u4E0D\u9700\u8981\u7684\u9898\u96C6\u3002",
-    practiceStorageCleanup: "\u6DF7\u5408\u7EC3\u4E60\u56DE\u5199\u6765\u6E90\u9898\u96C6\uFF0C\u4E0D\u518D\u5355\u72EC\u79EF\u7D2F\u5386\u53F2\u8BB0\u5F55\u3002",
-    questionResults: "\u6BCF\u9053\u9898\u6700\u8FD1\u7684\u4F5C\u7B54\u60C5\u51B5",
+    practiceStorageCleanup: "\u6DF7\u5408\u6D4B\u9A8C\u5386\u53F2\u53EA\u4FDD\u5B58\u4E00\u4EFD\uFF0C\u5E76\u51FA\u73B0\u5728\u5B9E\u9645\u51FA\u9898\u7684\u6BCF\u4EFD\u6765\u6E90\u9898\u96C6\u4E2D\u3002",
     legacyPracticeNotice: "\u65E7\u7248\u6DF7\u5408\u7EC3\u4E60\u65E0\u6CD5\u53EF\u9760\u5173\u8054\u5230\u539F\u9898\u96C6\uFF0C\u5DF2\u4FDD\u7559\u5728\u6B64\u8BBE\u5907\uFF0C\u53EF\u5355\u72EC\u5BFC\u51FA\u3002",
     legacyPracticeExport: "\u5BFC\u51FA\u65E7\u7248\u6DF7\u5408\u7EC3\u4E60",
     localStorageTitle: "\u5173\u4E8E\u9898\u96C6\u7684\u4FDD\u5B58",
@@ -929,9 +963,8 @@ var common_default2 = {
     localStorageConfirm: "\u6211\u77E5\u9053\u4E86",
     libraryTitle: "\u6211\u7684\u9898\u96C6\u5E93",
     mediaUnsupported: "\u5F53\u524D\u5BA2\u6237\u7AEF\u65E0\u6CD5\u663E\u793A\u6B64\u9898\u96C6\u7684\u56FE\u6587\u5185\u5BB9\uFF0C\u8BF7\u66F4\u65B0\u5BA2\u6237\u7AEF\u3002",
-    visualImageFailed: "\u56FE\u7247\u6682\u65F6\u65E0\u6CD5\u663E\u793A\uFF0C\u8BF7\u68C0\u67E5\u7F51\u7EDC\u6216\u56FE\u7247\u94FE\u63A5\u3002",
+    visualImageFailed: "\u56FE\u7247\u4E0D\u53EF\u8BBF\u95EE",
     visualDrawFailed: "\u56FE\u793A\u6682\u65F6\u65E0\u6CD5\u663E\u793A\u3002",
-    visualFormulaSource: "\u516C\u5F0F\u539F\u6587\uFF08LaTeX\uFF09",
     visualPlay: "\u64AD\u653E\u56FE\u793A",
     visualPause: "\u6682\u505C\u56FE\u793A",
     visualProgress: "\u56FE\u793A\u52A8\u753B\u8FDB\u5EA6",
@@ -939,7 +972,16 @@ var common_default2 = {
     importReplyStep: "\u524D\u5F80 AI \u5E73\u53F0\u7684\u5BF9\u8BDD\u53D1\u9001\u63D0\u793A\u8BCD",
     importReplyHint: "\u7B49\u56DE\u590D\u751F\u6210\u5B8C\u6210\uFF0C\u590D\u5236\u8FD4\u56DE\u7684\u6D88\u606F\u4EE3\u7801\uFF0C\u518D\u56DE\u5230\u8FD9\u91CC\u3002",
     importErrorTitle: "\u6682\u65F6\u65E0\u6CD5\u5B8C\u6210\u64CD\u4F5C",
-    importErrorDismiss: "\u8FD4\u56DE\u91CD\u8BD5"
+    importErrorDismiss: "\u8FD4\u56DE\u91CD\u8BD5",
+    studyConnectionOffline: "AI \u8FDE\u63A5\u5DF2\u65AD\u5F00\u3002\u53EF\u4EE5\u7EE7\u7EED\u4F5C\u7B54\uFF0C\u56DE\u7B54\u4FDD\u5B58\u5728\u672C\u673A\uFF0C\u6062\u590D\u8FDE\u63A5\u540E\u4F1A\u81EA\u52A8\u540C\u6B65\u3002",
+    studyConnected: "AI \u5DF2\u8FDE\u63A5\uFF0C\u5B66\u4E60\u8FDB\u5EA6\u4F1A\u81EA\u52A8\u540C\u6B65\u3002",
+    historyToday: "\u4ECA\u5929",
+    historyYesterday: "\u6628\u5929",
+    historyDaysAgo: "{{days}} \u5929\u524D",
+    normalTest: "\u666E\u901A\u6D4B\u9A8C",
+    mixedTest: "\u6DF7\u5408\u6D4B\u9A8C",
+    currentQuizQuestion: "\u5C5E\u4E8E\u5F53\u524D\u9898\u96C6",
+    backToQuiz: "\u8FD4\u56DE\u9898\u96C6"
   },
   legalUi: {
     privacyIntro: "\u560E\u560E\u5B66\u4E60\u7F51\u7AD9\u4E0E AI\u804A\u5929\u8F6C\u5B66\u4E60\u95EE\u7B54\uFF08AI Chat to Quiz\uFF09Chrome \u6269\u5C55\u5E2E\u52A9\u4F60\u628A AI \u4F1A\u8BDD\u53D8\u6210\u4E2A\u4EBA\u7EC3\u4E60\u9898\u96C6\u3002\u672C\u9690\u79C1\u8BF4\u660E\u540C\u65F6\u9002\u7528\u4E8E\u8FD9\u4E24\u4E2A\u4EA7\u54C1\uFF0C\u4F7F\u7528\u5747\u65E0\u9700\u6CE8\u518C\u8D26\u53F7\u3002",
@@ -1019,15 +1061,45 @@ var common_default2 = {
     start: "\u5148\u67E5\u770B\u8BF4\u660E\uFF1B\u5982\u6709\u96BE\u5EA6\u9009\u9879\uFF0C\u53EF\u6309\u9700\u9009\u62E9\uFF0C\u51C6\u5907\u597D\u540E\u70B9\u51FB\u5F00\u59CB\u3002",
     export: "\u70B9\u51FB\u6392\u5E8F\u53F3\u4FA7\u7684\u201C\u5907\u4EFD\u201D\uFF0C\u9009\u62E9\u201C\u590D\u5236\u5907\u4EFD\u6587\u672C\u201D\uFF0C\u518D\u7C98\u8D34\u56DE AI \u4F1A\u8BDD\u8FDB\u884C\u590D\u76D8\u3002\u4E5F\u53EF\u4E0B\u8F7D\u5907\u4EFD\u6587\u4EF6\uFF1B\u9898\u5E93\u4E3A\u7A7A\u65F6\uFF0C\u8BF7\u5148\u5BFC\u5165\u9898\u96C6\u3002",
     close: "\u5173\u95ED\u64CD\u4F5C\u6307\u5F15"
+  },
+  whiteboardUi: {
+    title: "\u5BFC\u5165\u5B66\u4E60\u5185\u5BB9",
+    intro: "\u5C06 AI \u4E3A\u4F60\u751F\u6210\u7684\u5B8C\u6574\u5185\u5BB9\u590D\u5236\u5230\u526A\u8D34\u677F\uFF0C\u6216\u76F4\u63A5\u4E0A\u4F20\u6587\u4EF6\uFF0C\u5373\u53EF\u5BFC\u5165\u9898\u96C6\u3001\u95EE\u5377\u6216\u6F14\u793A\u767D\u677F\u3002",
+    clipboard: "\u83B7\u53D6\u526A\u8D34\u677F",
+    upload: "\u4E0A\u4F20\u6587\u4EF6",
+    library: "\u6F14\u793A\u767D\u677F",
+    saved: "\u5DF2\u4FDD\u5B58\u5728\u5F53\u524D\u6D4F\u89C8\u5668",
+    empty: "AI \u521B\u5EFA\u7684\u6F14\u793A\u767D\u677F\u4F1A\u663E\u793A\u5728\u8FD9\u91CC\u3002",
+    choose: "\u9009\u62E9\u4E00\u4E2A\u60C5\u51B5\u6216\u9636\u6BB5\u3002",
+    repeat: "\u518D\u6B21\u70B9\u51FB\u540C\u4E00\u6309\u94AE\u53EF\u91CD\u65B0\u89C2\u770B\u3002",
+    replayStep: "\u70B9\u51FB\u8BB2\u89E3\u6587\u5B57\u53EF\u91CD\u64AD\u5BF9\u5E94\u7684\u8FD9\u4E00\u6B65\uFF0C\u7ED3\u675F\u540E\u505C\u4F4F\u3002",
+    drawingError: "\u767D\u677F\u672A\u80FD\u663E\u793A\uFF0C\u8BF7\u8BA9 AI \u68C0\u67E5\u5185\u5BB9\u3002",
+    imageError: "\u767D\u677F\u56FE\u7247\u4E0D\u53EF\u8BBF\u95EE",
+    readError: "\u672A\u80FD\u8BFB\u53D6\u5185\u5BB9\uFF0C\u8BF7\u91CD\u8BD5\uFF1B\u82E5\u65E0\u6CD5\u8BBF\u95EE\u526A\u8D34\u677F\uFF0C\u53EF\u4EE5\u6539\u7528\u4E0A\u4F20\u6587\u4EF6\u3002",
+    invalid: "\u8FD9\u4EFD\u5185\u5BB9\u672A\u80FD\u6253\u5F00\u3002",
+    missing: "\u5F53\u524D\u6D4F\u89C8\u5668\u4E2D\u6CA1\u6709\u8FD9\u4EFD\u767D\u677F\uFF0C\u8BF7\u91CD\u65B0\u5BFC\u5165 AI \u6587\u4EF6\u3002",
+    loadError: "\u672A\u80FD\u8BFB\u53D6\u767D\u677F\u5B58\u6863\uFF0C\u8BF7\u91CD\u8BD5\u3002",
+    rename: "\u91CD\u547D\u540D\u767D\u677F",
+    delete: "\u5220\u9664\u767D\u677F",
+    deleteConfirm: "\u8981\u4ECE\u5F53\u524D\u6D4F\u89C8\u5668\u5220\u9664\u8FD9\u4EFD\u767D\u677F\u5417\uFF1F",
+    name: "\u767D\u677F\u6807\u9898",
+    save: "\u4FDD\u5B58\u6807\u9898",
+    cancel: "\u4FDD\u7559\u5F53\u524D\u6807\u9898",
+    view: "\u67E5\u770B\u6F14\u793A",
+    loading: "\u6B63\u5728\u8BFB\u53D6 AI \u5185\u5BB9\u2026",
+    actionError: "\u767D\u677F\u4FEE\u6539\u672A\u4FDD\u5B58\uFF0C\u8BF7\u91CD\u8BD5\u3002",
+    create: "\u65B0\u589E\u767D\u677F"
   }
 };
 
 // apps/web/skills/selfstudy-coach/tools/questionnaire-bridge.ts
 var literal = (value) => JSON.stringify(value).replaceAll("<", "\\u003c");
 function bridgePage(session) {
-  const copy = (session.locale === "zh-CN" ? common_default2 : common_default).quizUi;
-  return `<!doctype html><html lang="${session.locale}"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>${session.locale === "zh-CN" ? "\u5B66\u4E60\u95EE\u5377" : "Learning questionnaire"}</title>
-<style>html,body{height:100%;margin:0}iframe{width:100%;height:100%;border:0;display:block}#status{position:fixed;inset:0 0 auto;padding:16px;background:#fff8e8;color:#392f19;font:16px/1.5 system-ui;z-index:1}#status[hidden]{display:none}</style>
+  const resources = session.locale === "zh-CN" ? common_default2 : common_default;
+  const copy = resources.quizUi;
+  const icon = new URL("/icon.png", session.origin).href;
+  return `<!doctype html><html lang="${session.locale}"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="${icon}"><title>${resources.skillUi.brand}</title>
+<style>html,body{height:100%;margin:0}body{display:flex;flex-direction:column}iframe{width:100%;flex:1;min-height:0;border:0;display:block}#status{padding:8px 12px;background:#fff8e8;color:#392f19;font:14px/1.5 system-ui;overflow-wrap:anywhere}#status[hidden]{display:none}</style>
 <div id="status" role="status">${copy.questionnaireConnecting}</div><iframe title="${copy.questionnaireTitle}" referrerpolicy="no-referrer" allow="clipboard-write"></iframe>
 <script>
 const token = location.hash.slice(1);
@@ -1036,8 +1108,14 @@ const id = ${literal(session.id)};
 const frame = document.querySelector('iframe');
 const status = document.getElementById('status');
 const headers = { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' };
-let setup, latest, sending = false, acknowledged = '', retryTimer;
-const fail = () => { status.textContent = ${literal(copy.questionnaireConnectionError)}; status.hidden = false; };
+let setup, latest, sending = false, acknowledged = '', retryTimer, webSeen = false, connectionState = 'connecting';
+const reportConnection = (state) => {
+  connectionState = state;
+  if (webSeen) frame.contentWindow.postMessage({ type: 'gaga.questionnaire.connection', token, id, state }, site);
+  status.hidden = webSeen;
+  if (!webSeen && state === 'error') status.textContent = ${literal(copy.questionnaireConnectionError)};
+};
+const fail = () => reportConnection('error');
 async function forward() {
   if (sending || !latest) return;
   sending = true;
@@ -1048,8 +1126,7 @@ async function forward() {
     acknowledged = value;
     if (latest === value) latest = null;
     const state = JSON.parse(value).pageState;
-    if (state === 'running' || state === 'completed') status.hidden = true;
-    if (state === 'error') fail();
+    reportConnection(state === 'error' ? 'error' : 'connected');
   } catch { fail(); clearTimeout(retryTimer); retryTimer = setTimeout(forward, 2000); }
   finally { sending = false; }
   if (latest && acknowledged === value) void forward();
@@ -1057,6 +1134,8 @@ async function forward() {
 window.addEventListener('message', (event) => {
   const message = event.data;
   if (!setup || event.source !== frame.contentWindow || event.origin !== site || !message || message.token !== token || message.id !== id) return;
+  webSeen = true;
+  reportConnection(connectionState);
   if (message.type === 'gaga.questionnaire.ready') {
     frame.contentWindow.postMessage({ type: 'gaga.questionnaire.import', token, id, questionnaire: setup.questionnaire, resume: setup.imported }, site);
   } else if (message.type === 'gaga.questionnaire.state') {
@@ -1072,6 +1151,14 @@ fetch('/session', { headers }).then(async (response) => {
   frame.src = url.href;
 }).catch(fail);
 setTimeout(() => { if (!acknowledged) fail(); }, 20000);
+setInterval(async () => {
+  if (!setup) return;
+  try {
+    const response = await fetch('/status', { headers, signal: AbortSignal.timeout(5000) });
+    if (!response.ok) throw Error('CONNECTION_FAILED');
+    reportConnection('connected');
+  } catch { fail(); }
+}, 2000);
 </script></html>`;
 }
 async function serveBridge(directory, requestedPort = 0) {
@@ -1161,16 +1248,6 @@ async function serveBridge(directory, requestedPort = 0) {
   if (!address || typeof address === "string") throw new Error("NO_LOCAL_ADDRESS");
   session.port = address.port;
   save(filename(directory, "session"), session);
-  const lifetime = setTimeout(
-    () => {
-      server.close();
-    },
-    2 * 60 * 60 * 1e3
-  );
-  lifetime.unref();
-  server.on("close", () => {
-    clearTimeout(lifetime);
-  });
   return server;
 }
 async function main(args) {
@@ -1225,6 +1302,10 @@ async function main(args) {
       throw new Error("INVALID_COMPLETION");
     console.log(JSON.stringify(result2, null, 2));
     return;
+  }
+  if (command === "status") {
+    await launch(directory, fileURLToPath(import.meta.url), false);
+    Object.assign(session, load(filename(directory, "session")));
   }
   const response = await fetch(`http://127.0.0.1:${session.port}/${command}`, {
     method: command === "stop" ? "POST" : "GET",

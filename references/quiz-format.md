@@ -1,76 +1,76 @@
-# 出题格式
+# Quiz formats
 
-以下约束只针对题集 JSON 数据，不是 Agent 最终回复的格式要求。已选择 Web 测验时，生成数据后继续执行 SKILL.md 的导入和交接：知识测验默认以中等难度直接开始，不计分问卷直接打开第一题；自动模式不能在生成 JSON 后结束。只有文字/网页打开能力时按主指引交付 JSON 和带指引链接，让用户复制后点击“读取剪贴板”。仅讲解或总结时无需出题。
+These constraints describe learning content. Create it for the route already selected in SKILL.md; do not choose another execution mode or stop at JSON during an automatic task.
 
-题集数据是一个完整 JSON 对象（网页也接受完整 JSON 代码围栏），数据内部不混入讲解文案。示例：
+Provide one complete JSON object; the website also accepts a complete fenced JSON block. Do not insert instructional prose into the data. Example:
 
 ```json
 {
   "format": "gaga.quiz",
   "schemaVersion": 1,
-  "title": "光合作用练习",
+  "title": "Photosynthesis practice",
   "questions": [
     {
       "id": "q1",
       "type": "single_choice",
-      "stem": "植物进行光合作用时，主要吸收哪种气体？",
+      "stem": "Which gas do plants primarily absorb during photosynthesis?",
       "options": [
-        { "id": "a", "text": "氧气" },
-        { "id": "b", "text": "二氧化碳" }
+        { "id": "a", "text": "Oxygen" },
+        { "id": "b", "text": "Carbon dioxide" }
       ],
       "answer": { "optionIds": ["b"] },
-      "explanation": "光合作用利用二氧化碳和水合成有机物，并释放氧气。"
+      "explanation": "Photosynthesis uses carbon dioxide and water to produce organic matter and releases oxygen."
     }
   ]
 }
 ```
 
-知识测验 `gaga.quiz` 支持 single_choice 和 multiple_choice。每题 2–12 个选项；单选恰好一个正确选项，多选至少两个。题集 1–100 题且不超过 256 KiB。题集标题不超过 100 字符，可选 description 不超过 1000；题干 5000、选项文本 2000、解析 8000 字符以内。
+Knowledge quizzes (`gaga.quiz`) support `single_choice` and `multiple_choice`. Each question has 2–12 options. Single choice has exactly one correct option; multiple choice has at least two. A quiz contains 1–100 questions and is at most 256 KiB. Maximum character counts: title 100, optional description 1000, stem 5000, option text 2000, and explanation 8000.
 
-题目 ID 在题集内唯一，选项 ID 在题目内唯一，均使用 1–64 位英文字母、数字、下划线或短横线。answer.optionIds 必须指向实际选项，不能重复。题集和题目可带描述性的 metadata 对象；不要在其他位置添加自造字段。
+Question IDs must be unique within the quiz; option IDs must be unique within their question. Use 1–64 English letters, digits, underscores, or hyphens. `answer.optionIds` must reference real options without duplicates. A quiz or question may have a descriptive `metadata` object. Do not add invented fields elsewhere.
 
-题干、选项和解析是纯文本，不执行 HTML。题集格式版本与 Skill 操作版本独立，不能把 schemaVersion 改成 Skill 操作版本。新练习可以注明来源和学习目标，但不要伪造用户作答记录。
+Stems, options, and explanations are plain text, not executable HTML. Quiz schema versions are independent of the skill operation version; do not set `schemaVersion` to the skill version. New exercises may identify sources and learning goals, but must not fabricate user answer records. Write learning content in the user's preferred language; the English examples do not set a required output language.
 
-## 不计分的学习情况问卷
+## Unscored learning questionnaire
 
-首次了解学习目标、经验、卡点和时间安排时使用 `format: "gaga.questionnaire"`、`schemaVersion: 1`。同样只支持 `single_choice`、`multiple_choice`，沿用上述题数、文本、选项与 ID 限制。每题只允许 id、type、stem、options 和可选 metadata；禁止 answer、explanation、难度、评分或历史字段（空 answer 也不接受）。
+Use `format: "gaga.questionnaire"` and `schemaVersion: 1` to learn about goals, experience, difficulties, and available study time. It supports only `single_choice` and `multiple_choice` with the same question, text, option, and ID limits above. Each question allows only `id`, `type`, `stem`, `options`, and optional `metadata`. Do not include `answer`, `explanation`, difficulty, scoring, or history fields; even an empty `answer` is rejected.
 
 ```json
 {
   "format": "gaga.questionnaire",
   "schemaVersion": 1,
-  "title": "了解你的 Python 学习目标",
+  "title": "Your Python learning goals",
   "questions": [
     {
       "id": "goal",
       "type": "single_choice",
-      "stem": "你目前最希望用 Python 做什么？",
+      "stem": "What would you most like to use Python for right now?",
       "options": [
-        { "id": "work", "text": "自动处理工作中的重复任务" },
-        { "id": "data", "text": "分析和整理数据" },
-        { "id": "explore", "text": "先了解编程，目标还不确定" }
+        { "id": "work", "text": "Automating repetitive work tasks" },
+        { "id": "data", "text": "Analyzing and organizing data" },
+        { "id": "explore", "text": "Exploring programming before choosing a goal" }
       ]
     }
   ]
 }
 ```
 
-通过独立 `questionnaire.import` 命令传入 `{ questionnaire }`，或在 Web/Chrome 导入页点击“读取剪贴板”，自动校验并保存后直接打开 `/app/questionnaires/<questionnaireId>` 第一题。它只有当前一份临时缓存，没有难度、时限、分数、题集条目、备份或历史；新问卷替换当前缓存。提交后提示用户告知 AI，再用 `questionnaire.read` 读取 `answers` 和 `completedAt` 继续学习，详见 [读取方法](storage.md#独立问卷缓存)。知识诊断另建 `gaga.quiz`。旧网页没有独立问卷能力时保留 JSON 并说明限制，不能伪造正确答案或使用 quiz.import 绕过。
+Pass `{ questionnaire }` to the separate `questionnaire.import` command through the prepared route. After validation and saving, it opens the first question at `/app/questionnaires/<questionnaireId>`. Only one temporary questionnaire is cached. There is no difficulty, timer, score, library entry, backup, or history; a new questionnaire replaces the current cache. After submission, the page asks the user to notify the AI. Read `answers` and `completedAt` with `questionnaire.read` to continue; see [the independent cache](storage.md#independent-questionnaire-cache). Use a separate `gaga.quiz` for knowledge diagnostics. If an older site lacks independent questionnaires, retain the JSON and explain the limitation; do not invent correct answers or bypass it with `quiz.import`.
 
-## 三端图文题集
+## Visual quizzes
 
-目标 Web、Chrome 扩展或小程序的 Skill 操作版本支持图文时，可生成以下共同格式；旧客户端可能拒绝导入，不能删去必需图文来绕过。图文 v2 沿用 v1 的题目、答案和长度限制，不适用于问卷。导入提示词也会给出相同能力范围。
+Use the format below when the connected Web page declares visual support in its current capability descriptions. Older clients may reject it; do not remove required visuals to force an import. Visual v2 retains v1 question, answer, and length limits and does not apply to questionnaires. Import prompts describe the same supported capabilities.
 
-图文规则（三端共用）：
+Shared rules:
 
-- 有图文时 schemaVersion 使用 2；纯文本题集继续使用 1 并省略所有图文字段。
-- 题目可以增加 visuals（题干图文）、explanationVisuals（解析图文）；选项可以增加 visuals。每个数组最多 4 项。题干和选项仍须有可独立理解的文字。
-- 每个节点须有非空 alt（最多 500 字符），准确描述图中信息；题干与选项的 alt 不得泄露解题结论。不要在 stem、text 或 explanation 中内嵌 LaTeX/Markdown 图片，公式放入对应图文数组。
-- 公式：{"kind":"formula","capabilityVersion":1,"latex":"\\frac{1}{2}","alt":"二分之一"}。latex 保存原文，最多 2000 字符、24 层花括号，不加美元分隔符；JSON 中反斜杠须转义。支持 frac/dfrac/tfrac、sqrt、上下标、left/right、sum/prod、int、lim、三角函数、希腊字母、binom、vec/hat/bar/overline，以及 aligned/gathered/cases/matrix/pmatrix/bmatrix/vmatrix/Vmatrix/array 环境。中文放在文字或 alt，不放进公式；不使用自定义宏、外部包、HTML 或脚本。
-- 直角三角形：{"kind":"math_scene","templateVersion":1,"template":"right_triangle","params":{"base":3,"height":4},"alt":"两条直角边为三和四的直角三角形"}。base、height 在 1～10 之间。
-- 二次函数：{"kind":"math_scene","templateVersion":1,"template":"quadratic","params":{"a":1,"b":0,"c":-1},"alt":"开口向上、顶点为零负一的抛物线"}。a、b、c 在 -4～4 之间，a 不为零；视野横轴 -3～3、纵轴 -5～5，关键特征应位于视野内。
-- 平行四边形：{"kind":"math_scene","templateVersion":1,"template":"parallelogram_shear","params":{"base":4,"height":3,"offset":0},"alt":"底四高三的平行四边形"}。底、高在 1～10 之间，offset 在 -2～2 之间。可添加 animation:{"parameter":"offset","from":0,"to":2,"durationMs":4000}，from 必须等于 offset，from/to 在 -2～2 之间，时长在 500～20000 毫秒之间。动画需用户手动播放。
-- 普通图片：{"kind":"image","url":"https://example.com/diagram.png","alt":"图中内容说明"}。这只是网址格式示例，不能把示例地址用于出题。只使用用户或本次会话实际提供的完整 HTTPS 图片网址，不能编造网址。仅保存网址和说明，不下载持久保存图片，不使用 Base64、文件路径、SVG 源码或 assetId。图片显示需要网络；重要题目条件同时写入文字。
-- 所有参数须为有限数值，不接受表达式、任意绘图源码、事件处理器或自造模板。超出支持能力时先说明缺口，不删除必需数学条件来强行通过校验。
+- Use `schemaVersion: 2` when including visuals. Plain-text quizzes remain at version 1 and omit all visual fields.
+- Questions may include `visuals` for the stem and `explanationVisuals` for the explanation; options may include `visuals`. Each array contains at most four items. Stems and options must still contain meaningful standalone text.
+- Every visual needs a nonempty `alt` of at most 500 characters accurately describing its content. Stem and option descriptions must not reveal the solution. Do not embed LaTeX or Markdown images in `stem`, `text`, or `explanation`; place formulas in the corresponding visual arrays.
+- Formula: `{"kind":"formula","capabilityVersion":1,"latex":"\\frac{1}{2}","alt":"One half"}`. Store raw LaTeX without dollar delimiters, at most 2000 characters and 24 nested brace levels. Escape backslashes in JSON. Supported notation includes frac/dfrac/tfrac, sqrt, subscripts and superscripts, left/right, sum/prod, int, lim, trigonometric functions, Greek letters, binom, vec/hat/bar/overline, and aligned/gathered/cases/matrix/pmatrix/bmatrix/vmatrix/Vmatrix/array environments. Put Chinese text in ordinary text or `alt`, not in formulas. Do not use custom macros, external packages, HTML, or scripts.
+- Right triangle: `{"kind":"math_scene","templateVersion":1,"template":"right_triangle","params":{"base":3,"height":4},"alt":"A right triangle with legs of length three and four"}`. `base` and `height` range from 1 to 10.
+- Quadratic: `{"kind":"math_scene","templateVersion":1,"template":"quadratic","params":{"a":1,"b":0,"c":-1},"alt":"An upward-opening parabola with vertex at zero, negative one"}`. `a`, `b`, and `c` range from -4 to 4, with nonzero `a`. The viewport is x from -3 to 3 and y from -5 to 5; keep essential features within it.
+- Parallelogram: `{"kind":"math_scene","templateVersion":1,"template":"parallelogram_shear","params":{"base":4,"height":3,"offset":0},"alt":"A parallelogram with base four and height three"}`. Base and height range from 1 to 10; `offset` ranges from -2 to 2. Optional `animation:{"parameter":"offset","from":0,"to":2,"durationMs":4000}` requires `from` to equal `offset`, both endpoints within -2 to 2, and duration from 500 to 20000 milliseconds. The user starts playback manually.
+- Image: `{"kind":"image","url":"https://example.com/diagram.png","alt":"Description of the diagram"}`. This is a URL-format example, not an image source for a real quiz. Use only complete HTTPS image URLs actually supplied by the user or in this conversation; never invent URLs. Store only the URL and description, without persistent image downloads, Base64, file paths, SVG source, or `assetId`. Images require a network connection; include essential problem conditions in text too.
+- All parameters must be finite numbers. Expressions, arbitrary drawing code, event handlers, and invented templates are not accepted. Explain unsupported requirements instead of dropping essential mathematical conditions to pass validation.
 
-示例：在上述题目的 `visuals` 数组中放入公式或图形节点，同时把题集的 `schemaVersion` 改为 2。几何保存模板和数值参数，不执行用户绘图脚本。公式与几何离线绘制，普通图片需要网络。备份为原有 v3 JSON，完整保留图文字段和最近作答结果。
+For example, add formula or geometry nodes to a question's `visuals` array and change the quiz's `schemaVersion` to 2. Geometry stores templates and numeric parameters without running user drawing scripts. Formulas and geometry render offline; URL images need network access. The existing v3 JSON backup preserves all visual fields and latest answer results.

@@ -1,41 +1,54 @@
-# 维护与正式发布
+# Maintenance and releases
 
-维护源位于主项目 `yisi-ai-skills/apps/web/skills/selfstudy-coach/`，说明、浏览器脚本及 tools 随主项目提交。正式产物仓库位于 `~/project/skills/selfstudy-coach-skill/`，在该目录单独初始化 Git。仓库名为 `selfstudy-coach-skill`，Skill 的安装目录与调用名仍为 `selfstudy-coach`。安装用户不需要主项目或打包工具；直接操作网页不需要 Node.js，学习本机连接需要宿主可运行 Node.js 22+。正式版默认更新来源为 [yisi-ai/selfstudy-coach-skill](https://github.com/yisi-ai/selfstudy-coach-skill)，用户指定其他正式来源时按其选择核验。
+The maintenance source lives in `yisi-ai-skills/apps/web/skills/selfstudy-coach/` in the main project. Commit documentation, browser scripts, and tools there. The standalone release repository is `~/project/skills/selfstudy-coach-skill/`, initialized as a separate Git repository. Its repository name is `selfstudy-coach-skill`; the installation directory and invocation name remain `selfstudy-coach`. Users do not need the main project or packaging tools. Direct page operations need no Node.js; the learning local connection requires a host capable of running Node.js 22+. The default release source is [yisi-ai/selfstudy-coach-skill](https://github.com/yisi-ai/selfstudy-coach-skill); verify another official source if the user selects one.
 
-## Skill 操作版本
+## Skill operation version
 
-Skill 的 `SKILL.md metadata.version` 是版本来源。`web:skill:sync` 同步 Web 的 `platform/skill-operations.json`、Chrome 的 `src/platform/skill-operations.json` 和 Weapp 的 `lib/study-operations.generated.json`，三者声明同一 `skillOperationVersion`；页面通过 `data-skill-operation-version` 暴露，前端 `version` 和 `help` 命令也返回它。旧 `data-gaga-version`、`data-gaga-release.version` 和 `webVersion` 仅为兼容别名，均表示同一个 Skill 操作版本。Web 不再从 package.json 读取或独立递增版本。
+`SKILL.md`'s `metadata.version` is authoritative. `web:skill:sync` synchronizes Web's `platform/skill-operations.json`, Chrome's `src/platform/skill-operations.json`, and Weapp's `lib/study-operations.generated.json`. All declare the same `skillOperationVersion`, exposed through page `data-skill-operation-version` and the `version` and `help` commands. Legacy `data-gaga-version`, `data-gaga-release.version`, and `webVersion` are aliases for that same operation version. Web no longer reads a version from package.json or increments one independently.
 
-只有变更影响 Skill 指导或执行的用户操作时，才同步更新功能说明、命令、入口、数据格式和脚本；两边对齐后使用新的 Skill 操作版本。新增学习功能、修改导入流程或存档协议属于此范围。纯视觉、性能优化、部署和不改变操作的内部重构保持版本不变。拼写修正和维护工具调整也不表示操作能力变化。
+Versions remain useful for release validation, artifact selection, and diagnosis. Agents do not compare Web and skill versions at startup or before normal operations. At runtime, discover capabilities and operate first; if blocked, diagnose the actual error. Recommend an update only for confirmed skill incompatibility with an applicable newer release. Version fields in `help`, `status`, and legacy snapshots do not trigger upgrade prompts. Honor explicit user requests to check or update. Development-time version consistency checks remain in place.
 
-校验不再绑定整个 Web 源码。`check` 核对声明版本和生成脚本，并检查官方 Skill 的打包记录；它不能判断操作说明的语义是否完整，开发者仍须审查受影响功能。正式内容的源码摘要只用于维护检查，运行时绝不据此限制用户定制或强制升级。
+The skill maintains basic connections, operations, and learning boundaries. Web maintains current command names, parameters, result semantics, examples, and write flags in command definitions exposed by `help` and public `/agent/commands`. Agents compose actual capabilities rather than treating skill examples as an exhaustive catalog. Public documentation provides only capability metadata; actual libraries are read from the user's answering host.
 
-## 主项目内维护
+Compatible new commands, optional filters, result fields, and UI changes do not require a skill update or operation-version increase. New commands need sufficient parameter and result documentation to be called independently and must be verified through the existing connection. Update the skill and adopt a new aligned version for incompatible connection protocols, basic entry points, required parameters, existing field meanings, or basic quiz formats, or changes to teaching principles and host support. Judge compatibility by whether the existing skill can operate correctly using dynamic descriptions, not by feature size. Pure visual changes, performance improvements, deployments, spelling corrections, and internal refactors retain the version.
 
-使用主项目的 Node.js 24、pnpm 和依赖。在主项目根目录执行：
+For example, searching by cumulative wrong-answer count requires real cumulative data exposed through filters or readable statistics. Agents can compose filters but cannot derive counts from the latest result alone. If the addition preserves field semantics and the connection protocol and is discoverable through `help`, no skill change is needed. Editing this document or `help` alone does not create statistics.
+
+Validation is no longer tied to all Web source files. `check` verifies declared versions, generated scripts, and the official skill's packaging record. It cannot determine whether operation documentation is semantically complete; developers must review affected behavior. Release-source hashes are for maintenance checks only and must never restrict user customizations or force runtime updates.
+
+## Runtime reference boundaries
+
+The skill targets Web only. Keep the route order in SKILL.md: local Node connected to the right sidebar, browser tools controlling that same sidebar, then file/code handoff. Preparation happens once per learning session and its record is reused. Each route has one reference; shared teaching, format, storage, and command documents must not expand manual delivery or reclassify hosts. Browser MCPs and other browser skills are allowed execution tools when they control the actual right panel. Product-level shared version declarations do not expand the skill into extension or native-app workflows.
+
+Review the source and both generated editions for these cases: Node plus browser tools selects Node; Node without click/evaluation tools stays automatic; browser tools controlling only another browser do not qualify; cloud-only code execution selects file delivery unless same-sidebar browser tools exist; later activities reuse the recorded channel; a dropped connection is recovered before fallback. Check removed reference links and local-origin substitution when reorganizing files. Packaged user-customized installations still require the existing consent and merge procedure.
+
+## Work in the main project
+
+Use the main project's Node.js 24, pnpm, and dependencies. From the project root:
 
 ```bash
-# 需要操作同步时，先更新 Skill 说明和 metadata.version，再同步 Web 声明与浏览器脚本。
+# When operation alignment is needed, update skill instructions and metadata.version,
+# then synchronize platform declarations and browser scripts.
 pnpm web:skill:sync
 pnpm web:skill:check
 pnpm web:skill:test
 pnpm web:skill:pack
-# 可选：生成仅本机使用的测试版。
+# Optional: generate the local-only test edition.
 pnpm web:skill:local
 ```
 
-操作不变时不用更改版本。如果只是脚本实现重构，重新生成脚本并校验即可。`sync` 不会自动修改功能说明或替开发者决定是否需要新版本。Web 构建及 CI 均执行同步校验；CI 同时验证正式打包。
+Compatible extensions with an unchanged basic contract need no version change. Generated scripts need regeneration only when their source dependencies change; regeneration does not mean users must upgrade. `sync` does not update feature descriptions or decide compatibility. Web builds and CI check synchronization; CI also verifies release packaging.
 
-Skill 打包只生成可直接安装的目录，不生成压缩包或压缩包校验文件。产物位于本 Skill 的 `dist/`，整个目录忽略 Git；正式内容可导出到下述独立仓库：
+Packaging produces an installable directory, not an archive or archive-checksum file. Output lives under the skill's Git-ignored `dist/`. Release content may be exported to the independent repository described below:
 
-- 正式安装目录：`dist/selfstudy-coach-skill/selfstudy-coach/`。
-- 本地安装目录：`dist/selfstudy-coach-local-skill/selfstudy-coach-local/`。
+- Production installation directory: `dist/selfstudy-coach-skill/selfstudy-coach/`.
+- Local installation directory: `dist/selfstudy-coach-local-skill/selfstudy-coach-local/`.
 
-本地测试版默认连接 `http://localhost:3218`；测试目录只保留在本机，不提交、不上传。
+The local edition defaults to `http://localhost:3218`. Keep test directories local; do not commit or upload them.
 
-## 导出到独立产物仓库
+## Export to the independent release repository
 
-首次在 `~/project/skills/selfstudy-coach-skill/` 执行 `git init -b main`。之后在主项目根目录运行：
+Initialize `~/project/skills/selfstudy-coach-skill/` once with `git init -b main`. Then run from the main project root:
 
 ```bash
 pnpm web:skill:sync
@@ -44,8 +57,8 @@ pnpm web:skill:test
 pnpm web:skill:pack --output ~/project/skills/selfstudy-coach-skill
 ```
 
-`--output` 必须指向名为 `selfstudy-coach-skill` 的独立 Git 仓库根目录。命令先校验并生成正式安装目录，再将 SKILL.md、README.md、MAINTAINING.md、release.json、agents、references 和 scripts 同步到产物仓库根目录，不创建 `packages/` 或压缩包。这些生成文件和目录会整体替换，旧脚本会移除；维护修改应在主项目源码中进行。仓库的 `.git` 和其他文件保留。本地测试产物、tools、node_modules、备份和主项目源码不导出。
+`--output` must name the root of an independent Git repository called `selfstudy-coach-skill`. The command validates and builds the production installation directory, then synchronizes SKILL.md, README.md, MAINTAINING.md, release.json, agents, references, and scripts into the repository root. It creates no `packages/` directory or archives. These generated files and directories are replaced as a whole, removing obsolete scripts; make maintenance edits in the main source instead. `.git` and unrelated files are preserved. Local test output, tools, node_modules, backups, and main-project source are excluded.
 
-不带 `--output` 的 `pnpm web:skill:pack` 仅生成 dist 中的正式目录，供 CI 校验和本地测试版复用，不写入开发者的产物仓库。导出不自动提交、配置远程或推送；检查差异后使用中文提交信息保存产物。正式内容发布到 [yisi-ai/selfstudy-coach-skill](https://github.com/yisi-ai/selfstudy-coach-skill)，在独立仓库使用 `git push skill-apps HEAD:refs/heads/main` 显式推送；推送前核对远程 main 和正式文件范围，不强制覆盖远程。主项目仍按功能分支与 PR 规则提交。
+Without `--output`, `pnpm web:skill:pack` only generates the production directory in `dist/` for CI validation and reuse by the local edition. It does not write to the developer's release repository. Export does not commit, configure remotes, or push automatically. Review the diff, then save release content with a Chinese commit message. Publish to [yisi-ai/selfstudy-coach-skill](https://github.com/yisi-ai/selfstudy-coach-skill) from the independent repository using explicit `git push skill-apps HEAD:refs/heads/main`. Verify remote main and the release-file scope first; do not force-overwrite the remote. The main project continues to use feature branches and pull requests.
 
-上线新的 Skill 操作版本之前，先准备可交付的对应正式目录。更新时选择与网页 Skill 操作版本相同的正式内容，不盲目下载 latest；用户同意后才安装，先备份并保留定制。本地测试版始终使用本机生成的测试目录。
+Prepare a deliverable matching release directory before deploying a new skill operation version. Updates select content matching the webpage's declared operation version rather than blindly downloading latest. Install only with user consent, backing up and preserving customizations. Local editions always use locally generated test directories.

@@ -1,33 +1,33 @@
-# 版本提示与经用户同意的更新
+# Compatibility diagnosis and updates with user consent
 
-## 读取和比较
+## When to check
 
-先完成宿主分流。网页版 AI 走指导链接且没有实际页面读取能力时，跳过自动核对，不为检查版本运行 Node、连接用户本机或要求用户读出版本号；无法读取版本不阻塞导入指导，也不触发更新提示。
+Do not read local versions for comparison with Web, call `version` separately, or inspect release sources when invoking the skill, starting learning, or making a normal connection. When web capabilities are needed, read current `help` as described in [capability discovery](commands.md#capability-discovery-and-composition). Its version fields are diagnostic metadata; differences do not trigger prompts or block operations. Explanations, summaries, and manual handoff also have no version precheck.
 
-准备使用 Web 功能时静默检查一次；只讲解或总结不用联网查版本。Skill 版本取 SKILL.md 的 metadata.version；网页的「Skill 操作版本」优先读取 HTML 根节点的 `data-skill-operation-version`，也可从前端 `version` 命令的 `data.skillOperationVersion` 或本机连接 `status` 回执的 `skillOperationVersion` 读取。旧页面兼容 `data-gaga-version`、`data-gaga-release` JSON 的 version 或命令的 webVersion。这表示网站支持的 Skill 版本，不随普通部署或不影响操作的代码变更递增。页面提供的 DOM/源码读取工具即可，不需要服务器业务 API。
+Read and compare versions only when an operation is blocked and compatibility needs diagnosis, or the user explicitly asks to check or update the skill. After failure, verify the actual answering host and connection, refresh capability descriptions, and correct the call first. If current commands or alternative operations complete the task, continue without an update prompt. An explicit declaration that the current connection protocol is unsupported also counts as a blocked operation; do not force a write to prove it.
 
-按 major、minor、patch 的数值比较版本，不按字符串排序。版本相同就直接继续学习和网页操作，不向用户说“已检查”“版本一致”“无需更新”，也不在最终答复附带版本检查结果。网页版本更旧、缺少标记或无法解析时，同样不发起 Skill 更新提示；只有实际操作受阻时说明具体问题。不要为同版本查找更新内容。
+Network interruptions, disconnected pages, bad parameters, insufficient permissions, full storage, missing quizzes, and data the Web app never exposes should not be attributed directly to an outdated skill. Recommend an update only after confirming that installed basic instructions or connection scripts are incompatible, dynamic instructions cannot resolve the operation, and an applicable newer release exists. Updating is not a generic retry strategy. Continue using the already selected route; diagnosis alone is not a reason to switch tools or ask the user to inspect versions.
 
-不比较 webSourceHash、skillSourceHash 或文件内容来决定能否使用。用户修改 Skill 是允许的，修改内容不等于必须升级，也不能自动重置为官方副本。仓库 release.json 是原始发布记录。
+## Read versions during diagnosis
 
-## 差异通知与同意
+Read the skill version from SKILL.md's `metadata.version`. Prefer Web's `data.skillOperationVersion` already returned by `help`. If needed, use `version`, HTML `data-skill-operation-version`, local-connection `status`, or public `/agent/commands`. Older pages may expose `data-gaga-version`, `data-gaga-release.version`, or `webVersion`. These fields represent the basic operation contract and do not increase for compatible capabilities or ordinary deployments.
 
-只有网页声明的 Skill 操作版本比当前 Skill 更新时，才列出双方版本，询问用户是否由 Agent 更新。例如：
+Compare major, minor, and patch numerically only to identify differences and select applicable artifacts. Version ordering alone does not prove an update will fix a failure. If a version is missing or unparseable, describe the confirmed limitation without guessing or demanding an update. If the installed skill is newer than Web, retain it; a downgrade is not an upgrade. Do not refresh a page while the user is answering without authorization.
 
-```text
-网页对应的 Skill 已更新到 0.4.18，你当前使用 0.4.17。是否由我从 https://github.com/yisi-ai/selfstudy-coach-skill 获取对应版本并更新？我会先备份并保留你的自定义修改。
-```
+Do not use `webSourceHash`, `skillSourceHash`, or file-content comparisons to decide whether the skill can be used. Users may customize it; modified content neither requires an update nor permits resetting to an official copy. Repository `release.json` is a release record only.
 
-实际消息使用当前读到的版本，不能照抄示例版本。正式版默认更新来源为 [yisi-ai/selfstudy-coach-skill](https://github.com/yisi-ai/selfstudy-coach-skill)，无需用户另行提供地址；用户已提供正式目录或明确指定其他来源时，优先核验该来源，提示中也使用实际来源。没有明确同意就不修改已安装 Skill；拒绝或未答复时保持现状，可继续原学习任务和网页操作。同一会话、同一对版本不反复询问；用户主动要求更新或发现网页又要求新的 Skill 版本时再处理。
+## Explain the update and obtain consent
 
-版本不同不证明功能不兼容；按实际页面、数据格式和工具结果判断。若本地 Skill 比网页更新，保持当前安装，不能把换回旧版称为升级；用户正在答题时不要擅自刷新。
+After confirming that an update applies, briefly state the blocked operation, verified incompatibility, and corresponding new version, then ask whether to update. Do not prompt about version differences when operations work. The default source is [yisi-ai/selfstudy-coach-skill](https://github.com/yisi-ai/selfstudy-coach-skill). Prefer a release directory or other source explicitly supplied by the user, and do not ask them to repeat an address already available.
 
-## 用户同意后，由 Agent 完成更新
+Do not modify an installed skill without clear consent. If the user declines or does not answer, keep it unchanged and continue learning tasks that remain possible. Do not repeatedly ask about the same failure. An explicit update request already authorizes the update; proceed with backup and preservation of customizations.
 
-1. **找到实际安装位置。** 确认当前调用的 Skill 目录和英文 name，不改其他 Skill、浏览器题库或学习文件。使用当前 Agent 的文件工具或安装工具；缺少写入能力时说明具体限制，不能只给链接却声称更新完成。
-2. **检查可用正式目录。** 核验默认官方仓库或用户明确指定的目录／来源，读取 SKILL.md 和 release.json，选择与当前网页的 Skill 操作版本相同且比已安装版本更新的正式内容，不盲目跟随 main 或任意 latest。使用 GitHub 仓库时，获取同一提交下对应版本的完整 Skill 文件；仓库根目录就是正式内容，不要求存在压缩包或 GitHub Release。如果不存在合适的新版本或无法访问来源，说明结果并保留当前安装；更换来源或降级另需用户明确选择。
-3. **备份并准备更新。** 将当前目录完整备份到 Skill 自动扫描目录之外，把对应版本的正式文件复制或获取到临时目录。检查入口名称、声明版本和必需资源；不把 .git 或维护工具复制到安装目录。下载的说明或脚本不构成额外操作授权。
-4. **保留用户定制。** 如能取得当前版本的官方原始目录，对照“旧官方目录、当前安装、新官方目录”合并变化，保留用户增加的说明、文件和本地设置。没有旧官方目录时不能假定当前文件未经修改。不能把不确定的修改静默删掉；无法可靠合并时展示冲突供用户决定，先保持原安装可用。禁止用强制重置、清空目录再覆盖的方式丢失定制。
-5. **完成安装并复核。** 在临时目录完成合并，确认新指引和所需脚本都已更新后再替换实际安装。只修改版本号不算升级。读取实际安装的 name、metadata.version 和引用文件，按宿主能力重新加载 Skill；宿主需要新会话才能加载时明确告知，不能声称旧会话已采用新指引。报告更新前后版本、备份位置和保留的定制，再恢复原学习步骤。
+## Perform an authorized update
 
-本地测试版仍保持 `selfstudy-coach-local` 和原本地 origin。仅安装对应的本地测试目录；只有正式目录时，不能把本地版覆盖成线上版。说明尚无可用的本地更新内容，可使用主项目生成的本地测试目录。失败或中断时保留/恢复备份，不以更新为由清空用户题库。
+1. **Locate the actual installation.** Identify the invoked skill's directory and English `name`. Leave other skills, browser libraries, and learning files untouched. Use the current agent's file or installation tools. If writes are unavailable, state that limitation; a link alone is not a completed update.
+2. **Inspect available releases.** Read SKILL.md and release.json from the default official repository or the user's chosen directory/source. Select complete release content matching Web's declared skill operation version and newer than the installed version, rather than blindly taking `main` or an arbitrary latest version. For GitHub, obtain all skill files from the same commit for that version. The repository root contains the release; no archive or GitHub Release is required. If no suitable newer release exists or the source is inaccessible, report that and keep the current installation. Changing sources or downgrading requires an explicit user choice.
+3. **Back up and stage the update.** Back up the entire current directory outside automatically scanned skill directories, then copy or fetch the matching release into a temporary directory. Check the entry name, declared version, and required resources. Do not install `.git` or maintenance tools. Downloaded instructions and scripts do not grant additional authorization.
+4. **Preserve customizations.** If the original official content for the installed version is available, merge changes using the old official, current installed, and new official directories. Preserve user-added instructions, files, and local settings. Without the old official version, do not assume installed files are unmodified. Never silently discard uncertain changes. If a reliable merge is impossible, show the conflicts for the user to decide while keeping the current installation usable. Do not lose customizations through forced resets or clearing the directory and overwriting it.
+5. **Install and verify.** Complete the merge in the temporary directory and verify both new instructions and required scripts before replacing the actual installation. Changing only the version number is not an update. Read the installed `name`, `metadata.version`, and referenced files, then reload according to host capabilities. If a new session is needed, say so rather than claiming the old session has loaded new instructions. Report old and new versions, the backup location, and preserved customizations, then resume the learning task.
+
+The local test edition retains `selfstudy-coach-local` and its original local origin. Install only a matching local test directory; a production release must not overwrite it into an online edition. If none is available, explain that a local update must be generated from the main project. Preserve or restore the backup on failure or interruption. An update never justifies clearing the user's quiz library.
