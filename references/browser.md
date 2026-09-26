@@ -38,6 +38,8 @@ Web/Chrome 的随机与混合入口位于练习首页 `/app`，在「新增题�
 
 题集页的「备份」「导入」位于排序下拉框右侧，不再使用页面下方的备份折叠区。先点击 `#quiz-library-backup` 打开弹窗，再选下载或复制；`#guide=export` 提醒高亮的是这个备份入口。空题库禁用备份但保留导入入口，复制与下载失败仍显示原有错误提示。
 
+我的题集页不再显示混合练习记录，也不在题集卡片上提供删除按钮。查看普通题集练习历史时打开题集详情；只有用户明确要求删除时，才使用详情页的删除入口。移除列表展示不会清空存档，混合记录仍可通过指定 practice 的读取命令查看。
+
 知识测验自动导入后继续等待本次题集的 `/run` 页。知识测验若显示 `#quiz-ready`，先核对标题，再选择 `input[name="quiz-mode"][value="medium"]` 并确认已选中，点击 `#quiz-start`，等待 `#quiz-run` 显示第一题再交接；用户明确指定其他难度时按其要求操作。问卷导入后等待独立问卷地址和 `#questionnaire-run`，无需开始按钮。若已有作答区，保留原模式和进度，不重复开始，也不替用户选答案。自动路径不得只返回 JSON、首页链接或导入页链接。打开方式遵循 [网页打开与答题交接](browser-handoff.md) 中的宿主分流；展示页面与导入所用浏览器须为同一存储上下文。
 
 问卷地址：`/app/questionnaires/<questionnaireId>`，ID 由网页返回。知识测验正式地址：`/app/library`、`/app/import`、`/app/quizzes/<quizId>`、`/app/quizzes/<quizId>/run`、`/app/quizzes/<quizId>/results/<attemptId>`。题集 ID 由网页生成，不是标题，也不是题目 ID。混合练习地址携带 `practice=1`，读取时也需指定 practice。
