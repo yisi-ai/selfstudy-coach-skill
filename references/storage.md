@@ -28,7 +28,7 @@ versionCheck 包含 `skillVersion`、`skillOperationVersion`（网页声明支�
 每个 record：
 
 - `storageVersion: 3`、`id`（本地题集 ID）、`importedAt`（导入时间）。
-- `quiz`：完整知识题集 `gaga.quiz` v1，或小程序支持的图文 v2（公式原文、几何参数、图片网址；无图片文件）；不再重复保存原始 source JSON。
+- `quiz`：完整知识题集 `gaga.quiz` v1，或三端支持的图文 v2（公式原文、几何参数、图片网址；无图片文件）；不再重复保存原始 source JSON。
 - `results`：以题目 ID 为键，值为 `{ correct: boolean, answeredAt: number }`；时间为 Unix 毫秒。仅保存最近一次已判定且实际作答的结果。无此键表示尚无判定，不等于答错。
 - `attempts`：最多一份未完成进度，用于继续作答；完成后为空。不持久保存历次完整答案、模式成绩或轮次。
 
