@@ -465,6 +465,8 @@ var common_default = {
     mixedTitle: "Mixed practice",
     mixedDescription: "{{count}} questions drawn from {{sets}} quizzes.",
     practiceHistory: "Current mixed practice",
+    backupAction: "Backup",
+    restoreAction: "Import",
     backup: "Download library backup",
     copyBackup: "Copy backup text",
     backupCopied: "Backup text copied. Paste it into a file and save it.",
@@ -562,7 +564,7 @@ var common_default = {
     legacyPracticeNotice: "Older mixed-practice records cannot be linked reliably to source quizzes. They remain on this device and can be exported separately.",
     legacyPracticeExport: "Export older mixed practice",
     localStorageTitle: "About your saved quiz sets",
-    localStorageDescription: "Your quiz sets and answer records stay on this device and do not automatically sync to other devices. Before switching devices or clearing local data, save a backup. You can also back up regularly from the Backup / Restore section to keep your learning records safe.",
+    localStorageDescription: "Your quiz sets and answer records stay on this device and do not automatically sync to other devices. Before switching devices or clearing local data, save a backup. Use Backup next to the library sort menu to save your learning records regularly.",
     localStorageConfirm: "Got it",
     libraryTitle: "My quiz library",
     mediaUnsupported: "This quiz uses visual content that this client cannot display. Please update the client.",
@@ -654,7 +656,7 @@ var common_default = {
     check: "Check the backup before restoring it.",
     confirm: "Confirm to add this backup to your library.",
     start: "Review the introduction, choose a mode if available, then start when you are ready.",
-    export: "Copy your library backup and paste it into your AI conversation for review. If copying is unavailable, use Download library backup. Import a quiz first if your library is empty.",
+    export: "Select Backup beside the sort menu, then Copy backup text, and paste it into your AI conversation for review. You can also download a backup file. Import a quiz first if your library is empty.",
     close: "Close guide"
   }
 };
@@ -824,6 +826,8 @@ var common_default2 = {
     mixedTitle: "\u6DF7\u5408\u7EC3\u4E60",
     mixedDescription: "\u4ECE {{sets}} \u4EFD\u9898\u96C6\u4E2D\u62BD\u53D6 {{count}} \u9053\u9898\u3002",
     practiceHistory: "\u5F53\u524D\u6DF7\u5408\u7EC3\u4E60",
+    backupAction: "\u5907\u4EFD",
+    restoreAction: "\u5BFC\u5165",
     backup: "\u4E0B\u8F7D\u9898\u96C6\u5E93\u5907\u4EFD",
     copyBackup: "\u590D\u5236\u5907\u4EFD\u6587\u672C",
     backupCopied: "\u5907\u4EFD\u5168\u6587\u5DF2\u590D\u5236\uFF0C\u8BF7\u7C98\u8D34\u5230\u6587\u4EF6\u4E2D\u4FDD\u5B58\u3002",
@@ -921,7 +925,7 @@ var common_default2 = {
     legacyPracticeNotice: "\u65E7\u7248\u6DF7\u5408\u7EC3\u4E60\u65E0\u6CD5\u53EF\u9760\u5173\u8054\u5230\u539F\u9898\u96C6\uFF0C\u5DF2\u4FDD\u7559\u5728\u6B64\u8BBE\u5907\uFF0C\u53EF\u5355\u72EC\u5BFC\u51FA\u3002",
     legacyPracticeExport: "\u5BFC\u51FA\u65E7\u7248\u6DF7\u5408\u7EC3\u4E60",
     localStorageTitle: "\u5173\u4E8E\u9898\u96C6\u7684\u4FDD\u5B58",
-    localStorageDescription: "\u4F60\u7684\u9898\u96C6\u548C\u7B54\u9898\u8BB0\u5F55\u90FD\u7559\u5728\u8FD9\u53F0\u8BBE\u5907\u4E0A\uFF0C\u4E0D\u4F1A\u81EA\u52A8\u540C\u6B65\u5230\u5176\u4ED6\u8BBE\u5907\u3002\u6362\u8BBE\u5907\u6216\u6E05\u9664\u672C\u5730\u6570\u636E\u524D\uFF0C\u8BB0\u5F97\u5148\u5907\u4EFD\u4E00\u4EFD\u3002\u5E73\u65F6\u4E5F\u53EF\u4EE5\u5728\u201C\u5907\u4EFD/\u5BFC\u5165\u201D\u91CC\u4FDD\u5B58\u5907\u4EFD\uFF0C\u8BA9\u5B66\u4E60\u8BB0\u5F55\u5B89\u5FC3\u7559\u5B58\u3002",
+    localStorageDescription: "\u4F60\u7684\u9898\u96C6\u548C\u7B54\u9898\u8BB0\u5F55\u90FD\u7559\u5728\u8FD9\u53F0\u8BBE\u5907\u4E0A\uFF0C\u4E0D\u4F1A\u81EA\u52A8\u540C\u6B65\u5230\u5176\u4ED6\u8BBE\u5907\u3002\u6362\u8BBE\u5907\u6216\u6E05\u9664\u672C\u5730\u6570\u636E\u524D\uFF0C\u8BB0\u5F97\u5148\u5907\u4EFD\u4E00\u4EFD\u3002\u5E73\u65F6\u4E5F\u53EF\u4EE5\u70B9\u51FB\u9898\u96C6\u6392\u5E8F\u53F3\u4FA7\u7684\u201C\u5907\u4EFD\u201D\u4FDD\u5B58\u4E00\u4EFD\uFF0C\u8BA9\u5B66\u4E60\u8BB0\u5F55\u5B89\u5FC3\u7559\u5B58\u3002",
     localStorageConfirm: "\u6211\u77E5\u9053\u4E86",
     libraryTitle: "\u6211\u7684\u9898\u96C6\u5E93",
     mediaUnsupported: "\u5F53\u524D\u5BA2\u6237\u7AEF\u65E0\u6CD5\u663E\u793A\u6B64\u9898\u96C6\u7684\u56FE\u6587\u5185\u5BB9\uFF0C\u8BF7\u66F4\u65B0\u5BA2\u6237\u7AEF\u3002",
@@ -1013,7 +1017,7 @@ var common_default2 = {
     check: "\u5148\u68C0\u67E5\u8FD9\u4EFD\u5907\u4EFD\uFF0C\u518D\u786E\u8BA4\u6062\u590D\u3002",
     confirm: "\u786E\u8BA4\u540E\u628A\u8FD9\u4EFD\u5907\u4EFD\u8FFD\u52A0\u6062\u590D\u5230\u9898\u96C6\u5E93\u3002",
     start: "\u5148\u67E5\u770B\u8BF4\u660E\uFF1B\u5982\u6709\u96BE\u5EA6\u9009\u9879\uFF0C\u53EF\u6309\u9700\u9009\u62E9\uFF0C\u51C6\u5907\u597D\u540E\u70B9\u51FB\u5F00\u59CB\u3002",
-    export: "\u590D\u5236\u9898\u5E93\u5907\u4EFD\uFF0C\u7C98\u8D34\u56DE AI \u4F1A\u8BDD\u8FDB\u884C\u590D\u76D8\u3002\u65E0\u6CD5\u590D\u5236\u65F6\uFF0C\u53EF\u4E0B\u8F7D\u9898\u5E93\u5907\u4EFD\uFF1B\u9898\u5E93\u4E3A\u7A7A\u65F6\uFF0C\u8BF7\u5148\u5BFC\u5165\u9898\u96C6\u3002",
+    export: "\u70B9\u51FB\u6392\u5E8F\u53F3\u4FA7\u7684\u201C\u5907\u4EFD\u201D\uFF0C\u9009\u62E9\u201C\u590D\u5236\u5907\u4EFD\u6587\u672C\u201D\uFF0C\u518D\u7C98\u8D34\u56DE AI \u4F1A\u8BDD\u8FDB\u884C\u590D\u76D8\u3002\u4E5F\u53EF\u4E0B\u8F7D\u5907\u4EFD\u6587\u4EF6\uFF1B\u9898\u5E93\u4E3A\u7A7A\u65F6\uFF0C\u8BF7\u5148\u5BFC\u5165\u9898\u96C6\u3002",
     close: "\u5173\u95ED\u64CD\u4F5C\u6307\u5F15"
   }
 };
