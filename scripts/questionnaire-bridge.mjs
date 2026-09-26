@@ -440,8 +440,8 @@ var common_default = {
     repairCopied: "Repair prompt copied. Send it to the same AI conversation.",
     storageError: "We could not read or save this library. Your existing data has been kept. Try again, or free some browser storage.",
     unsupported: "This browser cannot safely save quizzes. Open this site over HTTPS in a current browser.",
-    clipboardError: "Clipboard access failed. You can paste the text into the box instead.",
-    copyError: "Copying failed. Select the prompt below and copy it manually.",
+    clipboardError: "Could not read the clipboard. Allow clipboard access in your browser, copy the full AI reply, then try again.",
+    copyError: "Could not copy the prompt. Allow clipboard access in your browser, then try again.",
     fileError: "We could not read that file. Choose a UTF-8 JSON or TXT file.",
     parseError: "The JSON is incomplete or malformed. Copy the full AI reply, or use a repair prompt.",
     invalidQuiz: "Check the quiz fields and answer references, or ask your AI to repair the quiz.",
@@ -570,7 +570,11 @@ var common_default = {
     visualPlay: "Play diagram",
     visualPause: "Pause diagram",
     visualProgress: "Diagram animation progress",
-    visualReducedMotion: "Reduced motion is enabled. Use the slider to explore the diagram."
+    visualReducedMotion: "Reduced motion is enabled. Use the slider to explore the diagram.",
+    importReplyStep: "Send the prompt in your AI conversation",
+    importReplyHint: "Wait for the reply to finish, then copy the code from the AI\u2019s message and return here.",
+    importErrorTitle: "Could not complete this action",
+    importErrorDismiss: "Back and try again"
   },
   legalUi: {
     privacyIntro: "GAGA learn\u2019s website and the AI Chat to Quiz (AI\u4F1A\u8BDD\u8F6C\u6D4B\u9A8C) Chrome extension help you turn AI conversations into personal practice quizzes. This policy covers both products. Neither requires an account.",
@@ -644,9 +648,9 @@ var common_default = {
   },
   guideUi: {
     title: "Continue your learning",
-    paste: "Copy the complete quiz JSON from your AI conversation and paste it here (Ctrl+V on Windows, Command+V on Mac).",
-    check: "Check the pasted quiz. If an error appears, correct the text using the message on this page.",
-    confirm: "Check the title and question count, then confirm the import. The quiz will be saved in this browser.",
+    paste: "Copy the code from the AI reply, then click \u201CRead clipboard\u201D. The quiz is checked and saved automatically.",
+    check: "Check the backup before restoring it.",
+    confirm: "Confirm to add this backup to your library.",
     start: "Review the introduction, choose a mode if available, then start when you are ready.",
     export: "Copy your library backup and paste it into your AI conversation for review. If copying is unavailable, use Download library backup. Import a quiz first if your library is empty.",
     close: "Close guide"
@@ -793,8 +797,8 @@ var common_default2 = {
     repairCopied: "\u4FEE\u6B63\u63D0\u793A\u8BCD\u5DF2\u590D\u5236\uFF0C\u8BF7\u53D1\u7ED9\u539F AI \u4F1A\u8BDD\u3002",
     storageError: "\u6682\u65F6\u65E0\u6CD5\u8BFB\u53D6\u6216\u4FDD\u5B58\u9898\u96C6\u5E93\uFF0C\u5DF2\u6709\u6570\u636E\u4F1A\u4FDD\u7559\u3002\u8BF7\u91CD\u8BD5\uFF0C\u6216\u91CA\u653E\u4E00\u4E9B\u6D4F\u89C8\u5668\u5B58\u50A8\u7A7A\u95F4\u3002",
     unsupported: "\u5F53\u524D\u6D4F\u89C8\u5668\u65E0\u6CD5\u53EF\u9760\u4FDD\u5B58\u9898\u96C6\uFF0C\u8BF7\u4F7F\u7528\u65B0\u7248\u6D4F\u89C8\u5668\uFF0C\u901A\u8FC7 HTTPS \u6253\u5F00\u7F51\u7AD9\u3002",
-    clipboardError: "\u65E0\u6CD5\u8BBF\u95EE\u526A\u8D34\u677F\uFF0C\u4F60\u53EF\u4EE5\u76F4\u63A5\u628A\u6587\u5B57\u7C98\u8D34\u5230\u8F93\u5165\u6846\u4E2D\u3002",
-    copyError: "\u590D\u5236\u5931\u8D25\uFF0C\u8BF7\u9009\u4E2D\u4E0B\u65B9\u63D0\u793A\u8BCD\u624B\u52A8\u590D\u5236\u3002",
+    clipboardError: "\u65E0\u6CD5\u8BFB\u53D6\u526A\u8D34\u677F\uFF0C\u8BF7\u5141\u8BB8\u6D4F\u89C8\u5668\u8BBF\u95EE\u526A\u8D34\u677F\uFF0C\u590D\u5236 AI \u7684\u5B8C\u6574\u56DE\u590D\u540E\u91CD\u8BD5\u3002",
+    copyError: "\u590D\u5236\u5931\u8D25\uFF0C\u8BF7\u5141\u8BB8\u6D4F\u89C8\u5668\u8BBF\u95EE\u526A\u8D34\u677F\u540E\u91CD\u8BD5\u3002",
     fileError: "\u65E0\u6CD5\u8BFB\u53D6\u6587\u4EF6\uFF0C\u8BF7\u9009\u62E9 UTF-8 JSON \u6216 TXT \u6587\u4EF6\u3002",
     parseError: "JSON \u4E0D\u5B8C\u6574\u6216\u683C\u5F0F\u6709\u8BEF\uFF0C\u8BF7\u590D\u5236 AI \u7684\u5B8C\u6574\u56DE\u590D\uFF0C\u6216\u4F7F\u7528\u4FEE\u6B63\u63D0\u793A\u8BCD\u3002",
     invalidQuiz: "\u8BF7\u68C0\u67E5\u9898\u96C6\u5B57\u6BB5\u548C\u7B54\u6848\u5F15\u7528\uFF0C\u6216\u8BA9\u539F AI \u4F1A\u8BDD\u4FEE\u6B63\u9898\u96C6\u3002",
@@ -923,7 +927,11 @@ var common_default2 = {
     visualPlay: "\u64AD\u653E\u56FE\u793A",
     visualPause: "\u6682\u505C\u56FE\u793A",
     visualProgress: "\u56FE\u793A\u52A8\u753B\u8FDB\u5EA6",
-    visualReducedMotion: "\u5DF2\u542F\u7528\u51CF\u5C11\u52A8\u6001\u6548\u679C\uFF0C\u8BF7\u62D6\u52A8\u8FDB\u5EA6\u6761\u89C2\u5BDF\u56FE\u5F62\u3002"
+    visualReducedMotion: "\u5DF2\u542F\u7528\u51CF\u5C11\u52A8\u6001\u6548\u679C\uFF0C\u8BF7\u62D6\u52A8\u8FDB\u5EA6\u6761\u89C2\u5BDF\u56FE\u5F62\u3002",
+    importReplyStep: "\u524D\u5F80 AI \u5E73\u53F0\u7684\u5BF9\u8BDD\u53D1\u9001\u63D0\u793A\u8BCD",
+    importReplyHint: "\u7B49\u56DE\u590D\u751F\u6210\u5B8C\u6210\uFF0C\u590D\u5236\u8FD4\u56DE\u7684\u6D88\u606F\u4EE3\u7801\uFF0C\u518D\u56DE\u5230\u8FD9\u91CC\u3002",
+    importErrorTitle: "\u6682\u65F6\u65E0\u6CD5\u5B8C\u6210\u64CD\u4F5C",
+    importErrorDismiss: "\u8FD4\u56DE\u91CD\u8BD5"
   },
   legalUi: {
     privacyIntro: "\u560E\u560E\u5B66\u4E60\u7F51\u7AD9\u4E0E AI\u4F1A\u8BDD\u8F6C\u6D4B\u9A8C\uFF08AI Chat to Quiz\uFF09Chrome \u6269\u5C55\u5E2E\u52A9\u4F60\u628A AI \u4F1A\u8BDD\u53D8\u6210\u4E2A\u4EBA\u7EC3\u4E60\u9898\u96C6\u3002\u672C\u9690\u79C1\u8BF4\u660E\u540C\u65F6\u9002\u7528\u4E8E\u8FD9\u4E24\u4E2A\u4EA7\u54C1\uFF0C\u4F7F\u7528\u5747\u65E0\u9700\u6CE8\u518C\u8D26\u53F7\u3002",
@@ -997,9 +1005,9 @@ var common_default2 = {
   },
   guideUi: {
     title: "\u7EE7\u7EED\u4F60\u7684\u5B66\u4E60",
-    paste: "\u590D\u5236 AI \u4F1A\u8BDD\u63D0\u4F9B\u7684\u5B8C\u6574\u9898\u96C6 JSON\uFF0C\u7C98\u8D34\u5230\u8FD9\u91CC\uFF08Windows \u4F7F\u7528 Ctrl+V\uFF0CMac \u4F7F\u7528 Command+V\uFF09\u3002",
-    check: "\u70B9\u51FB\u6821\u9A8C\u9898\u96C6\u3002\u5982\u679C\u51FA\u73B0\u9519\u8BEF\uFF0C\u8BF7\u6839\u636E\u9875\u9762\u63D0\u793A\u4FEE\u6539\u5185\u5BB9\u3002",
-    confirm: "\u6838\u5BF9\u9898\u96C6\u6807\u9898\u548C\u9898\u6570\uFF0C\u518D\u786E\u8BA4\u5BFC\u5165\u3002\u9898\u96C6\u5C06\u4FDD\u5B58\u5728\u5F53\u524D\u6D4F\u89C8\u5668\u4E2D\u3002",
+    paste: "\u590D\u5236 AI \u56DE\u590D\u4E2D\u7684\u6D88\u606F\u4EE3\u7801\uFF0C\u70B9\u51FB\u201C\u8BFB\u53D6\u526A\u8D34\u677F\u201D\uFF0C\u7CFB\u7EDF\u4F1A\u81EA\u52A8\u6821\u9A8C\u5E76\u5BFC\u5165\u9898\u96C6\u3002",
+    check: "\u5148\u68C0\u67E5\u8FD9\u4EFD\u5907\u4EFD\uFF0C\u518D\u786E\u8BA4\u6062\u590D\u3002",
+    confirm: "\u786E\u8BA4\u540E\u628A\u8FD9\u4EFD\u5907\u4EFD\u8FFD\u52A0\u6062\u590D\u5230\u9898\u96C6\u5E93\u3002",
     start: "\u5148\u67E5\u770B\u8BF4\u660E\uFF1B\u5982\u6709\u96BE\u5EA6\u9009\u9879\uFF0C\u53EF\u6309\u9700\u9009\u62E9\uFF0C\u51C6\u5907\u597D\u540E\u70B9\u51FB\u5F00\u59CB\u3002",
     export: "\u590D\u5236\u9898\u5E93\u5907\u4EFD\uFF0C\u7C98\u8D34\u56DE AI \u4F1A\u8BDD\u8FDB\u884C\u590D\u76D8\u3002\u65E0\u6CD5\u590D\u5236\u65F6\uFF0C\u53EF\u4E0B\u8F7D\u9898\u5E93\u5907\u4EFD\uFF1B\u9898\u5E93\u4E3A\u7A7A\u65F6\uFF0C\u8BF7\u5148\u5BFC\u5165\u9898\u96C6\u3002",
     close: "\u5173\u95ED\u64CD\u4F5C\u6307\u5F15"

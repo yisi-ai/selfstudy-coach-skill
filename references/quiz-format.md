@@ -1,6 +1,6 @@
 # 出题格式
 
-以下约束只针对写入题集文件或网页输入框的数据，不是 Agent 最终回复的格式要求。已选择 Web 测验时，生成数据后继续执行 SKILL.md 的导入和交接：知识测验默认以中等难度直接开始，不计分问卷直接打开第一题；自动模式不能在生成 JSON 后结束。只有文字/网页打开能力时按主指引交付 JSON 和带指引链接，让用户粘贴。仅讲解或总结时无需出题。
+以下约束只针对题集 JSON 数据，不是 Agent 最终回复的格式要求。已选择 Web 测验时，生成数据后继续执行 SKILL.md 的导入和交接：知识测验默认以中等难度直接开始，不计分问卷直接打开第一题；自动模式不能在生成 JSON 后结束。只有文字/网页打开能力时按主指引交付 JSON 和带指引链接，让用户复制后点击“读取剪贴板”。仅讲解或总结时无需出题。
 
 题集数据是一个完整 JSON 对象（网页也接受完整 JSON 代码围栏），数据内部不混入讲解文案。示例：
 
@@ -55,7 +55,7 @@
 }
 ```
 
-通过独立 `questionnaire.import` 命令传入 `{ questionnaire }`，或在导入页粘贴，确认后直接打开 `/app/questionnaires/<questionnaireId>` 第一题。它只有当前一份临时缓存，没有难度、时限、分数、题集条目、备份或历史；新问卷替换当前缓存。提交后提示用户告知 AI，再用 `questionnaire.read` 读取 `answers` 和 `completedAt` 继续学习，详见 [读取方法](storage.md#独立问卷缓存)。知识诊断另建 `gaga.quiz`。旧网页没有独立问卷能力时保留 JSON 并说明限制，不能伪造正确答案或使用 quiz.import 绕过。
+通过独立 `questionnaire.import` 命令传入 `{ questionnaire }`，或在 Web/Chrome 导入页点击“读取剪贴板”，自动校验并保存后直接打开 `/app/questionnaires/<questionnaireId>` 第一题。它只有当前一份临时缓存，没有难度、时限、分数、题集条目、备份或历史；新问卷替换当前缓存。提交后提示用户告知 AI，再用 `questionnaire.read` 读取 `answers` 和 `completedAt` 继续学习，详见 [读取方法](storage.md#独立问卷缓存)。知识诊断另建 `gaga.quiz`。旧网页没有独立问卷能力时保留 JSON 并说明限制，不能伪造正确答案或使用 quiz.import 绕过。
 
 ## 三端图文题集
 
