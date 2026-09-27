@@ -14,11 +14,11 @@ The outer object has `format: gaga.learn.snapshot`, `schemaVersion: 1`, and fiel
 
 `versionCheck` contains `skillVersion`, `skillOperationVersion` (the webpage's declared supported skill version, or null), and `status` (`same`, `different`, or `unavailable`). It is diagnostic metadata, not an access restriction: valid readable data is returned across version differences. None of these statuses triggers an update prompt. Normal reads do not analyze version direction; use the fields only for actual compatibility diagnosis or an explicit user request. Prefer `data-skill-operation-version`, with legacy fallbacks to `data-gaga-version` and `data-gaga-release.version`. Legacy `webVersion` aliases `skillOperationVersion`. Content hashes play no role.
 
-`backup` uses `format: gaga.quiz.backup`, `schemaVersion: 4`, `exportedAt` (Unix milliseconds), `settings`, `records`, and `histories`. Versions 1–3 are readable. Genuine legacy completions retain their selections; v3 latest-result-only data cannot reconstruct past tests. Read-only conversion leaves originals unchanged. Older clients cannot read v4.
+`backup` uses `format: gaga.quiz.backup`, `schemaVersion: 5`, `exportedAt` (Unix milliseconds), `settings`, `records`, and `histories`. Versions 1–4 are readable. Genuine legacy completions retain their selections; v3 latest-result-only data cannot reconstruct past tests. Read-only conversion leaves originals unchanged. Older clients cannot read v5.
 
 Each record contains:
 
-- `storageVersion: 3`, `id` (local quiz ID), and `importedAt`.
+- `storageVersion: 4`, `id` (local quiz ID), and `importedAt`.
 - `quiz`: the complete `gaga.quiz` v1 or supported visual v2, including raw formulas, geometry parameters, and image URLs, but no image files. The original source JSON is not duplicated separately.
 - `results`: a map from question ID to `{ correct: boolean, answeredAt: number }`, with Unix-millisecond timestamps. Only the latest actually answered and graded result is saved. A missing key means no grade, not an incorrect answer.
 - `attempts`: at most one unfinished attempt for resumption, empty after completion. Compact completed tests live separately in `histories`; full attempts and difficulty are not retained there.
@@ -27,7 +27,7 @@ Each record contains:
 
 Discover `quiz.history` and `quiz.history.read` through current `help` to inspect compact history and computed correctness. History detail is read-only and shows stems and correctness; selected option IDs are available to the Agent. Dates in the UI use local calendar days (today, yesterday, N days ago); stored timestamps remain Unix milliseconds.
 
-An unfinished attempt retains `id`, `startedAt`, `updatedAt`, `completedAt: null`, `mode`, `feedbackMode`, `deadlineAt`, `finishReason`, `gradingRule`, `currentIndex`, and `answers`. Each answer has `questionId`, `optionIds`, `submittedAt`, and `correct`. Resuming does not extend a hard-mode deadline.
+An unfinished attempt retains `id`, `startedAt`, `updatedAt`, `completedAt: null`, `mode`, `feedbackMode`, `deadlineAt`, `finishReason`, `gradingRule`, `currentIndex`, and `answers`. Each answer has `questionId`, `optionIds`, `submittedAt`, and `correct`. New attempts shuffle the `answers` array and store each question's option IDs in `optionOrder`; resolve content by IDs, not source-array positions. Resuming preserves both orders and the hard-mode deadline. Legacy attempts without `optionOrder` retain source option order. Completed history does not retain presentation order.
 
 `quiz.result` can read the complete just-finished result during the current page process. After refresh, the Node connection may retain a separately delivered completion receipt. In ordinary library reads, omitting `attemptId` returns each question's latest result; requesting a vanished attempt ID returns `QUIZ_ATTEMPT_NOT_FOUND`. An ongoing attempt returns `QUIZ_NOT_COMPLETED`; do not present earlier results as the current score.
 

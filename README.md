@@ -1,6 +1,6 @@
 # Self-Study Tutor Skill
 
-Use `$selfstudy-coach` for explanations, conversation summaries, questions, single-topic teaching whiteboards, Web practice, and review based on the user's goals and understanding. This skill targets the companion Web app. Instructions are in English; tutoring and generated content follow the user's preferred language.
+Use `$selfstudy-coach` for adaptable self-study plans, explanations, conversation summaries, questions, single-topic teaching whiteboards, Web practice, and review based on the user's goals and understanding. This skill targets the companion Web app. Instructions are in English; tutoring and generated content follow the user's preferred language.
 
 ## Install
 
@@ -26,12 +26,15 @@ The user answers questions and makes learning choices; the agent handles prepara
 
 Example requests:
 
+- “Help me plan how to learn statistics for my work with three hours a week. Give me the plan first.”
 - “Use $selfstudy-coach to explain this concept and help me apply it.”
 - “Summarize the concepts and open questions in this conversation.”
 - “Explain HTTP caching, then prepare three questions in the right sidebar. After I finish, review my mistakes.”
 - “Show how this mechanism changes step by step with a whiteboard.”
 
 Web activities are optional teaching aids; preparing a connection does not force a quiz on every invocation. New-topic questionnaires are optional and use actual responses without scoring them. Automatically imported knowledge quizzes default to medium. Whiteboards focus on one topic and use buttons for its cases or stages.
+
+Self-study plans connect stage goals to practice, progress checks, and a concrete next task, with pacing adjusted to the user's time and actual learning evidence. Plans and pause summaries stay in the conversation; Web does not store learning plans or send automatic reminders. Bring the summary when continuing in a new conversation.
 
 The agent discovers current capabilities through `help`, without startup version comparisons. Compatible additions do not require Skill updates. Public `/agent/commands` contains documentation, not the user's library. Browser-local data is not automatically synchronized across devices; review uses actual results, not inferred history.
 

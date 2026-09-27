@@ -29,6 +29,8 @@ Knowledge quizzes (`gaga.quiz`) support `single_choice` and `multiple_choice`. E
 
 Question IDs must be unique within the quiz; option IDs must be unique within their question. Use 1–64 English letters, digits, underscores, or hyphens. `answer.optionIds` must reference real options without duplicates. A quiz or question may have a descriptive `metadata` object. Do not add invented fields elsewhere.
 
+Every new quiz attempt randomizes questions and options. Write independent questions, avoid references to previous questions or option letters/positions (including "all of the above"), and refer to option content in explanations. The Web handles shuffling; do not add order fields to quiz JSON.
+
 Stems, options, and explanations are plain text, not executable HTML. Quiz schema versions are independent of the skill operation version; do not set `schemaVersion` to the skill version. New exercises may identify sources and learning goals, but must not fabricate user answer records. Write learning content in the user's preferred language; the English examples do not set a required output language.
 
 ## Unscored learning questionnaire

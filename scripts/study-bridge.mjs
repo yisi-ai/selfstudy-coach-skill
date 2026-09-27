@@ -437,11 +437,6 @@ function timestamp(value, path3) {
   quizAssert(Number.isSafeInteger(value) && Number(value) >= 0, "\u65F6\u95F4\u8BB0\u5F55\u65E0\u6548", path3);
   return value;
 }
-function checkSelection(quiz, index, ids) {
-  const q = quiz.questions[index];
-  quizAssert(q, "\u9898\u76EE\u4E0D\u5B58\u5728");
-  checkChoiceSelection(q, ids);
-}
 function readQuizAttempt(input, quiz) {
   const value = quizObject(input, "attempt");
   quizFields(
@@ -496,14 +491,23 @@ function readQuizAttempt(input, quiz) {
     "\u4F5C\u7B54\u8BB0\u5F55\u4E0E\u9898\u76EE\u6570\u91CF\u4E0D\u4E00\u81F4"
   );
   let firstUnsubmitted = quiz.questions.length;
+  const questionIds = /* @__PURE__ */ new Set();
   value.answers.forEach((inputAnswer, index) => {
     const path3 = `answers[${String(index)}]`;
-    const question = quiz.questions[index];
-    quizAssert(question, "\u4F5C\u7B54\u5173\u8054\u9898\u76EE\u4E0D\u5B58\u5728", path3);
     const answer = quizObject(inputAnswer, path3);
-    quizFields(answer, ["questionId", "optionIds", "submittedAt", "correct"], path3);
-    quizAssert(answer.questionId === question.id, "\u4F5C\u7B54\u8BB0\u5F55\u5173\u8054\u4E86\u4E0D\u540C\u9898\u76EE", path3);
-    checkSelection(quiz, index, answer.optionIds);
+    quizFields(answer, ["questionId", "optionOrder", "optionIds", "submittedAt", "correct"], path3);
+    const question = quiz.questions.find((q) => q.id === answer.questionId);
+    quizAssert(question && !questionIds.has(question.id), "\u4F5C\u7B54\u5173\u8054\u9898\u76EE\u4E0D\u5B58\u5728\u6216\u91CD\u590D", path3);
+    questionIds.add(question.id);
+    if (answer.optionOrder !== void 0) {
+      const order = answer.optionOrder;
+      quizAssert(
+        Array.isArray(order) && order.length === question.options.length && new Set(order).size === order.length && order.every((id) => question.options.some((option) => option.id === id)),
+        "\u4F5C\u7B54\u9009\u9879\u987A\u5E8F\u65E0\u6548",
+        path3
+      );
+    }
+    checkChoiceSelection(question, answer.optionIds);
     if (answer.submittedAt === null) {
       firstUnsubmitted = Math.min(firstUnsubmitted, index);
       quizAssert(answer.correct === null, "\u672A\u63D0\u4EA4\u7684\u9898\u76EE\u4E0D\u80FD\u5DF2\u6709\u6210\u7EE9", path3);

@@ -1,8 +1,8 @@
 ---
 name: selfstudy-coach
-description: Tutor users through explanations, conversation summaries, questions, single-topic teaching whiteboards, Web practice, and review. Prepare one reusable Web connection on first use, preferring local Node.js and the user's right sidebar, then browser tools controlling that same sidebar. Use file or code delivery only when automation is unavailable or explicitly requested. Adapt to the user's goals and understanding without assuming a learning stage.
+description: Guide self-study with adaptable learning plans, explanations, conversation summaries, questions, single-topic teaching whiteboards, Web practice, and review. Use when users want to learn a subject, plan their learning, or work through a specific difficulty. Prepare one reusable Web connection on first use, preferring local Node.js and the user's right sidebar, then browser tools controlling that same sidebar. Use file or code delivery only when automation is unavailable or explicitly requested. Adapt to the user's goals and understanding without assuming a learning stage.
 metadata:
-  version: "0.4.34"
+  version: "0.4.35"
   display_name: "Self-Study Tutor"
   display_name_en: "Self-Study Tutor"
 ---
@@ -39,9 +39,9 @@ Both automatic routes must verify the actual visible activity ID, title, and sta
 
 ## Teach for the current task
 
-Read the visible conversation, supplied material, and known goals. Do not assume a beginner, an entire course, or access to other conversations. Use [the tutoring guide](references/learning.md) when choosing explanations, practice, or review. A summary request should receive a summary; a sticking point should receive the missing explanation. Brief comprehension checks may remain in chat. Preparing a Web connection does not require generating a quiz or using Web for every explanation.
+Read the visible conversation, supplied material, and known goals. Do not assume a beginner, an entire course, or access to other conversations. Use [the tutoring guide](references/learning.md) when planning self-study or choosing explanations, practice, and review. For self-study, use it to choose a starting point, plan staged outcomes, and revise the route from learning evidence. Honor requests for a plan only. A summary request should receive a summary; a sticking point should receive the missing explanation without requiring a curriculum. Brief comprehension checks may remain in chat. Preparing a Web connection does not require generating a quiz or using Web for every explanation.
 
-For a new topic with unclear goals or experience, optionally offer a short unscored questionnaire. Generate it after consent, or immediately if already requested. If skipped, start teaching from available information. Use its actual answers to choose a starting point; self-rated familiarity is not demonstrated mastery.
+For a new topic with unclear goals or experience, optionally offer a short unscored questionnaire. Generate it after consent, or immediately if already requested. If skipped, continue planning or teaching from available information. Use its actual answers to choose a starting point; self-rated familiarity is not demonstrated mastery.
 
 Use [quiz formats](references/quiz-format.md) for `gaga.quiz` knowledge tests and `gaga.questionnaire` background questions. Knowledge quizzes default to medium difficulty; questionnaires have no score or timer and open their first question directly. Use [whiteboards](references/whiteboards.md) when intermediate visual changes clarify one topic. Each board's buttons explain cases or stages within that topic, using animation and text without speech or a global playback bar. Deliver all of these through the already selected route.
 
