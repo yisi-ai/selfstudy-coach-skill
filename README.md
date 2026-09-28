@@ -1,18 +1,26 @@
 # Self-Study Tutor Skill
 
-Use `$selfstudy-coach` for adaptable self-study plans, explanations, conversation summaries, questions, single-topic teaching whiteboards, Web practice, and review based on the user's goals and understanding. This skill targets the companion Web app. Instructions are in English; tutoring and generated content follow the user's preferred language.
-
 ## Install
 
-Ask an agent with local file access to install the complete release:
+Copy this message to your agent:
 
 ```text
-Install the Self-Study Tutor skill from https://github.com/yisi-ai/selfstudy-coach-skill into your host's skill directory under selfstudy-coach. Verify the installation. If already installed, back it up and preserve my customizations.
+Use npx skills add yisi-ai/selfstudy-coach-skill --skill selfstudy-coach to install selfstudy-coach for the current agent and verify it is available; if already installed, back it up and preserve my customizations.
 ```
+
+Or run the installation command in your terminal:
+
+```bash
+npx skills add yisi-ai/selfstudy-coach-skill --skill selfstudy-coach
+```
+
+Choose your current agent when prompted. The command installs into the current project by default; add `--global` to use the skill across projects. See the [skills CLI documentation](https://github.com/vercel-labs/skills#install-a-skill) for installation options.
 
 The release repository is named `selfstudy-coach-skill`; the installed directory and invocation name are `selfstudy-coach`. Install the repository-root content without `.git/`. Runtime scripts are compiled and included. Updates require user consent and preservation of customizations; see [update guidance](references/version-update.md). Read [SKILL.md](SKILL.md) to use the skill without installing another copy when the host supports that workflow.
 
 ## Use
+
+Use `$selfstudy-coach` for adaptable self-study plans, explanations, conversation summaries, questions, single-topic teaching whiteboards, Web practice, and review based on the user's goals and understanding. This skill targets the companion Web app. Instructions are in English; tutoring and generated content follow the user's preferred language.
 
 During the first learning response, including a plan or explanation, the agent selects and prepares one route in this order:
 
