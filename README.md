@@ -31,8 +31,11 @@ Example requests:
 - “Summarize the concepts and open questions in this conversation.”
 - “Explain HTTP caching, then prepare three questions in the right sidebar. After I finish, review my mistakes.”
 - “Show how this mechanism changes step by step with a whiteboard.”
+- “Read these note photos and help me practise the key ideas. Keep the photos out of Web.”
 
 Web activities are optional teaching aids; preparing a connection does not force a quiz on every invocation. New-topic questionnaires are optional and use actual responses without scoring them. Automatically imported knowledge quizzes default to medium. Whiteboards focus on one topic and use buttons for its cases or stages.
+
+For note photos, the agent uses the host's image-understanding capability and adapts its organization to the material and your goal. It clarifies consequential ambiguities and distinguishes notes from added explanations. Only derived learning content goes to Web; source photos are not uploaded or embedded. See [image-note guidance](references/image-notes.md).
 
 Self-study plans connect stage goals to practice, progress checks, and a concrete next task, with pacing adjusted to the user's time and actual learning evidence. Plans and pause summaries stay in the conversation; Web does not store learning plans or send automatic reminders. Bring the summary when continuing in a new conversation.
 
