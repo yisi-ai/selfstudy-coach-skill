@@ -14,15 +14,15 @@ The release repository is named `selfstudy-coach-skill`; the installed directory
 
 ## Use
 
-On first invocation, the agent selects and prepares one route in this order:
+During the first learning response, including a plan or explanation, the agent selects and prepares one route in this order:
 
-1. [Local Node connection](references/local-connection.md), with Node.js 22+ on the user's computer and the real Web app displayed in the right sidebar.
-2. [Browser control](references/browser-control.md), through an available browser MCP, browser-operation skill, or host tool controlling that same right-side page.
+1. [Local Node connection](references/local-connection.md), started from a local terminal with Node.js 22+. Use the sidebar when available; a TUI opens the system browser instead and needs no browser MCP.
+2. [Browser control](references/browser-control.md), through an available browser MCP, browser-operation skill, or host tool controlling the actual visible page where the user answers.
 3. [File or code handoff](references/manual-handoff.md), only when both automatic routes are unavailable or the user explicitly requests files/code.
 
-The agent records the selected route and session, then reuses it. It restores a failed connection before changing routes and does not ask the user to copy or import content while automation works. Control of a separate browser does not count as control of the right sidebar. Product names and browser-based chat interfaces do not determine tool capabilities.
+The agent records the selected route and session, then reuses it. It restores a failed connection before changing routes and does not ask the user to copy or import content while automation works. Without an automatic browser opener, it provides the existing preview link and leaves the service on standby. A headless browser or another browser's storage does not replace the user's answering page. Product names and browser-based chat interfaces do not determine tool capabilities.
 
-The user answers questions and makes learning choices; the agent handles preparation, import, display, and reads. A connection remains open while the user is away. Complete answers awaiting synchronization are saved locally and delivered when it returns; hard-mode quiz deadlines retain their normal rules.
+The user answers questions and makes learning choices; the agent handles startup, preparation, import, display, and reads. The local service stays running between replies, while the user is away, and after the conversation ends, until the user explicitly asks to stop it. Closing the page leaves the service on standby; reopening its preview restores the connection. A stopped process or restarted computer requires the agent to resume the saved session. Complete answers awaiting synchronization are saved locally and delivered when the connection returns; hard-mode quiz deadlines retain their normal rules.
 
 Example requests:
 

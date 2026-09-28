@@ -35,9 +35,9 @@ Send requests through the already prepared route. The Node connection retains wr
 - `running`: A quiz/questionnaire is answering or resumed; a whiteboard segment is demonstrating. Let the user answer.
 - `ready`: For a quiz, start with `quiz.start` if practice was requested; for a whiteboard, it is displayed and ready to demonstrate. A prepared home page may also be ready before an activity exists.
 - `completed`: Read the matching quiz/questionnaire result; a completed whiteboard segment is not a grade or proof of understanding.
-- `pending` or `navigationRequested: false`: The save may have succeeded. Inspect or open the returned real URL in the same right-side page without reimporting.
+- `pending` or `navigationRequested: false`: The save may have succeeded. Inspect the same answering page without reimporting. Node keeps the outer preview URL and navigates through commands; direct browser control may open the returned real URL in the bound page.
 - `QUIZ_NOT_COMPLETED`: Keep the current unfinished attempt; do not substitute old scores.
-- Missing quiz/questionnaire: Confirm the right-side page, origin, and actual record. A replaced questionnaire is not in quiz history. Do not silently recreate missing content as a recovery step.
+- Missing quiz/questionnaire: Confirm the answering page, origin, and actual record. A replaced questionnaire is not in quiz history. Do not silently recreate missing content as a recovery step.
 - `COMMAND_BRIDGE_UNAVAILABLE`: Check that the prepared page has initialized. Browser control may use its available UI tools; Node follows its connection recovery. Follow SKILL.md's route order only when the current route actually fails.
 - Content/argument errors: Correct the indicated `code`, `message`, and `path` on the existing route, consulting current help as needed.
 

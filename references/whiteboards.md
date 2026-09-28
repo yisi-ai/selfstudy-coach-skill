@@ -4,7 +4,7 @@ Use a whiteboard when spatial changes, comparisons or intermediate steps clarify
 
 ## Discover and create
 
-Use the Web connection or sidebar already prepared in SKILL.md. Discover `whiteboard.help` through the current host's `help`. The public Web `/agent/whiteboard` endpoint returns the same current format documentation and complete JSON example without requiring browser control. `/agent/commands` lists commands. These endpoints contain no user content.
+Use the Web connection or answering page already prepared in SKILL.md. Discover `whiteboard.help` through the current host's `help`. The public Web `/agent/whiteboard` endpoint returns the same current format documentation and complete JSON example without requiring browser control. `/agent/commands` lists commands. These endpoints contain no user content.
 
 The data discriminator is `format: "gaga.whiteboard"`, with an independent `schemaVersion`. A document contains a title, logical canvas dimensions, identified drawing objects, and identified segments. Build scenes freely from supported primitives; do not restrict explanations to preset subject templates. Each segment defines initial object changes and a sequence of timed changes with explanatory text. Intermediate motion, simultaneous changes and pauses for reading can all be composed. Call current help for supported properties, limits, interpolation rules and examples; compatible additions need no Skill update.
 
