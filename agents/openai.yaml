@@ -1,4 +1,4 @@
 interface:
-  display_name: "Self-Study Tutor"
+  display_name: "selfstudy-coach"
   short_description: "Plan self-study with guided practice and review"
   default_prompt: "Use $selfstudy-coach to tutor me in my preferred language, start the local Web service now and keep it on standby between replies, using my sidebar or system browser for learning activities."
