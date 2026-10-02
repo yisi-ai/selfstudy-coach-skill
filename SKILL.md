@@ -2,7 +2,7 @@
 name: selfstudy-coach
 description: Help users start self-study, understand a topic, learn from supplied material, or review earlier learning with explanations, questionnaires, animated whiteboards, and quizzes in a companion Web app.
 metadata:
-  version: "0.4.37"
+  version: "0.4.38"
   display_name: "Self-Study Tutor"
   display_name_en: "Self-Study Tutor"
 ---
