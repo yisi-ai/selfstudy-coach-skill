@@ -2652,6 +2652,20 @@ function checkChoiceSelection(question, ids) {
 
 // packages/consumer-core/src/questionnaire.ts
 var QUESTIONNAIRE_FORMAT = "gaga.questionnaire";
+var QUESTIONNAIRE_OTHER_OPTION_ID = "$other";
+var QUESTIONNAIRE_OTHER_MAX_LENGTH = 2e3;
+function questionnaireHasAnswer(answer) {
+  return answer.optionIds.length > 0 && (!answer.optionIds.includes(QUESTIONNAIRE_OTHER_OPTION_ID) || Boolean(answer.otherText?.trim()));
+}
+function checkQuestionnaireSelection(question, ids) {
+  checkChoiceSelection(
+    {
+      ...question,
+      options: [...question.options, { id: QUESTIONNAIRE_OTHER_OPTION_ID, text: "" }]
+    },
+    ids
+  );
+}
 function readQuestionnaire(input) {
   return readQuizVersion(
     input,
@@ -2725,21 +2739,33 @@ function readQuestionnaireSession(input) {
     Array.isArray(value.answers) && value.answers.length === questionnaire.questions.length,
     "\u4F5C\u7B54\u6570\u91CF\u65E0\u6548"
   );
-  value.answers.forEach((input2, index) => {
+  const answers = value.answers.map((input2, index) => {
     const answer = quizObject(input2, "answer");
     const question = questionnaire.questions[index];
     quizAssert(question, "\u95EE\u9898\u4E0D\u5B58\u5728");
-    quizFields(answer, ["questionId", "optionIds"], "answer");
+    quizFields(answer, ["questionId", "optionIds", "otherText"], "answer");
     quizAssert(answer.questionId === question.id, "\u4F5C\u7B54\u5173\u8054\u9898\u76EE\u65E0\u6548");
-    checkChoiceSelection(question, answer.optionIds);
-    if (value.completedAt !== null) quizAssert(answer.optionIds.length > 0, "\u95EE\u5377\u5C1A\u672A\u7B54\u5B8C");
+    checkQuestionnaireSelection(question, answer.optionIds);
+    if (answer.otherText !== void 0)
+      quizAssert(
+        typeof answer.otherText === "string" && answer.otherText.length <= QUESTIONNAIRE_OTHER_MAX_LENGTH,
+        "\u5176\u4ED6\u5185\u5BB9\u65E0\u6548",
+        "answer.otherText"
+      );
+    const result = {
+      questionId: question.id,
+      optionIds: answer.optionIds,
+      ...typeof answer.otherText === "string" && (value.completedAt === null || answer.optionIds.includes(QUESTIONNAIRE_OTHER_OPTION_ID)) ? { otherText: answer.otherText } : {}
+    };
+    if (value.completedAt !== null) quizAssert(questionnaireHasAnswer(result), "\u95EE\u5377\u5C1A\u672A\u7B54\u5B8C");
+    return result;
   });
   if (value.completedAt !== null)
     quizAssert(
       Number(value.completedAt) >= Number(value.createdAt) && Number(value.completedAt) <= Number(value.updatedAt),
       "\u5B8C\u6210\u65F6\u95F4\u65E0\u6548"
     );
-  return JSON.parse(JSON.stringify({ ...value, questionnaire }));
+  return JSON.parse(JSON.stringify({ ...value, questionnaire, answers }));
 }
 
 // packages/quiz-react/locales/en/common.json
@@ -2809,20 +2835,20 @@ var common_default = {
   },
   homeUi: {
     eyebrow: "MAKE ROOM FOR WHAT YOU LEARN",
-    headline: "AI-powered quizzes.\nLearn through practice.",
-    intro: "Turn your AI conversations into quizzes with GAGA learn. Practice at your own pace, review explanations, and keep your progress in this browser.",
+    headline: "AI-assisted learning.\nPractice what you learn.",
+    intro: "Use your own AI conversations to learn with GAGA learn. Set a goal, import quizzes, animated whiteboards or questionnaires, and send your results back to AI for the next explanation.",
     cta: "Start a quiz",
     howLink: "See how it works",
-    promise: "No account needed. Your quizzes stay in your browser.",
-    howTitle: "From a good chat to a little practice.",
-    howIntro: "Bring the conversation you already have. We help you turn it into something you remember.",
-    stepOneTitle: "Let your AI write the questions",
-    stepOneBody: "Copy our prompt into the AI conversation you want to revisit. Your AI creates a quiz from what you discussed.",
-    stepTwoTitle: "Bring your quiz back",
-    stepTwoBody: "Paste the reply or open a JSON file. Preview the quiz before adding it to your library.",
-    stepThreeTitle: "Find out what stuck",
-    stepThreeBody: "Choose a practice mode, answer at your own pace, and revisit the explanations when you finish.",
-    modesTitle: "A pace for every kind of practice.",
+    promise: "No account needed. Your learning stays in this browser.",
+    howTitle: "From a learning goal to understanding.",
+    howIntro: "Let your AI explain. Use quizzes and animations to check what you understand, then bring your feedback back to the conversation.",
+    stepOneTitle: "Send a prompt to your AI",
+    stepOneBody: "Set an optional learning goal. Choose a prompt for self-study, review, a quiz, an animated explanation or a questionnaire, and paste it into your AI conversation.",
+    stepTwoTitle: "Import what your AI creates",
+    stepTwoBody: "Copy the complete AI reply or open its JSON file. GAGA learn recognizes quizzes, animated whiteboards and questionnaires and opens the matching activity.",
+    stepThreeTitle: "Practise, watch and ask again",
+    stepThreeBody: "Answer questions, watch explanations step by step, or complete a questionnaire. Copy your results or unclear steps back to AI to continue learning.",
+    modesTitle: "Three ways to practise with a quiz.",
     easyTitle: "Learn as you go",
     easyBody: "Get feedback and an explanation after each answer. No timer, no rush.",
     mediumTitle: "See the whole picture",
@@ -2830,17 +2856,17 @@ var common_default = {
     hardTitle: "Add a little challenge",
     hardBody: "A shared time limit of 30 seconds per question. Use your time wherever you need it most.",
     aboutTitle: "Learning starts with a question.",
-    aboutBody: "GAGA learn is a place to make AI part of everyday learning. Our quiz workspace turns conversations into personal practice: a library of your own, saved progress, and a clearer picture of what to revisit.",
+    aboutBody: "GAGA learn connects your AI conversations with hands-on learning. Save a learning goal, use prompts for self-study and review, practise with quizzes, watch animated whiteboards and answer questionnaires. Return your answers or unclear steps to AI for further explanation. Quizzes, progress and whiteboards are saved in this browser.",
     faqTitle: "A few things to know.",
-    faqOneQuestion: "Does GAGA learn generate the quiz for me?",
-    faqOneAnswer: "You use the provided prompt in your own AI conversation, then import its reply. GAGA learn checks the quiz format and handles practice and scoring. AI-written questions can contain mistakes; check them against your source material.",
-    faqTwoQuestion: "Where are my quizzes and answers stored?",
-    faqTwoAnswer: "In this browser, on this device. They are not uploaded to an account. Export a library backup before clearing browser data or moving to another device.",
-    faqThreeQuestion: "Can I bring a quiz from the WeChat app?",
-    faqThreeAnswer: "Yes. Import a quiz file or a compatible library backup from the WeChat app. Restoring a backup adds its quizzes and attempts without replacing your existing library.",
-    closing: "Keep a little more from your next conversation.",
-    seoTitle: "GAGA learn \u2014 AI-Powered Quizzes & Practice",
-    seoDescription: "Turn AI conversations into practice quizzes with GAGA learn. Import questions, choose a practice mode, and review answers. No account needed.",
+    faqOneQuestion: "Where does the learning content come from?",
+    faqOneAnswer: "Choose a prompt in GAGA learn and send it to your own AI conversation. Your AI explains and creates the content; GAGA learn imports it for practice, animation playback or questionnaires. Copy your feedback back to the same conversation to continue.",
+    faqTwoQuestion: "Where is my learning saved?",
+    faqTwoAnswer: "Quizzes, answers, whiteboards and your learning goal are saved in this browser on this device. Your current questionnaire is cached separately and is not part of quiz scores or library backups. Export a quiz library backup before clearing browser data or changing devices; keep your original whiteboard files too.",
+    faqThreeQuestion: "Can I move my quizzes between devices?",
+    faqThreeAnswer: "Yes. Export a quiz file or library backup and import it on another device, in the compatible Chrome extension or in the WeChat app. A library backup adds quizzes and attempts without replacing your existing library. Other learning data is managed separately.",
+    closing: "Turn your next AI conversation into understanding.",
+    seoTitle: "GAGA learn \u2014 AI-Assisted Learning, Quizzes & Whiteboards",
+    seoDescription: "Learn with your own AI conversations. Set goals, import quizzes, animated whiteboards and questionnaires, and send feedback to AI. No account needed.",
     privacy: "Privacy",
     terms: "Terms",
     sampleLabel: "Sample question",
@@ -3027,25 +3053,27 @@ var common_default = {
     normalTest: "Regular test",
     mixedTest: "Mixed test",
     currentQuizQuestion: "From this quiz",
-    backToQuiz: "Back to quiz"
+    backToQuiz: "Back to quiz",
+    questionnaireOther: "Other",
+    questionnaireOtherPlaceholder: "Enter your own answer"
   },
   legalUi: {
-    privacyIntro: "GAGA learn\u2019s website and the AI Chat to Quiz (AI\u804A\u5929\u8F6C\u5B66\u4E60\u95EE\u7B54) Chrome extension help you turn AI conversations into personal practice quizzes. This policy covers both products. Neither requires an account.",
+    privacyIntro: "GAGA learn\u2019s website and the AI-Assisted Learning Chrome extension help you learn through AI-generated quizzes and animated whiteboards. This policy covers both products. Neither requires an account.",
     storageTitle: "Website: your local library",
     storageBody: "The website stores imported quizzes, selected answers, results and saved skills in this browser on your device. This data is used to manage your library, save progress, show results and restore backups. The website does not upload your quiz content or practice records to a server. Website storage and extension storage are separate; there is no automatic synchronization. You can move quizzes yourself using export and import.",
     requestsTitle: "Website requests and cookies",
     requestsBody: "When you visit the website, page requests and image downloads reach our website and asset servers. Servers may process technical information such as your IP address and request logs to deliver the service and investigate faults. Your website language choice is saved in a cookie. The website also uses Microsoft Clarity and Baidu Analytics to understand visits and interactions and improve the experience. These services receive technical information such as page URLs, referrers, device and browser details, and interaction events, and may use cookies to distinguish visits. Page content is masked for Clarity session recordings. Our quiz features do not send your library, answers or practice records as analytics events. These website requests are separate from the extension\u2019s local quiz storage. Quiz images in both the website and extension load directly from their HTTPS source. That image server receives the request; backups save only the URL and description, not the image file.",
     aiTitle: "Sharing and external AI services",
-    aiBody: "We do not receive or sell your quiz content or practice records, use them for advertising or transfer them to third parties. You decide whether to copy the quiz prompt into an external AI conversation, such as ChatGPT, Claude, Gemini, DeepSeek or Kimi, and bring the reply back. The extension does not automatically read or send your conversations. Opening an external website or sending it content is a separate action; that service handles the visit and content under its own privacy policy. Imported replies are processed locally by the website or extension.",
-    termsIntro: "GAGA learn offers a way to turn AI conversations into personal practice quizzes. Use the service and imported content responsibly.",
+    aiBody: "We do not receive or sell your learning content or records, use them for advertising, or automatically send them to third parties. You choose whether to copy learning prompts, answers or understanding feedback into an external AI conversation, and whether to import its reply. The extension does not automatically read or send your chats. External AI services process the content you send under their own policies; imported replies are processed locally by the website or extension.",
+    termsIntro: "GAGA learn helps you learn with your own AI conversations, quizzes, animated whiteboards and questionnaires. Use the service and imported content responsibly.",
     accuracyTitle: "Questions and answers",
     accuracyBody: "Quiz scores compare your choices with the answers in the imported file. They do not independently verify whether an AI-generated answer is correct. Check questionable content against the original material.",
     backupTitle: "Keeping your work",
     backupBody: "Your data is local to this browser. Export a backup before clearing browser data or moving devices. The service does not provide account-based recovery or automatic device synchronization.",
     useTitle: "Responsible use",
     useBody: "Only import content you are entitled to use. Do not use the service for unlawful activity, harassment, fraud, or infringement. Product features and these explanations may change as the service develops.",
-    extensionTitle: "Chrome extension: AI Chat to Quiz",
-    extensionBody: "The extension processes the quizzes, answers, explanations and backups you choose to import, along with your selected answers, results, practice history and preferences. It saves your library, progress, language choice and introduction-completed flag in this Chrome profile on your device. This data is used only for importing, practising, reviewing and backing up your quizzes, and for remembering your settings. The extension does not collect account details, read webpages or browsing history, upload quiz data or include analytics. It does not synchronize your data with an account or other devices.",
+    extensionTitle: "Chrome extension: AI-Assisted Learning",
+    extensionBody: "The extension processes the quizzes, questionnaires, whiteboards, drawing instructions, explanations and backups you choose to import, along with your answers, results, practice history, whiteboard understanding feedback, learning goals and preferences. It stores saved learning content, progress and settings in this Chrome profile on your device; questionnaires use a temporary local cache. This data is used only for your learning activities, feedback, backups and settings. The extension does not collect account details, read webpages or browsing history, upload learning data or include analytics. It does not synchronize your data with an account or other devices.",
     clipboardTitle: "Clipboard and files",
     clipboardBody: "On both the website and extension, clipboard access happens only when you press a copy or read-clipboard button. There is no background clipboard monitoring. Selected files are read locally; exported quiz files and backups are saved by your browser. Content you paste or import is used only for the quiz and backup functions you choose.",
     introductionTitle: "The three-question introduction",
@@ -3085,8 +3113,8 @@ var common_default = {
     q3Explanation: "These 3 questions are only a walkthrough. They do not create a quiz or a history entry. Only a flag that you\u2019ve seen the introduction is saved."
   },
   extensionUi: {
-    brand: "AI Chat to Quiz",
-    welcomeIntro: "Turn conversations with ChatGPT, Claude, Gemini, DeepSeek or Kimi into self-tests. Try 3 questions to see how it works."
+    brand: "AI-Assisted Learning",
+    welcomeIntro: "Use the provided prompts to get quizzes and animated whiteboards from your AI chat. Send your answers and understanding feedback back to the AI. Try 3 questions to get started."
   },
   articleUi: {
     title: "Articles",
@@ -3125,6 +3153,7 @@ var common_default = {
     repeat: "Select it again to repeat the demonstration.",
     replayStep: "Select an explanation to replay just that step, then pause.",
     unclearStep: "Unclear here",
+    markUnclearStep: "Mark as unclear",
     panHint: "Drag to explore the canvas, use arrow keys to move, or press Home to recenter.",
     drawingError: "The whiteboard could not be drawn. Ask your AI to check this content.",
     imageError: "Whiteboard image unavailable",
@@ -3296,20 +3325,20 @@ var common_default2 = {
   },
   homeUi: {
     eyebrow: "\u8BA9\u5B66\u8FC7\u7684\u77E5\u8BC6\uFF0C\u771F\u6B63\u7559\u4E0B\u6765",
-    headline: "\u7528 AI \u51FA\u9898\uFF0C\n\u5728\u7EC3\u4E60\u4E2D\u638C\u63E1\u77E5\u8BC6\u3002",
-    intro: "\u7528\u560E\u560E\u5B66\u4E60\u628A AI \u4F1A\u8BDD\u53D8\u6210\u53EF\u4EE5\u53CD\u590D\u7EC3\u4E60\u7684\u9898\u96C6\u3002\u6309\u81EA\u5DF1\u7684\u8282\u594F\u7B54\u9898\u3001\u67E5\u770B\u89E3\u6790\uFF0C\u5728\u5F53\u524D\u6D4F\u89C8\u5668\u4FDD\u7559\u5B66\u4E60\u8FDB\u5EA6\u3002",
+    headline: "\u8BA9 AI \u5E2E\u4F60\u5B66\uFF0C\n\u7528\u7EC3\u4E60\u68C0\u9A8C\u7406\u89E3\u3002",
+    intro: "\u7528\u560E\u560E\u5B66\u4E60\u8FDE\u63A5\u81EA\u5DF1\u7684 AI \u4F1A\u8BDD\u4E0E\u5B9E\u9645\u7EC3\u4E60\u3002\u8BBE\u5B9A\u5B66\u4E60\u76EE\u6807\uFF0C\u5BFC\u5165\u95EE\u7B54\u6D4B\u9A8C\u3001\u52A8\u753B\u767D\u677F\u6216\u95EE\u5377\uFF0C\u628A\u4F5C\u7B54\u7ED3\u679C\u548C\u7591\u95EE\u53D1\u56DE AI\uFF0C\u7EE7\u7EED\u7406\u89E3\u4E0E\u590D\u76D8\u3002",
     cta: "\u5F00\u59CB\u6D4B\u9A8C",
     howLink: "\u770B\u770B\u5982\u4F55\u4F7F\u7528",
-    promise: "\u65E0\u9700\u6CE8\u518C\uFF0C\u9898\u96C6\u4FDD\u5B58\u5728\u5F53\u524D\u6D4F\u89C8\u5668\u3002",
-    howTitle: "\u4ECE\u4E00\u6B21\u597D\u5BF9\u8BDD\uFF0C\u5230\u4E00\u6B21\u5C0F\u7EC3\u4E60\u3002",
-    howIntro: "\u4ECE\u5DF2\u7ECF\u804A\u8FC7\u7684\u5185\u5BB9\u5F00\u59CB\uFF0C\u8BA9\u5B66\u4E60\u4E0D\u53EA\u505C\u7559\u5728\u5BF9\u8BDD\u91CC\u3002",
-    stepOneTitle: "\u8BA9 AI \u6839\u636E\u539F\u4F1A\u8BDD\u51FA\u9898",
-    stepOneBody: "\u628A\u51FA\u9898\u63D0\u793A\u8BCD\u53D1\u56DE\u60F3\u590D\u4E60\u7684 AI \u4F1A\u8BDD\uFF0C\u8BA9 AI \u6839\u636E\u5DF2\u6709\u5185\u5BB9\u751F\u6210\u9898\u96C6\u3002",
-    stepTwoTitle: "\u628A\u751F\u6210\u7684\u9898\u96C6\u5E26\u56DE\u6765",
-    stepTwoBody: "\u7C98\u8D34\u5B8C\u6574\u56DE\u590D\uFF0C\u6216\u9009\u62E9 JSON \u6587\u4EF6\u3002\u68C0\u67E5\u6982\u8981\u540E\uFF0C\u4FDD\u5B58\u5230\u4F60\u7684\u9898\u96C6\u5E93\u3002",
-    stepThreeTitle: "\u770B\u770B\u81EA\u5DF1\u771F\u6B63\u8BB0\u4F4F\u4E86\u4EC0\u4E48",
-    stepThreeBody: "\u9009\u62E9\u7B54\u9898\u6A21\u5F0F\uFF0C\u5B8C\u6210\u7EC3\u4E60\uFF0C\u518D\u901A\u8FC7\u89E3\u6790\u590D\u76D8\u7406\u89E3\u4E2D\u7684\u9057\u6F0F\u3002",
-    modesTitle: "\u4E3A\u4E0D\u540C\u7684\u7EC3\u4E60\uFF0C\u9009\u4E00\u4E2A\u5408\u9002\u8282\u594F\u3002",
+    promise: "\u65E0\u9700\u6CE8\u518C\uFF0C\u5B66\u4E60\u5185\u5BB9\u4FDD\u5B58\u5728\u5F53\u524D\u6D4F\u89C8\u5668\u3002",
+    howTitle: "\u4ECE\u4E00\u4E2A\u5B66\u4E60\u76EE\u6807\uFF0C\u5230\u771F\u6B63\u7406\u89E3\u3002",
+    howIntro: "\u8BA9 AI \u8BB2\u89E3\uFF0C\u7528\u6D4B\u9A8C\u548C\u52A8\u753B\u9A8C\u8BC1\u7406\u89E3\uFF0C\u518D\u628A\u5B9E\u9645\u53CD\u9988\u5E26\u56DE\u539F\u4F1A\u8BDD\u3002",
+    stepOneTitle: "\u628A\u5B66\u4E60\u63D0\u793A\u8BCD\u53D1\u7ED9 AI",
+    stepOneBody: "\u6309\u9700\u8BBE\u7F6E\u5B66\u4E60\u76EE\u6807\uFF0C\u9009\u62E9\u65B0\u7684\u5F00\u59CB\u3001\u590D\u76D8\u603B\u7ED3\u3001\u95EE\u7B54\u7EC3\u4E60\u3001\u52A8\u753B\u8BB2\u89E3\u6216\u95EE\u5377\u63D0\u793A\u8BCD\uFF0C\u590D\u5236\u5230\u81EA\u5DF1\u7684 AI \u4F1A\u8BDD\u3002",
+    stepTwoTitle: "\u5BFC\u5165 AI \u4E3A\u4F60\u751F\u6210\u7684\u5185\u5BB9",
+    stepTwoBody: "\u590D\u5236 AI \u7684\u5B8C\u6574\u56DE\u590D\uFF0C\u6216\u6253\u5F00\u751F\u6210\u7684 JSON \u6587\u4EF6\u3002\u560E\u560E\u5B66\u4E60\u4F1A\u8BC6\u522B\u9898\u96C6\u3001\u52A8\u753B\u767D\u677F\u548C\u95EE\u5377\uFF0C\u5E76\u6253\u5F00\u5BF9\u5E94\u6D3B\u52A8\u3002",
+    stepThreeTitle: "\u7EC3\u4E00\u7EC3\uFF0C\u770B\u4E00\u770B\uFF0C\u518D\u95EE\u4E00\u95EE",
+    stepThreeBody: "\u5B8C\u6210\u6D4B\u9A8C\u3001\u9010\u6B65\u89C2\u770B\u52A8\u753B\u8BB2\u89E3\u6216\u586B\u5199\u95EE\u5377\uFF0C\u628A\u4F5C\u7B54\u7ED3\u679C\u548C\u6CA1\u770B\u61C2\u7684\u6B65\u9AA4\u590D\u5236\u56DE AI\uFF0C\u7EE7\u7EED\u5B66\u4E60\u3002",
+    modesTitle: "\u4E09\u79CD\u6D4B\u9A8C\u6A21\u5F0F\uFF0C\u6309\u4F60\u7684\u8282\u594F\u7EC3\u4E60\u3002",
     easyTitle: "\u8FB9\u7B54\u8FB9\u5B66",
     easyBody: "\u6BCF\u9898\u63D0\u4EA4\u540E\u67E5\u770B\u53CD\u9988\u4E0E\u89E3\u6790\uFF0C\u4E0D\u9650\u65F6\uFF0C\u6162\u6162\u6765\u3002",
     mediumTitle: "\u5B8C\u6210\u540E\u518D\u770B\u5168\u8C8C",
@@ -3317,17 +3346,17 @@ var common_default2 = {
     hardTitle: "\u7ED9\u81EA\u5DF1\u4E00\u70B9\u6311\u6218",
     hardBody: "\u603B\u65F6\u957F\u4E3A\u6BCF\u9898 30 \u79D2\uFF0C\u81EA\u7531\u5206\u914D\u6574\u573A\u65F6\u95F4\uFF0C\u5230\u65F6\u81EA\u52A8\u4EA4\u5377\u3002",
     aboutTitle: "\u5B66\u4E60\uFF0C\u4ECE\u4E00\u4E2A\u95EE\u9898\u5F00\u59CB\u3002",
-    aboutBody: "\u560E\u560E\u5B66\u4E60\u5E0C\u671B\u8BA9 AI \u6210\u4E3A\u65E5\u5E38\u5B66\u4E60\u7684\u4E00\u90E8\u5206\u3002\u95EE\u7B54\u6D4B\u9A8C\u628A\u5BF9\u8BDD\u53D8\u6210\u81EA\u5DF1\u7684\u7EC3\u4E60\uFF0C\u4FDD\u7559\u9898\u96C6\u548C\u8FDB\u5EA6\uFF0C\u4E5F\u8BA9\u4E0B\u4E00\u6B21\u590D\u4E60\u66F4\u6709\u65B9\u5411\u3002",
+    aboutBody: "\u560E\u560E\u5B66\u4E60\u628A\u81EA\u5DF1\u7684 AI \u4F1A\u8BDD\u4E0E\u5B9E\u9645\u5B66\u4E60\u8FDE\u63A5\u8D77\u6765\u3002\u4FDD\u5B58\u5B66\u4E60\u76EE\u6807\uFF0C\u4F7F\u7528\u81EA\u5B66\u4E0E\u590D\u76D8\u63D0\u793A\u8BCD\uFF0C\u5B8C\u6210\u95EE\u7B54\u6D4B\u9A8C\uFF0C\u89C2\u770B\u52A8\u753B\u767D\u677F\uFF0C\u586B\u5199\u95EE\u5377\uFF1B\u518D\u628A\u771F\u5B9E\u7B54\u6848\u548C\u6CA1\u770B\u61C2\u7684\u6B65\u9AA4\u53D1\u56DE AI\uFF0C\u83B7\u5F97\u8FDB\u4E00\u6B65\u8BB2\u89E3\u3002\u9898\u96C6\u3001\u6D4B\u9A8C\u8FDB\u5EA6\u548C\u767D\u677F\u4FDD\u5B58\u5728\u5F53\u524D\u6D4F\u89C8\u5668\u3002",
     faqTitle: "\u5F00\u59CB\u524D\uFF0C\u4F60\u53EF\u80FD\u60F3\u77E5\u9053",
-    faqOneQuestion: "\u560E\u560E\u5B66\u4E60\u4F1A\u76F4\u63A5\u751F\u6210\u9898\u76EE\u5417\uFF1F",
-    faqOneAnswer: "\u8BF7\u628A\u63D0\u4F9B\u7684\u63D0\u793A\u8BCD\u53D1\u5230\u81EA\u5DF1\u7684 AI \u4F1A\u8BDD\uFF0C\u518D\u5BFC\u5165\u56DE\u590D\u3002\u560E\u560E\u5B66\u4E60\u8D1F\u8D23\u683C\u5F0F\u68C0\u67E5\u3001\u6D4B\u9A8C\u4E0E\u5224\u5206\u3002AI \u9898\u76EE\u53EF\u80FD\u6709\u8BEF\uFF0C\u8BF7\u7ED3\u5408\u539F\u8D44\u6599\u6838\u5BF9\u3002",
-    faqTwoQuestion: "\u9898\u96C6\u548C\u7B54\u6848\u4FDD\u5B58\u5728\u54EA\u91CC\uFF1F",
-    faqTwoAnswer: "\u4FDD\u5B58\u5728\u5F53\u524D\u8BBE\u5907\u7684\u6D4F\u89C8\u5668\u4E2D\uFF0C\u4E0D\u4E0A\u4F20\u5230\u8D26\u53F7\u3002\u6E05\u7406\u6D4F\u89C8\u5668\u6570\u636E\u6216\u66F4\u6362\u8BBE\u5907\u524D\uFF0C\u8BF7\u5BFC\u51FA\u9898\u96C6\u5E93\u5907\u4EFD\u3002",
-    faqThreeQuestion: "\u53EF\u4EE5\u4ECE\u5FAE\u4FE1\u5C0F\u7A0B\u5E8F\u5E26\u6765\u9898\u96C6\u5417\uFF1F",
-    faqThreeAnswer: "\u53EF\u4EE5\u5BFC\u5165\u5C0F\u7A0B\u5E8F\u5BFC\u51FA\u7684\u9898\u96C6\u6587\u4EF6\u6216\u517C\u5BB9\u7684\u9898\u96C6\u5E93\u5907\u4EFD\u3002\u6062\u590D\u4EE5\u8FFD\u52A0\u65B9\u5F0F\u4FDD\u5B58\u9898\u96C6\u548C\u6D4B\u9A8C\u8BB0\u5F55\uFF0C\u4E0D\u8986\u76D6\u73B0\u6709\u9898\u96C6\u5E93\u3002",
-    closing: "\u8BA9\u4E0B\u4E00\u6B21\u5BF9\u8BDD\uFF0C\u591A\u7559\u4E0B\u4E00\u70B9\u6536\u83B7\u3002",
-    seoTitle: "\u560E\u560E\u5B66\u4E60 \u2014 AI \u95EE\u7B54\u6D4B\u9A8C\u4E0E\u81EA\u4E3B\u7EC3\u4E60",
-    seoDescription: "\u7528\u560E\u560E\u5B66\u4E60\u628A AI \u4F1A\u8BDD\u53D8\u6210\u95EE\u7B54\u6D4B\u9A8C\u3002\u5BFC\u5165\u9898\u96C6\uFF0C\u9009\u62E9\u4E09\u79CD\u7EC3\u4E60\u6A21\u5F0F\uFF0C\u67E5\u770B\u7B54\u6848\u89E3\u6790\u4E0E\u6700\u8FD1\u4F5C\u7B54\u60C5\u51B5\uFF1B\u9898\u96C6\u548C\u8FDB\u5EA6\u4FDD\u5B58\u5728\u5F53\u524D\u6D4F\u89C8\u5668\uFF0C\u65E0\u9700\u6CE8\u518C\u3002",
+    faqOneQuestion: "\u5B66\u4E60\u5185\u5BB9\u7531\u8C01\u751F\u6210\uFF1F",
+    faqOneAnswer: "\u5728\u560E\u560E\u5B66\u4E60\u9009\u62E9\u63D0\u793A\u8BCD\uFF0C\u53D1\u9001\u5230\u81EA\u5DF1\u7684 AI \u4F1A\u8BDD\u3002AI \u8D1F\u8D23\u8BB2\u89E3\u548C\u751F\u6210\u5185\u5BB9\uFF0C\u560E\u560E\u5B66\u4E60\u8D1F\u8D23\u5BFC\u5165\u3001\u6D4B\u9A8C\u3001\u52A8\u753B\u64AD\u653E\u4E0E\u95EE\u5377\u4F5C\u7B54\u3002\u5B8C\u6210\u540E\uFF0C\u628A\u53CD\u9988\u590D\u5236\u56DE\u540C\u4E00\u4F1A\u8BDD\uFF0C\u7EE7\u7EED\u5B66\u4E60\u3002",
+    faqTwoQuestion: "\u5B66\u4E60\u5185\u5BB9\u4FDD\u5B58\u5728\u54EA\u91CC\uFF1F",
+    faqTwoAnswer: "\u9898\u96C6\u3001\u7B54\u6848\u3001\u767D\u677F\u548C\u5B66\u4E60\u76EE\u6807\u4FDD\u5B58\u5728\u5F53\u524D\u8BBE\u5907\u7684\u6D4F\u89C8\u5668\u4E2D\u3002\u5F53\u524D\u95EE\u5377\u5355\u72EC\u7F13\u5B58\uFF0C\u4E0D\u53C2\u4E0E\u6D4B\u9A8C\u8BC4\u5206\uFF0C\u4E5F\u4E0D\u5305\u542B\u5728\u9898\u96C6\u5E93\u5907\u4EFD\u91CC\u3002\u6E05\u7406\u6D4F\u89C8\u5668\u6570\u636E\u6216\u66F4\u6362\u8BBE\u5907\u524D\uFF0C\u8BF7\u5BFC\u51FA\u9898\u96C6\u5E93\u5907\u4EFD\uFF0C\u5E76\u4FDD\u7559\u539F\u59CB\u767D\u677F\u6587\u4EF6\u3002",
+    faqThreeQuestion: "\u53EF\u4EE5\u5728\u4E0D\u540C\u8BBE\u5907\u95F4\u8F6C\u79FB\u9898\u96C6\u5417\uFF1F",
+    faqThreeAnswer: "\u53EF\u4EE5\u5BFC\u51FA\u9898\u96C6\u6587\u4EF6\u6216\u9898\u96C6\u5E93\u5907\u4EFD\uFF0C\u5728\u53E6\u4E00\u53F0\u8BBE\u5907\u3001\u517C\u5BB9\u7684 Chrome \u6269\u5C55\u6216\u5FAE\u4FE1\u5C0F\u7A0B\u5E8F\u4E2D\u5BFC\u5165\u3002\u6062\u590D\u4F1A\u8FFD\u52A0\u9898\u96C6\u548C\u6D4B\u9A8C\u8BB0\u5F55\uFF0C\u4E0D\u8986\u76D6\u73B0\u6709\u9898\u96C6\u5E93\uFF1B\u5176\u4ED6\u5B66\u4E60\u6570\u636E\u5355\u72EC\u7BA1\u7406\u3002",
+    closing: "\u8BA9\u4E0B\u4E00\u6B21 AI \u5BF9\u8BDD\uFF0C\u53D8\u6210\u771F\u6B63\u7684\u7406\u89E3\u3002",
+    seoTitle: "\u560E\u560E\u5B66\u4E60 \u2014 AI \u8F85\u52A9\u81EA\u5B66\u3001\u95EE\u7B54\u6D4B\u9A8C\u4E0E\u52A8\u753B\u767D\u677F",
+    seoDescription: "\u7528\u81EA\u5DF1\u7684 AI \u4F1A\u8BDD\u5B66\u4E60\u4E0E\u590D\u76D8\uFF1A\u8BBE\u7F6E\u5B66\u4E60\u76EE\u6807\uFF0C\u5BFC\u5165\u95EE\u7B54\u6D4B\u9A8C\u3001\u52A8\u753B\u767D\u677F\u548C\u95EE\u5377\uFF0C\u628A\u4F5C\u7B54\u7ED3\u679C\u4E0E\u7591\u95EE\u53CD\u9988\u7ED9 AI\u3002\u65E0\u9700\u6CE8\u518C\uFF0C\u9898\u96C6\u548C\u8FDB\u5EA6\u4FDD\u5B58\u5728\u5F53\u524D\u6D4F\u89C8\u5668\u3002",
     privacy: "\u9690\u79C1\u8BF4\u660E",
     terms: "\u4F7F\u7528\u6761\u6B3E",
     sampleLabel: "\u793A\u4F8B\u9898\u76EE",
@@ -3514,25 +3543,27 @@ var common_default2 = {
     normalTest: "\u666E\u901A\u6D4B\u9A8C",
     mixedTest: "\u6DF7\u5408\u6D4B\u9A8C",
     currentQuizQuestion: "\u5C5E\u4E8E\u5F53\u524D\u9898\u96C6",
-    backToQuiz: "\u8FD4\u56DE\u9898\u96C6"
+    backToQuiz: "\u8FD4\u56DE\u9898\u96C6",
+    questionnaireOther: "\u5176\u4ED6",
+    questionnaireOtherPlaceholder: "\u8BF7\u8F93\u5165\u5176\u4ED6\u5185\u5BB9"
   },
   legalUi: {
-    privacyIntro: "\u560E\u560E\u5B66\u4E60\u7F51\u7AD9\u4E0E AI\u804A\u5929\u8F6C\u5B66\u4E60\u95EE\u7B54\uFF08AI Chat to Quiz\uFF09Chrome \u6269\u5C55\u5E2E\u52A9\u4F60\u628A AI \u4F1A\u8BDD\u53D8\u6210\u4E2A\u4EBA\u7EC3\u4E60\u9898\u96C6\u3002\u672C\u9690\u79C1\u8BF4\u660E\u540C\u65F6\u9002\u7528\u4E8E\u8FD9\u4E24\u4E2A\u4EA7\u54C1\uFF0C\u4F7F\u7528\u5747\u65E0\u9700\u6CE8\u518C\u8D26\u53F7\u3002",
+    privacyIntro: "\u560E\u560E\u5B66\u4E60\u7F51\u7AD9\u4E0E AI\u8F85\u52A9\u5B66\u4E60\uFF08AI-Assisted Learning\uFF09Chrome \u6269\u5C55\u5E2E\u52A9\u4F60\u901A\u8FC7 AI \u751F\u6210\u7684\u95EE\u7B54\u6D4B\u9A8C\u548C\u767D\u677F\u52A8\u753B\u8FDB\u884C\u5B66\u4E60\u3002\u672C\u9690\u79C1\u8BF4\u660E\u540C\u65F6\u9002\u7528\u4E8E\u8FD9\u4E24\u4E2A\u4EA7\u54C1\uFF0C\u4F7F\u7528\u5747\u65E0\u9700\u6CE8\u518C\u8D26\u53F7\u3002",
     storageTitle: "\u7F51\u7AD9\uFF1A\u672C\u5730\u9898\u96C6",
     storageBody: "\u7F51\u7AD9\u5728\u5F53\u524D\u8BBE\u5907\u7684\u6D4F\u89C8\u5668\u4E2D\u4FDD\u5B58\u5BFC\u5165\u7684\u9898\u96C6\u3001\u4F5C\u7B54\u3001\u6210\u7EE9\u548C\u6280\u80FD\u6536\u85CF\uFF0C\u7528\u4E8E\u7BA1\u7406\u9898\u5E93\u3001\u4FDD\u5B58\u8FDB\u5EA6\u3001\u5C55\u793A\u7ED3\u679C\u548C\u6062\u590D\u5907\u4EFD\uFF0C\u4E0D\u5C06\u9898\u96C6\u5185\u5BB9\u6216\u7EC3\u4E60\u8BB0\u5F55\u4E0A\u4F20\u5230\u670D\u52A1\u5668\u3002\u7F51\u7AD9\u4E0E\u6269\u5C55\u7684\u5B58\u50A8\u76F8\u4E92\u72EC\u7ACB\uFF0C\u4E0D\u4F1A\u81EA\u52A8\u540C\u6B65\uFF1B\u4F60\u53EF\u4EE5\u81EA\u884C\u901A\u8FC7\u5BFC\u51FA\u3001\u5BFC\u5165\u8FC1\u79FB\u9898\u96C6\u3002",
     requestsTitle: "\u7F51\u7AD9\u8BF7\u6C42\u4E0E Cookie",
     requestsBody: "\u8BBF\u95EE\u7F51\u7AD9\u65F6\uFF0C\u9875\u9762\u4E0E\u56FE\u7247\u8BF7\u6C42\u4F1A\u53D1\u9001\u81F3\u7F51\u7AD9\u548C\u8D44\u6E90\u670D\u52A1\u5668\u3002\u670D\u52A1\u5668\u53EF\u80FD\u5904\u7406 IP \u5730\u5740\u3001\u8BF7\u6C42\u65E5\u5FD7\u7B49\u5FC5\u8981\u6280\u672F\u4FE1\u606F\uFF0C\u4EE5\u63D0\u4F9B\u8BBF\u95EE\u548C\u6392\u67E5\u6545\u969C\u3002\u7F51\u7AD9\u7684\u8BED\u8A00\u9009\u62E9\u901A\u8FC7 Cookie \u4FDD\u5B58\u3002\u7F51\u7AD9\u8FD8\u4F7F\u7528 Microsoft Clarity \u548C\u767E\u5EA6\u7EDF\u8BA1\u4E86\u89E3\u8BBF\u95EE\u4E0E\u4EA4\u4E92\u60C5\u51B5\uFF0C\u4EE5\u6539\u8FDB\u4F7F\u7528\u4F53\u9A8C\u3002\u8FD9\u4E9B\u670D\u52A1\u4F1A\u63A5\u6536\u9875\u9762\u7F51\u5740\u3001\u6765\u6E90\u3001\u8BBE\u5907\u4E0E\u6D4F\u89C8\u5668\u4FE1\u606F\u3001\u4EA4\u4E92\u4E8B\u4EF6\u7B49\u6280\u672F\u4FE1\u606F\uFF0C\u5E76\u53EF\u80FD\u4F7F\u7528 Cookie \u533A\u5206\u8BBF\u95EE\u3002Clarity \u4F1A\u8BDD\u56DE\u653E\u4E2D\u7684\u9875\u9762\u5185\u5BB9\u5DF2\u8BBE\u7F6E\u906E\u7F69\uFF1B\u9898\u5E93\u529F\u80FD\u4E0D\u4F1A\u5C06\u4F60\u7684\u9898\u5E93\u3001\u7B54\u6848\u6216\u7EC3\u4E60\u8BB0\u5F55\u4F5C\u4E3A\u7EDF\u8BA1\u4E8B\u4EF6\u53D1\u9001\u3002\u8FD9\u4E9B\u7F51\u7AD9\u8BF7\u6C42\u4E0E\u6269\u5C55\u7684\u672C\u5730\u9898\u5E93\u5B58\u50A8\u76F8\u4E92\u72EC\u7ACB\u3002\u7F51\u7AD9\u4E0E\u6269\u5C55\u4E2D\u7684\u9898\u76EE\u56FE\u7247\u6309 HTTPS \u7F51\u5740\u76F4\u63A5\u5411\u56FE\u7247\u6765\u6E90\u8BF7\u6C42\uFF0C\u6765\u6E90\u670D\u52A1\u5668\u4F1A\u6536\u5230\u8BE5\u8BF7\u6C42\uFF1B\u5907\u4EFD\u53EA\u4FDD\u5B58\u7F51\u5740\u548C\u8BF4\u660E\uFF0C\u4E0D\u5305\u542B\u56FE\u7247\u6587\u4EF6\u3002",
     aiTitle: "\u6570\u636E\u5171\u4EAB\u4E0E\u5916\u90E8 AI \u670D\u52A1",
-    aiBody: "\u6211\u4EEC\u4E0D\u63A5\u6536\u6216\u51FA\u552E\u4F60\u7684\u9898\u5E93\u5185\u5BB9\u4E0E\u7EC3\u4E60\u8BB0\u5F55\uFF0C\u4E0D\u5C06\u5176\u7528\u4E8E\u5E7F\u544A\uFF0C\u4E5F\u4E0D\u5411\u7B2C\u4E09\u65B9\u4F20\u8F93\u3002\u7531\u4F60\u51B3\u5B9A\u662F\u5426\u5C06\u51FA\u9898\u63D0\u793A\u8BCD\u590D\u5236\u5230 ChatGPT\u3001Claude\u3001Gemini\u3001DeepSeek\u3001Kimi \u7B49\u5916\u90E8 AI \u4F1A\u8BDD\uFF0C\u518D\u5C06\u56DE\u590D\u5E26\u56DE\u3002\u6269\u5C55\u4E0D\u4F1A\u81EA\u52A8\u8BFB\u53D6\u6216\u53D1\u9001\u4F60\u7684\u4F1A\u8BDD\u3002\u6253\u5F00\u5916\u90E8\u7F51\u7AD9\u6216\u5411\u5176\u53D1\u9001\u5185\u5BB9\u662F\u4F60\u53E6\u884C\u8FDB\u884C\u7684\u64CD\u4F5C\uFF0C\u8BE5\u670D\u52A1\u6309\u81EA\u8EAB\u9690\u79C1\u653F\u7B56\u5904\u7406\u8BBF\u95EE\u548C\u5185\u5BB9\uFF1B\u5BFC\u5165\u7684\u56DE\u590D\u7531\u7F51\u7AD9\u6216\u6269\u5C55\u5728\u672C\u5730\u5904\u7406\u3002",
-    termsIntro: "\u560E\u560E\u5B66\u4E60\u5E2E\u52A9\u4F60\u5C06 AI \u5BF9\u8BDD\u6574\u7406\u4E3A\u4E2A\u4EBA\u7EC3\u4E60\u9898\u96C6\uFF0C\u8BF7\u5408\u7406\u4F7F\u7528\u670D\u52A1\u53CA\u5BFC\u5165\u5185\u5BB9\u3002",
+    aiBody: "\u6211\u4EEC\u4E0D\u63A5\u6536\u6216\u51FA\u552E\u4F60\u7684\u5B66\u4E60\u5185\u5BB9\u4E0E\u8BB0\u5F55\uFF0C\u4E0D\u5C06\u5176\u7528\u4E8E\u5E7F\u544A\uFF0C\u4E5F\u4E0D\u4F1A\u81EA\u52A8\u5411\u7B2C\u4E09\u65B9\u53D1\u9001\u3002\u7531\u4F60\u51B3\u5B9A\u662F\u5426\u628A\u5B66\u4E60\u63D0\u793A\u8BCD\u3001\u4F5C\u7B54\u7ED3\u679C\u6216\u7406\u89E3\u53CD\u9988\u590D\u5236\u5230\u5916\u90E8 AI \u5BF9\u8BDD\uFF0C\u518D\u5C06\u56DE\u590D\u5E26\u56DE\u3002\u6269\u5C55\u4E0D\u4F1A\u81EA\u52A8\u8BFB\u53D6\u6216\u53D1\u9001\u4F60\u7684\u4F1A\u8BDD\u3002\u5916\u90E8 AI \u670D\u52A1\u6309\u7167\u81EA\u8EAB\u653F\u7B56\u5904\u7406\u4F60\u4E3B\u52A8\u53D1\u9001\u7684\u5185\u5BB9\uFF1B\u5BFC\u5165\u7684\u56DE\u590D\u7531\u7F51\u7AD9\u6216\u6269\u5C55\u5728\u672C\u5730\u5904\u7406\u3002",
+    termsIntro: "\u560E\u560E\u5B66\u4E60\u5E2E\u52A9\u4F60\u7ED3\u5408\u81EA\u5DF1\u7684 AI \u4F1A\u8BDD\u3001\u95EE\u7B54\u6D4B\u9A8C\u3001\u52A8\u753B\u767D\u677F\u548C\u95EE\u5377\u8FDB\u884C\u5B66\u4E60\u3002\u8BF7\u5408\u7406\u4F7F\u7528\u670D\u52A1\u53CA\u5BFC\u5165\u5185\u5BB9\u3002",
     accuracyTitle: "\u9898\u76EE\u4E0E\u7B54\u6848",
     accuracyBody: "\u6D4B\u9A8C\u6839\u636E\u5BFC\u5165\u6587\u4EF6\u4E2D\u7684\u53C2\u8003\u7B54\u6848\u8BC4\u5206\uFF0C\u4E0D\u4F1A\u72EC\u7ACB\u6838\u5B9E AI \u751F\u6210\u7B54\u6848\u662F\u5426\u6B63\u786E\u3002\u9047\u5230\u7591\u95EE\uFF0C\u8BF7\u56DE\u5230\u539F\u59CB\u6750\u6599\u6838\u5BF9\u3002",
     backupTitle: "\u4FDD\u7559\u4F60\u7684\u8BB0\u5F55",
     backupBody: "\u6570\u636E\u4EC5\u4FDD\u5B58\u5728\u5F53\u524D\u6D4F\u89C8\u5668\u3002\u6E05\u7406\u6D4F\u89C8\u5668\u6216\u66F4\u6362\u8BBE\u5907\u524D\u8BF7\u5BFC\u51FA\u5907\u4EFD\u3002\u670D\u52A1\u4E0D\u63D0\u4F9B\u8D26\u53F7\u6062\u590D\u6216\u8BBE\u5907\u95F4\u81EA\u52A8\u540C\u6B65\u3002",
     useTitle: "\u5408\u7406\u4F7F\u7528",
     useBody: "\u8BF7\u53EA\u5BFC\u5165\u4F60\u6709\u6743\u4F7F\u7528\u7684\u5185\u5BB9\uFF0C\u4E0D\u5F97\u7528\u4E8E\u8FDD\u6CD5\u3001\u9A9A\u6270\u3001\u6B3A\u8BC8\u6216\u4FB5\u6743\u884C\u4E3A\u3002\u4EA7\u54C1\u529F\u80FD\u548C\u76F8\u5173\u8BF4\u660E\u53EF\u80FD\u968F\u670D\u52A1\u53D1\u5C55\u800C\u8C03\u6574\u3002",
-    extensionTitle: "Chrome \u6269\u5C55\uFF1AAI\u804A\u5929\u8F6C\u5B66\u4E60\u95EE\u7B54",
-    extensionBody: "\u6269\u5C55\u5904\u7406\u4F60\u4E3B\u52A8\u5BFC\u5165\u7684\u9898\u76EE\u3001\u7B54\u6848\u3001\u89E3\u6790\u3001\u5907\u4EFD\uFF0C\u4EE5\u53CA\u4F60\u7684\u4F5C\u7B54\u3001\u6210\u7EE9\u3001\u7EC3\u4E60\u8BB0\u5F55\u548C\u504F\u597D\u3002\u9898\u5E93\u3001\u8FDB\u5EA6\u3001\u8BED\u8A00\u9009\u62E9\u4E0E\u5F15\u5BFC\u5B8C\u6210\u6807\u8BB0\u4FDD\u5B58\u5728\u5F53\u524D\u8BBE\u5907\u7684 Chrome \u914D\u7F6E\u4E2D\uFF0C\u4EC5\u7528\u4E8E\u5BFC\u5165\u3001\u7EC3\u4E60\u3001\u590D\u76D8\u3001\u5907\u4EFD\u548C\u8BB0\u4F4F\u8BBE\u7F6E\u3002\u6269\u5C55\u4E0D\u6536\u96C6\u8D26\u53F7\u4FE1\u606F\uFF0C\u4E0D\u8BFB\u53D6\u7F51\u9875\u6216\u6D4F\u89C8\u5386\u53F2\uFF0C\u4E0D\u4E0A\u4F20\u9898\u5E93\u6570\u636E\uFF0C\u4E5F\u4E0D\u5305\u542B\u7EDF\u8BA1\u8FFD\u8E2A\uFF1B\u4E0D\u4F1A\u901A\u8FC7\u8D26\u53F7\u6216\u8DE8\u8BBE\u5907\u540C\u6B65\u4F60\u7684\u6570\u636E\u3002",
+    extensionTitle: "Chrome \u6269\u5C55\uFF1AAI\u8F85\u52A9\u5B66\u4E60",
+    extensionBody: "\u6269\u5C55\u5904\u7406\u4F60\u4E3B\u52A8\u5BFC\u5165\u7684\u9898\u96C6\u3001\u95EE\u5377\u3001\u767D\u677F\u3001\u7ED8\u56FE\u6307\u4EE4\u3001\u8BB2\u89E3\u548C\u5907\u4EFD\uFF0C\u4EE5\u53CA\u4F60\u7684\u4F5C\u7B54\u3001\u6210\u7EE9\u3001\u7EC3\u4E60\u8BB0\u5F55\u3001\u767D\u677F\u7406\u89E3\u53CD\u9988\u3001\u5B66\u4E60\u76EE\u6807\u548C\u504F\u597D\u3002\u5DF2\u4FDD\u5B58\u7684\u5B66\u4E60\u5185\u5BB9\u3001\u8FDB\u5EA6\u548C\u8BBE\u7F6E\u4FDD\u5B58\u5728\u5F53\u524D\u8BBE\u5907\u7684 Chrome \u914D\u7F6E\u4E2D\uFF1B\u95EE\u5377\u4F7F\u7528\u672C\u5730\u4E34\u65F6\u7F13\u5B58\u3002\u6570\u636E\u4EC5\u7528\u4E8E\u4F60\u7684\u5B66\u4E60\u6D3B\u52A8\u3001\u53CD\u9988\u3001\u5907\u4EFD\u548C\u8BB0\u4F4F\u8BBE\u7F6E\u3002\u6269\u5C55\u4E0D\u6536\u96C6\u8D26\u53F7\u4FE1\u606F\uFF0C\u4E0D\u8BFB\u53D6\u7F51\u9875\u6216\u6D4F\u89C8\u5386\u53F2\uFF0C\u4E0D\u4E0A\u4F20\u5B66\u4E60\u6570\u636E\uFF0C\u4E5F\u4E0D\u5305\u542B\u7EDF\u8BA1\u8FFD\u8E2A\uFF1B\u4E0D\u4F1A\u901A\u8FC7\u8D26\u53F7\u6216\u8DE8\u8BBE\u5907\u540C\u6B65\u6570\u636E\u3002",
     clipboardTitle: "\u526A\u8D34\u677F\u4E0E\u6587\u4EF6",
     clipboardBody: "\u7F51\u7AD9\u4E0E\u6269\u5C55\u90FD\u53EA\u5728\u4F60\u70B9\u51FB\u590D\u5236\u6216\u8BFB\u53D6\u526A\u8D34\u677F\u6309\u94AE\u65F6\u8BBF\u95EE\u526A\u8D34\u677F\uFF0C\u4E0D\u5728\u540E\u53F0\u76D1\u542C\u526A\u8D34\u677F\u3002\u4F60\u9009\u62E9\u7684\u6587\u4EF6\u5728\u672C\u673A\u8BFB\u53D6\uFF0C\u5BFC\u51FA\u7684\u9898\u96C6\u548C\u5907\u4EFD\u7531\u6D4F\u89C8\u5668\u4FDD\u5B58\u3002\u7C98\u8D34\u6216\u5BFC\u5165\u7684\u5185\u5BB9\u4EC5\u7528\u4E8E\u4F60\u4E3B\u52A8\u9009\u62E9\u7684\u6D4B\u9A8C\u548C\u5907\u4EFD\u529F\u80FD\u3002",
     introductionTitle: "\u4E09\u9898\u9996\u6B21\u5F15\u5BFC",
@@ -3572,8 +3603,8 @@ var common_default2 = {
     q3Explanation: "\u8FD9 3 \u9053\u9898\u53EA\u7528\u4E8E\u4F53\u9A8C\uFF0C\u4E0D\u4F1A\u521B\u5EFA\u9898\u96C6\u6216\u7B54\u9898\u8BB0\u5F55\u3002\u8BBE\u5907\u4E0A\u53EA\u4F1A\u4FDD\u5B58\u4E00\u4E2A\u201C\u5DF2\u770B\u8FC7\u5F15\u5BFC\u201D\u7684\u6807\u8BB0\u3002"
   },
   extensionUi: {
-    brand: "AI\u804A\u5929\u8F6C\u5B66\u4E60\u95EE\u7B54",
-    welcomeIntro: "\u628A ChatGPT\u3001Claude\u3001Gemini\u3001DeepSeek\u3001Kimi \u7B49 AI \u4F1A\u8BDD\u53D8\u6210\u81EA\u6D4B\u81EA\u68C0\u7684\u9898\u96C6\u3002\u5148\u7528 3 \u9053\u793A\u4F8B\u9898\u4F53\u9A8C\u7B54\u9898\u548C\u89E3\u6790\u3002"
+    brand: "AI\u8F85\u52A9\u5B66\u4E60",
+    welcomeIntro: "\u628A\u63D0\u4F9B\u7684\u63D0\u793A\u8BCD\u53D1\u5230 AI \u5BF9\u8BDD\uFF0C\u5F97\u5230\u95EE\u7B54\u6D4B\u9A8C\u6216\u767D\u677F\u52A8\u753B\uFF1B\u628A\u4F5C\u7B54\u548C\u7406\u89E3\u53CD\u9988\u5E26\u56DE AI\uFF0C\u8BA9\u8BB2\u89E3\u66F4\u8D34\u5408\u4F60\u3002\u5148\u7528 3 \u9053\u793A\u4F8B\u9898\u4F53\u9A8C\u3002"
   },
   articleUi: {
     title: "\u6587\u7AE0",
@@ -3612,6 +3643,7 @@ var common_default2 = {
     repeat: "\u518D\u6B21\u70B9\u51FB\u540C\u4E00\u6309\u94AE\u53EF\u91CD\u65B0\u89C2\u770B\u3002",
     replayStep: "\u70B9\u51FB\u8BB2\u89E3\u6587\u5B57\u53EF\u91CD\u64AD\u5BF9\u5E94\u7684\u8FD9\u4E00\u6B65\uFF0C\u7ED3\u675F\u540E\u505C\u4F4F\u3002",
     unclearStep: "\u6B64\u5904\u4E0D\u61C2",
+    markUnclearStep: "\u6807\u8BB0\u4E0D\u61C2",
     panHint: "\u62D6\u52A8\u753B\u5E03\u67E5\u770B\uFF0C\u65B9\u5411\u952E\u79FB\u52A8\uFF0CHome \u952E\u56DE\u5230\u4E2D\u5FC3\u3002",
     drawingError: "\u767D\u677F\u672A\u80FD\u663E\u793A\uFF0C\u8BF7\u8BA9 AI \u68C0\u67E5\u5185\u5BB9\u3002",
     imageError: "\u767D\u677F\u56FE\u7247\u4E0D\u53EF\u8BBF\u95EE",
