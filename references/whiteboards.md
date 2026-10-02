@@ -1,87 +1,34 @@
-# Single-topic teaching whiteboards
+# Animated teaching whiteboards
 
-Use a whiteboard when spatial changes, comparisons or intermediate steps clarify the user's current question. The agent may choose this teaching aid without waiting for the user to request a whiteboard. Keep one topic per board; its buttons represent cases, questions or stages within that topic. Use a separate board for another topic. Explanations are text, without speech or a whole-presentation player.
+Use a whiteboard to explain one topic through changing pictures: a process, spatial relationship, transformation, or comparison. Let movement, position, shape, paths, and connections carry the explanation, with short labels and supporting text. A useful stage shows what changes, why it matters, and a clear state to observe.
 
-## Discover and create
+## Format and drawing
 
-Use the Web connection or answering page already prepared in SKILL.md. Discover `whiteboard.help` through the current host's `help`. The public Web `/agent/whiteboard` endpoint returns the same current format documentation and complete JSON example without requiring browser control. `/agent/commands` lists commands. These endpoints contain no user content.
+Read `whiteboard.help` through the prepared connection for current fields, drawing APIs, and a complete example. Public `/agent/whiteboard` supplies the same format documentation when page commands are unavailable.
 
-The data discriminator is `format: "gaga.whiteboard"`, with an independent `schemaVersion`. A document contains a title, logical canvas dimensions, identified drawing objects, and identified segments. Build scenes freely from supported primitives; do not restrict explanations to preset subject templates. Each segment defines initial object changes and a sequence of timed changes with explanatory text. Intermediate motion, simultaneous changes and pauses for reading can all be composed. Call current help for supported properties, limits, interpolation rules and examples; compatible additions need no Skill update.
+The envelope is `{format:"gaga.whiteboard",schemaVersion:1,title,description?,width,height,objects?,segments}`. Create new boards at `width:800,height:600` (4:3). Limits: 1 MiB, 200 objects, 30 segments, five minutes per segment. Both supported representations render on Canvas:
 
-Through the prepared Web route, import with `whiteboard.import`, read with `whiteboard.read`, and modify the returned document using `whiteboard.update` with its current revision. Discover exact arguments from help. Updates can modify any objects or segments. On a revision conflict, read current content and reconcile; never overwrite blindly. `whiteboard.present` restarts a selected segment on an already open board. Use a fresh request ID for each intentional replay and the original ID when retrying the same request.
+| Representation                                         | Segment structure                                                                                                            | Replay and feedback                                                                                                                    |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Portable Canvas source, the default for new animations | `{id,label,explanation,content:{kind:"canvas",source,durationMs}}`; this segment owns its drawing and timing.                | One segment is one replayable feedback step. Split stages into separate segments when users need to replay or mark them independently. |
+| Objects and steps                                      | `{id,label,explanation?,initial?,steps:[{durationMs,explanation,changes?,easing?}]}`; changes reference declared object IDs. | Each step is individually replayable and can be marked unclear. Changes within a step run together; steps run in sequence.             |
 
-Each segment restores base objects plus its own initial changes. Selecting a later stage must establish all context needed to understand it. Repeating a segment must not depend on the previous segment's final state. Use intermediate steps and readable text to explain the mechanism, rather than merely showing two endpoints. The final scene remains visible.
+Choose one representation per segment. For Canvas source, omit object `initial`/`steps`. HTML/SVG documents are not supported whiteboard formats.
 
-Check the actual visible board's title, ID, selected segment, explanatory text and rendering. Web receipts report `active.kind: "whiteboard"`, its revision and segment, plus current step and elapsed time; `ready` means it is displayed, `running` means a segment is demonstrating, and `completed` means that segment ended, not that the user mastered the topic. This is not quiz grading or a learning result. Keep the same answering/preview host and local connection rules used for other learning activities.
+Canvas `source` is the body of an ES5 drawing function using `ctx` and `frame={width,height,elapsedMs,durationMs,progress}`. Draw the entire scene from the current frame; local variables are recreated each time. The host owns the animation loop, replay, and DPI. Use `var`, functions, arrays, loops, and supported Canvas 2D operations; source is limited to 65536 characters and duration to 0–300000 ms. Consult current help for supported APIs and execution limits.
 
-## Data and storage
+The host reserves 5% padding: an 800×600 board supplies a 740×540 inner Canvas viewport. Lay out source drawings using `frame.width`/`frame.height`; object scenes reserve the equivalent margin in board coordinates. Keep labels, strokes, arrowheads, and intermediate states inside that area. Split dense scenes into readable stages for narrow screens.
 
-Use the current `/agent/whiteboard` documentation when available. If live documentation cannot be read, use the stable baseline example below without guessing unsupported extensions. Deliver through the already selected route; lack of browser controls alone does not make an existing Node connection unavailable.
+## Build understandable stages
 
-Web stores boards in this browser's local database. The **Whiteboards** navigation opens `/app/whiteboards`, which supports opening, renaming and deleting. **Add whiteboard** opens `/app/open` to read the clipboard or upload a file. There is no account sync or inclusion in quiz backups.
+Choose stages at meaningful changes in the explanation. Establish the starting situation, animate the relationship being explained, and leave time to observe the result. Comparisons can use a fixed reference beside the changing scene. Text explains the visible action; the drawing demonstrates it.
 
-## Baseline file example
+Each segment must establish its own context so it makes sense when opened directly or replayed. Object segments restart from base objects plus their own initial changes; Canvas segments redraw from their own source and frame. Keep a useful final scene. For object steps, empty `changes` can provide a reading pause; durations are 0–30000 ms per step, up to 100 steps per segment.
 
-This complete baseline demonstrates two cases of the same concept. Coordinates use the declared canvas dimensions. Numeric changes interpolate over each duration; explanations appear at step boundaries and remain visible. Clicking a revealed explanation replays only its corresponding step and pauses at its final scene, keeping the other revealed text. Segment buttons restart the entire segment and its text sequence. Add reading pauses with empty `changes`. Text objects use `kind: "text"`, `text`, `fontSize` and a wrapping `width`; paths use local `[x,y]` points. Detailed drawing capabilities remain in live help.
+All step explanations are visible from the start. Clicking one replays that step and pauses at its end; a segment button replays the whole segment. Users can mark steps as unclear. Marks survive replay, segment changes, and reopening until the document is revised. Canvas timing phases within one source remain one feedback step, so use separate segments for independently discussable stages.
 
-```json
-{
-  "format": "gaga.whiteboard",
-  "schemaVersion": 1,
-  "title": "Constant speed",
-  "description": "Compare equal time intervals in either direction.",
-  "width": 400,
-  "height": 260,
-  "objects": [
-    {
-      "id": "ball",
-      "kind": "ellipse",
-      "x": 30,
-      "y": 100,
-      "width": 40,
-      "height": 40,
-      "fill": "#1858f5"
-    }
-  ],
-  "segments": [
-    {
-      "id": "right",
-      "label": "Move right",
-      "steps": [
-        {
-          "durationMs": 1500,
-          "easing": "linear",
-          "explanation": "In one interval, the ball travels 140 units.",
-          "changes": [{ "id": "ball", "x": 170 }]
-        },
-        { "durationMs": 1000, "explanation": "Observe the halfway position.", "changes": [] },
-        {
-          "durationMs": 1500,
-          "easing": "linear",
-          "explanation": "Another equal interval produces an equal distance.",
-          "changes": [{ "id": "ball", "x": 310 }]
-        }
-      ]
-    },
-    {
-      "id": "left",
-      "label": "Move left",
-      "initial": [{ "id": "ball", "x": 310 }],
-      "steps": [
-        {
-          "durationMs": 1500,
-          "easing": "linear",
-          "explanation": "The direction is reversed; the distance per interval is unchanged.",
-          "changes": [{ "id": "ball", "x": 170 }]
-        },
-        {
-          "durationMs": 1500,
-          "easing": "linear",
-          "explanation": "The next equal interval covers the same distance again.",
-          "changes": [{ "id": "ball", "x": 30 }]
-        }
-      ]
-    }
-  ]
-}
-```
+## Operate and review
+
+Use `whiteboard.import`, `whiteboard.read`, `whiteboard.update`, and `whiteboard.present` through the prepared route; discover exact arguments in help. Updates require the current revision. On conflict, read current content and reconcile. An intentional replay gets a new request ID; a retry keeps the original one.
+
+Verify the visible board's ID, title, segment, explanations, and rendering. Read marked steps to focus the next explanation; playback completion alone says nothing about understanding. Whiteboards stay in the current browser's separate library, outside quiz backups. [Manual handoff](manual-handoff.md) covers copied feedback when automatic reads are unavailable.

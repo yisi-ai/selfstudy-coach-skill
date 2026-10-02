@@ -1,19 +1,27 @@
 # File or code handoff
 
-Read this only when neither local Node nor browser tools can operate the user's actual Web page, or when the user explicitly asks for a file or code. A TUI, lack of a sidebar, or lack of clicking tools alone does not select this route; apply SKILL.md's capability order once. A running Node service waiting for its browser page stays on that route. Reading public webpages or running code in a cloud container does not grant access to the user's answering page.
+Use this reference for the manual route selected in SKILL.md. Keep that route for later activities unless capabilities or the user's preference change.
 
-## Deliver complete content
+## Deliver content
 
-Provide one complete JSON file when attachments are supported, otherwise one complete JSON code block. Follow [quiz and questionnaire formats](quiz-format.md) or [whiteboards](whiteboards.md). Use the installed skill's companion origin for all links; the examples below use the production site.
+Provide one complete JSON file when attachments are supported, otherwise one complete `json` code block. Follow [quiz and questionnaire formats](quiz-format.md) or [whiteboards](whiteboards.md).
 
-Give the full [learning content importer](https://www.aiskillonline.com/app/open) URL and one short instruction: upload the file, or copy the complete code and click **Read clipboard**. If clipboard permission is unavailable, provide a JSON file for upload. It detects `gaga.quiz`, `gaga.questionnaire`, and `gaga.whiteboard` and opens the corresponding activity. There is no prompt-copying step. Do not send already-generated content back through `/app/import#guide=import`.
+Link to [Import learning content](https://www.aiskillonline.com/app/import) and give one short instruction: import the copied code or upload the JSON file. The page identifies the quiz, questionnaire, or whiteboard and opens it. Use file upload if clipboard access is unavailable. Substitute the selected companion origin in links.
 
-State honestly that the user still needs to import the content. Opening a URL or producing a file does not mean the activity was saved, displayed, or started. Do not invent activity IDs or answering URLs. Never ask the user to execute JavaScript or open developer tools. Complete quiz JSON contains reference answers; do not separately reveal solutions or claim those fields are hidden from the user.
+The user completes this import before the activity is available. Use actual returned evidence to establish its state. Quiz JSON includes the reference answers required for grading.
 
-## Receive actual answers
+If the user returns a repair prompt, apply its error locations and format rules to the original content in the conversation, then provide the corrected complete document. Repair prompts contain diagnostics rather than the original source; retrieve only missing source needed for the correction if it is no longer available.
 
-After a questionnaire, ask the user to expand its completed questions and return the actual selected responses. After a quiz, prefer the visible result and relevant answer details; when a library backup is needed, give the full [library backup entry](https://www.aiskillonline.com/app/library#guide=export) and ask for its file or copied content. Backups retain each question's latest correctness and time, not full completed attempts or questionnaire history. Do not promise that a backup recovers every selected option.
+## Receive feedback
 
-“I finished” provides no answer data in this route. Analyze only returned evidence, not imagined page state. An old-question search can use supplied quizzes or backups, but cannot claim to have searched the user's browser storage. After a whiteboard, continue the explanation and use a comprehension question rather than treating animation completion as a score.
+After the activity, ask the user to choose **Copy feedback to AI** and send it in the same conversation. This provides the information needed for the next explanation:
 
-Keep the recorded file-delivery mode for subsequent tasks in this session. Reassess only if host capabilities change or the user requests another mode; do not repeatedly attempt unavailable local runtimes or browser tools.
+| Activity      | Copied feedback                                                                                                        |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Quiz          | Questions, reference answers, actual correctness or unanswered status, and any incorrectly selected or missed options. |
+| Questionnaire | Questions and the user's selected responses.                                                                           |
+| Whiteboard    | Topic, current segment, and explanations of steps marked unclear across segments.                                      |
+
+Work from this concise feedback. Source JSON and drawing code are unnecessary for ordinary review. A completion message without answers provides no performance evidence; a whiteboard with no marked steps leaves understanding unknown.
+
+For a task requiring older quiz history, request the relevant [library backup](https://www.aiskillonline.com/app/library#guide=export). Current v5 backups retain completed test selections, latest per-question results, and unfinished ordinary attempts. Resolve history against its quiz questions; older backups may contain only latest results. Questionnaires and whiteboards are separate from quiz backups.

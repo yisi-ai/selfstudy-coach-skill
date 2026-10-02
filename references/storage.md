@@ -61,4 +61,4 @@ The one-time starter quiz uses ordinary quiz and storage formats and supports no
 
 Web IndexedDB has no artificial library-size budget. Respect actual browser capacity and preserve committed data on write failure. The library explains that data stays in this browser without automatic synchronization. Do not delete data automatically to make an import succeed.
 
-Backup v4 has no legacy 4 MiB total-file limit. Individual quiz content still obeys the 100-question and 256 KiB rules; those validate content rather than cap library capacity. Legacy mixed history may be exported separately. Regular backups include completed ordinary and mixed histories, plus latest results written back from mixed practice, but exclude questionnaires and unfinished mixed sessions.
+Current v5 backups have no legacy 4 MiB total-file limit. Individual quiz content still obeys the 100-question and 256 KiB rules; those validate content rather than cap library capacity. Legacy mixed history may be exported separately. Regular backups include completed ordinary and mixed histories, plus latest results written back from mixed practice, but exclude questionnaires and unfinished mixed sessions.

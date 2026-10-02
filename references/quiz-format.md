@@ -1,78 +1,81 @@
 # Quiz formats
 
-These constraints describe learning content. Create it for the route already selected in SKILL.md; do not choose another execution mode or stop at JSON during an automatic task.
+Create one complete JSON document in the user's language. A file or a fenced `json` block is accepted. Use the prepared route to import and display it.
 
-Provide one complete JSON object; the website also accepts a complete fenced JSON block. Do not insert instructional prose into the data. Example:
+## Knowledge quiz
 
 ```json
 {
   "format": "gaga.quiz",
   "schemaVersion": 1,
-  "title": "Photosynthesis practice",
+  "title": "Fractions practice",
   "questions": [
     {
       "id": "q1",
       "type": "single_choice",
-      "stem": "Which gas do plants primarily absorb during photosynthesis?",
+      "stem": "What is $\\frac{1}{2}+\\frac{1}{2}$?",
       "options": [
-        { "id": "a", "text": "Oxygen" },
-        { "id": "b", "text": "Carbon dioxide" }
+        { "id": "a", "text": "One whole" },
+        { "id": "b", "text": "Two wholes" }
       ],
-      "answer": { "optionIds": ["b"] },
-      "explanation": "Photosynthesis uses carbon dioxide and water to produce organic matter and releases oxygen."
+      "answer": { "optionIds": ["a"] },
+      "explanation": "Two halves make one whole."
     }
   ]
 }
 ```
 
-Knowledge quizzes (`gaga.quiz`) support `single_choice` and `multiple_choice`. Each question has 2–12 options. Single choice has exactly one correct option; multiple choice has at least two. A quiz contains 1–100 questions and is at most 256 KiB. Maximum character counts: title 100, optional description 1000, stem 5000, option text 2000, and explanation 8000.
+- Envelope: `format`, `schemaVersion`, `title`, `questions`, optional `description` and `metadata`.
+- Questions: `id`, `type`, `stem`, `options`, `answer`, optional `explanation` and `metadata`. Each option has `id` and `text`.
+- `type` is `single_choice` or `multiple_choice`. `answer.optionIds` references distinct existing options: exactly one for single choice, at least two for multiple choice.
+- A quiz has 1–100 questions, 2–12 options per question, and a total size of at most 256 KiB. Text limits: title 1–100, description 1–1000, stem 1–5000, option text 1–2000, explanation 1–8000 characters; optional text fields may be omitted.
+- IDs use 1–64 English letters, digits, underscores, or hyphens. Question IDs are unique within a quiz; option IDs within a question. Additional descriptive data belongs in quiz/question `metadata`.
+- Questions and options are shuffled for each new attempt. Keep questions self-contained and refer to option content in explanations so the wording remains accurate after shuffling.
 
-Question IDs must be unique within the quiz; option IDs must be unique within their question. Use 1–64 English letters, digits, underscores, or hyphens. `answer.optionIds` must reference real options without duplicates. A quiz or question may have a descriptive `metadata` object. Do not add invented fields elsewhere.
-
-Every new quiz attempt randomizes questions and options. Write independent questions, avoid references to previous questions or option letters/positions (including "all of the above"), and refer to option content in explanations. The Web handles shuffling; do not add order fields to quiz JSON.
-
-Stems, options, and explanations are plain text, not executable HTML. Quiz schema versions are independent of the skill operation version; do not set `schemaVersion` to the skill version. New exercises may identify sources and learning goals, but must not fabricate user answer records. Write learning content in the user's preferred language; the English examples do not set a required output language.
+`stem`, option `text`, and `explanation` support Markdown and MathJax base/AMS LaTeX in both schema versions. Inline math uses `$...$` or `\( ... \)`; display math uses `$$...$$` or `\[ ... \]` on separate lines. Escape backslashes and newlines in JSON strings, as in the example. Code blocks preserve literal text. A formula inside text does not require visual fields or schema version 2.
 
 ## Unscored learning questionnaire
 
-Use `format: "gaga.questionnaire"` and `schemaVersion: 1` to learn about goals, experience, difficulties, and available study time. It supports only `single_choice` and `multiple_choice` with the same question, text, option, and ID limits above. Each question allows only `id`, `type`, `stem`, `options`, and optional `metadata`. Do not include `answer`, `explanation`, difficulty, scoring, or history fields; even an empty `answer` is rejected.
+Use `gaga.questionnaire`, schema version 1, for goals, background, preferences, and difficulties. It shares the quiz's question-count, option-count, ID, and text-length limits. The envelope supports optional `description` and `metadata`; each question has only `id`, `type`, `stem`, `options`, and optional `metadata`. Both choice types are supported. Questions collect responses without `answer` or `explanation` fields.
 
 ```json
 {
   "format": "gaga.questionnaire",
   "schemaVersion": 1,
-  "title": "Your Python learning goals",
+  "title": "Everyday English goals",
   "questions": [
     {
       "id": "goal",
       "type": "single_choice",
-      "stem": "What would you most like to use Python for right now?",
+      "stem": "Where would you most like to use English?",
       "options": [
-        { "id": "work", "text": "Automating repetitive work tasks" },
-        { "id": "data", "text": "Analyzing and organizing data" },
-        { "id": "explore", "text": "Exploring programming before choosing a goal" }
+        { "id": "travel", "text": "While travelling" },
+        { "id": "conversation", "text": "In everyday conversations" },
+        { "id": "unsure", "text": "I am still exploring" }
       ]
     }
   ]
 }
 ```
 
-Pass `{ questionnaire }` to the separate `questionnaire.import` command through the prepared route. After validation and saving, it opens the first question at `/app/questionnaires/<questionnaireId>`. Only one temporary questionnaire is cached. There is no difficulty, timer, score, library entry, backup, or history; a new questionnaire replaces the current cache. After submission, the page asks the user to notify the AI. Read `answers` and `completedAt` with `questionnaire.read` to continue; see [the independent cache](storage.md#independent-questionnaire-cache). Use a separate `gaga.quiz` for knowledge diagnostics. If an older site lacks independent questionnaires, retain the JSON and explain the limitation; do not invent correct answers or bypass it with `quiz.import`.
+`questionnaire.import` takes `{ questionnaire }` and opens the first question directly. Read actual selections and `completedAt` with `questionnaire.read`. A new import replaces the single temporary questionnaire; it is separate from quiz scores, history, and backups. Use a knowledge quiz for assessed questions.
 
-## Visual quizzes
+## Visual quiz fields
 
-Use the format below when the connected Web page declares visual support in its current capability descriptions. Older clients may reject it; do not remove required visuals to force an import. Visual v2 retains v1 question, answer, and length limits and does not apply to questionnaires. Import prompts describe the same supported capabilities.
+Use `schemaVersion: 2` for visual nodes when supported by current help. Questions may add `visuals` and `explanationVisuals`; options may add `visuals`. Each array holds at most four nodes. Keep essential conditions in text and give each node an accurate `alt` of 1–500 characters.
 
-Shared rules:
+| Kind         | Fields and limits                                                                                                                          |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `formula`    | `capabilityVersion: 1`, `latex`, `alt`. Raw base/AMS LaTeX without dollar delimiters, at most 2000 characters; escape backslashes in JSON. |
+| `math_scene` | `templateVersion: 1`, `template`, `params`, `alt`, optional supported `animation`. Use the templates below.                                |
+| `image`      | `url`, `alt`. A complete HTTPS image URL supplied in the conversation; the image needs network access.                                     |
 
-- Use `schemaVersion: 2` when including visuals. Plain-text quizzes remain at version 1 and omit all visual fields.
-- Questions may include `visuals` for the stem and `explanationVisuals` for the explanation; options may include `visuals`. Each array contains at most four items. Stems and options must still contain meaningful standalone text.
-- Every visual needs a nonempty `alt` of at most 500 characters accurately describing its content. Stem and option descriptions must not reveal the solution. Do not embed LaTeX or Markdown images in `stem`, `text`, or `explanation`; place formulas in the corresponding visual arrays.
-- Formula: `{"kind":"formula","capabilityVersion":1,"latex":"\\frac{1}{2}","alt":"One half"}`. Store raw LaTeX without dollar delimiters, at most 2000 characters and 24 nested brace levels. Escape backslashes in JSON. Supported notation includes frac/dfrac/tfrac, sqrt, subscripts and superscripts, left/right, sum/prod, int, lim, trigonometric functions, Greek letters, binom, vec/hat/bar/overline, and aligned/gathered/cases/matrix/pmatrix/bmatrix/vmatrix/Vmatrix/array environments. Put Chinese text in ordinary text or `alt`, not in formulas. Do not use custom macros, external packages, HTML, or scripts.
-- Right triangle: `{"kind":"math_scene","templateVersion":1,"template":"right_triangle","params":{"base":3,"height":4},"alt":"A right triangle with legs of length three and four"}`. `base` and `height` range from 1 to 10.
-- Quadratic: `{"kind":"math_scene","templateVersion":1,"template":"quadratic","params":{"a":1,"b":0,"c":-1},"alt":"An upward-opening parabola with vertex at zero, negative one"}`. `a`, `b`, and `c` range from -4 to 4, with nonzero `a`. The viewport is x from -3 to 3 and y from -5 to 5; keep essential features within it.
-- Parallelogram: `{"kind":"math_scene","templateVersion":1,"template":"parallelogram_shear","params":{"base":4,"height":3,"offset":0},"alt":"A parallelogram with base four and height three"}`. Base and height range from 1 to 10; `offset` ranges from -2 to 2. Optional `animation:{"parameter":"offset","from":0,"to":2,"durationMs":4000}` requires `from` to equal `offset`, both endpoints within -2 to 2, and duration from 500 to 20000 milliseconds. The user starts playback manually.
-- Image: `{"kind":"image","url":"https://example.com/diagram.png","alt":"Description of the diagram"}`. This is a URL-format example, not an image source for a real quiz. Use only complete HTTPS image URLs actually supplied by the user or in this conversation; never invent URLs. Store only the URL and description, without persistent image downloads, Base64, file paths, SVG source, or `assetId`. Images require a network connection; include essential problem conditions in text too.
-- All parameters must be finite numbers. Expressions, arbitrary drawing code, event handlers, and invented templates are not accepted. Explain unsupported requirements instead of dropping essential mathematical conditions to pass validation.
+For example, a formula node is `{"kind":"formula","capabilityVersion":1,"latex":"\\frac{1}{2}","alt":"One half"}`. Formulas may also appear directly in quiz text as above.
 
-For example, add formula or geometry nodes to a question's `visuals` array and change the quiz's `schemaVersion` to 2. Geometry stores templates and numeric parameters without running user drawing scripts. Formulas and geometry render offline; URL images need network access. The existing v3 JSON backup preserves all visual fields and latest answer results.
+| Geometry template     | Numeric `params`                                                                                                                                                                                          |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `right_triangle`      | `base`, `height`: 1–10.                                                                                                                                                                                   |
+| `quadratic`           | `a`, `b`, `c`: -4–4, with nonzero `a`. Visible range: x -3–3, y -5–5.                                                                                                                                     |
+| `parallelogram_shear` | `base`, `height`: 1–10; `offset`: -2–2. Optional `animation` has `parameter: "offset"`, `from` equal to the initial offset, `to` within -2–2, and `durationMs` 500–20000. Playback starts on user action. |
+
+Use finite numeric parameters and keep essential features in the visible range. These visual fields apply to quizzes; questionnaires remain at schema version 1. Quiz backups preserve visual fields; see [storage](storage.md) for retained results and history.
