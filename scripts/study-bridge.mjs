@@ -2448,6 +2448,17 @@ function readQuizVisuals(input, path3) {
       quizFields(visual, ["kind", "capabilityVersion", "latex", "alt"], at);
       quizAssert(visual.capabilityVersion === 1, "\u4E0D\u652F\u6301\u6B64\u516C\u5F0F\u80FD\u529B\u7248\u672C", at);
       quizText(visual.latex, 2e3, `${at}.latex`);
+    } else if (visual.kind === "canvas") {
+      quizFields(visual, ["kind", "width", "height", "source", "alt"], at);
+      for (const name of ["width", "height"]) {
+        const value = visual[name];
+        quizAssert(
+          typeof value === "number" && Number.isInteger(value) && value >= 200 && value <= 2e3,
+          "\u753B\u5E03\u5BBD\u9AD8\u987B\u4E3A 200\uFF5E2000 \u7684\u6574\u6570",
+          `${at}.${name}`
+        );
+      }
+      quizText(visual.source, 65536, `${at}.source`);
     } else {
       quizAssert(visual.kind === "math_scene", "\u5F53\u524D\u56FE\u6587\u9898\u96C6\u652F\u6301\u516C\u5F0F\u3001\u51E0\u4F55\u56FE\u5F62\u548C\u56FE\u7247\u7F51\u5740", at);
       quizFields(visual, ["kind", "templateVersion", "template", "params", "animation", "alt"], at);
@@ -2523,7 +2534,8 @@ var QUIZ_FORMAT = "gaga.quiz";
 var QUIZ_VERSION = 1;
 var QUIZ_MAX_BYTES = 256 * 1024;
 var QUIZ_IMPORT_MAX_BYTES = 4 * 1024 * 1024;
-var QUIZ_MAX_QUESTIONS = 100;
+var QUIZ_MAX_QUESTIONS = 20;
+var QUIZ_MAX_OPTIONS = 6;
 function quizAssert(condition, message, path3 = "") {
   if (!condition) throw new QuizError("INVALID_DATA", message, path3);
 }
@@ -2610,8 +2622,8 @@ function readChoiceQuestion(input, path3) {
   );
   quizText(q.stem, 5e3, `${path3}.stem`);
   quizAssert(
-    Array.isArray(q.options) && q.options.length >= 2 && q.options.length <= 12,
-    "\u6BCF\u9898\u9700\u8981 2\uFF5E12 \u4E2A\u9009\u9879",
+    Array.isArray(q.options) && q.options.length >= 2 && q.options.length <= QUIZ_MAX_OPTIONS,
+    `\u6BCF\u9898\u9700\u8981 2\uFF5E${String(QUIZ_MAX_OPTIONS)} \u4E2A\u9009\u9879`,
     `${path3}.options`
   );
   const optionIds = /* @__PURE__ */ new Set();
@@ -2805,7 +2817,7 @@ function readQuestionnaire(input) {
         optionalMetadata(value, "questionnaire");
         quizAssert(
           Array.isArray(value.questions) && value.questions.length > 0 && value.questions.length <= QUIZ_MAX_QUESTIONS,
-          "\u95EE\u5377\u9700\u8981 1\uFF5E100 \u4E2A\u95EE\u9898",
+          `\u95EE\u5377\u9700\u8981 1\uFF5E${String(QUIZ_MAX_QUESTIONS)} \u4E2A\u95EE\u9898`,
           "questions"
         );
         const ids = /* @__PURE__ */ new Set();
@@ -3098,7 +3110,7 @@ var common_default = {
     howTitle: "From a learning goal to understanding.",
     howIntro: "Let your AI explain. Use quizzes and animations to check what you understand, then bring your feedback back to the conversation.",
     stepOneTitle: "Send a prompt to your AI",
-    stepOneBody: "Set an optional learning goal. Choose a prompt for self-study, review, a quiz, an animated explanation or a questionnaire, and paste it into your AI conversation.",
+    stepOneBody: "Set an optional learning goal. Choose a prompt for self-study, review, a quiz, a whiteboard demonstration or a questionnaire, and paste it into your AI conversation.",
     stepTwoTitle: "Import what your AI creates",
     stepTwoBody: "Copy the complete AI reply or open its JSON file. GAGA learn recognizes quizzes, animated whiteboards and questionnaires and opens the matching activity.",
     stepThreeTitle: "Practise, watch and ask again",
@@ -3309,6 +3321,8 @@ var common_default = {
     mixedTest: "Mixed test",
     currentQuizQuestion: "From this quiz",
     backToQuiz: "Back to quiz",
+    questionnaireProgress: "Question {{current}} of {{total}}",
+    questionnaireNext: "Next question",
     questionnaireOther: "Other",
     questionnaireOtherPlaceholder: "Enter your own answer"
   },
@@ -3402,6 +3416,7 @@ var common_default = {
     clipboard: "Read clipboard",
     upload: "Upload file",
     library: "Whiteboard demonstrations",
+    backLibrary: "Back to whiteboards",
     saved: "Saved in this browser",
     empty: "Whiteboard demonstrations created by your AI will appear here.",
     choose: "Choose a case or stage.",
@@ -3409,7 +3424,15 @@ var common_default = {
     replayStep: "Select an explanation to replay just that step, then pause.",
     unclearStep: "Unclear here",
     markUnclearStep: "Mark as unclear",
-    panHint: "Drag to explore the canvas, use arrow keys to move, or press Home to recenter.",
+    unclearNoteStep: "Step being marked",
+    unclearNoteLabel: "Note (optional)",
+    unclearNotePlaceholder: "Explain what is unclear, or leave this blank.",
+    unclearNoteConfirm: "Confirm marker",
+    unclearNoteCancel: "Don't mark yet",
+    panHint: "Drag to explore the canvas. Use the zoom buttons, arrow keys to move, or Home to fit the canvas.",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
+    fitCanvas: "Fit canvas",
     drawingError: "The whiteboard could not be drawn. Ask your AI to check this content.",
     imageError: "Whiteboard image unavailable",
     readError: "Unable to read the content. Try again, or upload a file if clipboard access is unavailable.",
@@ -3426,7 +3449,21 @@ var common_default = {
     loading: "Reading AI content\u2026",
     actionError: "The whiteboard change was not saved. Please try again.",
     create: "Add whiteboard",
-    importIntro: "Import your AI-generated Canvas whiteboard from the clipboard or a JSON file. HTML and SVG animations are not supported."
+    importIntro: "Import your AI-generated Canvas whiteboard from the clipboard or a JSON file. HTML and SVG animations are not supported.",
+    play: "Play",
+    pause: "Pause",
+    replay: "Replay",
+    previousStep: "Previous step",
+    nextStep: "Next step",
+    animationProgress: "Animation progress",
+    rotateHint: "Drag to rotate the scene. Pinch or scroll to zoom; use arrow keys to rotate and Home to fit the canvas.",
+    backImport: "Back to import",
+    threeDimensional: "3D",
+    manage: "Manage",
+    doneManaging: "Done",
+    selectWhiteboard: "Select whiteboard",
+    deleteSelected: "Delete selected",
+    deleteSelectedConfirm: "Delete the selected whiteboards from this device?"
   },
   learningUi: {
     homeNav: "Home",
@@ -3442,7 +3479,7 @@ var common_default = {
     fileHint: "Download the file to your computer, then click Import and select the downloaded file.",
     fileHintMobile: "Download the file to your phone, then tap Import and select the downloaded file.",
     importFile: "Import a file",
-    importHint: "Quiz, animated whiteboard and questionnaire files are recognized automatically. Restore library backups from your quiz library.",
+    importHint: "Quiz, animated whiteboard, 3D whiteboard and questionnaire files are recognized automatically. Restore library backups from your quiz library.",
     errorTitle: "Unable to import yet",
     repair: "Copy a repair prompt",
     dismiss: "Got it",
@@ -3470,13 +3507,21 @@ var common_default = {
         title: "Review",
         description: "Revisit your conversations and materials to find what matters."
       },
+      "photo-tutoring": {
+        title: "Learn from a photo",
+        description: "Start learning from a specific problem, understand the ideas behind it, and learn how to solve it."
+      },
       quiz: {
         title: "Quiz",
         description: "Check understanding and practise applying what you have learned."
       },
       whiteboard: {
-        title: "Animated explanation",
-        description: "Explore concepts, relationships and changes through moving pictures."
+        title: "Whiteboard demonstration",
+        description: "Use whiteboard demonstrations to show concepts, relationships and changes."
+      },
+      "whiteboard-3d": {
+        title: "3D whiteboard",
+        description: "Rotate solid figures and use animation to explore spatial relationships."
       },
       questionnaire: {
         title: "Questionnaire",
@@ -3488,6 +3533,8 @@ var common_default = {
       set: "Set a goal",
       edit: "Edit goal",
       save: "Save goal",
+      clear: "Clear",
+      close: "Close goal panel",
       title: "Learning goal",
       hint: "These optional details are saved on this device and included when you copy a prompt.",
       loading: "Loading your learning details\u2026",
@@ -3588,11 +3635,11 @@ var common_default2 = {
     howTitle: "\u4ECE\u4E00\u4E2A\u5B66\u4E60\u76EE\u6807\uFF0C\u5230\u771F\u6B63\u7406\u89E3\u3002",
     howIntro: "\u8BA9 AI \u8BB2\u89E3\uFF0C\u7528\u6D4B\u9A8C\u548C\u52A8\u753B\u9A8C\u8BC1\u7406\u89E3\uFF0C\u518D\u628A\u5B9E\u9645\u53CD\u9988\u5E26\u56DE\u539F\u4F1A\u8BDD\u3002",
     stepOneTitle: "\u628A\u5B66\u4E60\u63D0\u793A\u8BCD\u53D1\u7ED9 AI",
-    stepOneBody: "\u6309\u9700\u8BBE\u7F6E\u5B66\u4E60\u76EE\u6807\uFF0C\u9009\u62E9\u65B0\u7684\u5F00\u59CB\u3001\u590D\u76D8\u603B\u7ED3\u3001\u95EE\u7B54\u7EC3\u4E60\u3001\u52A8\u753B\u8BB2\u89E3\u6216\u95EE\u5377\u63D0\u793A\u8BCD\uFF0C\u590D\u5236\u5230\u81EA\u5DF1\u7684 AI \u4F1A\u8BDD\u3002",
+    stepOneBody: "\u6309\u9700\u8BBE\u7F6E\u5B66\u4E60\u76EE\u6807\uFF0C\u9009\u62E9\u65B0\u7684\u5F00\u59CB\u3001\u590D\u76D8\u603B\u7ED3\u3001\u95EE\u7B54\u7EC3\u4E60\u3001\u767D\u677F\u6F14\u793A\u6216\u95EE\u5377\u63D0\u793A\u8BCD\uFF0C\u590D\u5236\u5230\u81EA\u5DF1\u7684 AI \u4F1A\u8BDD\u3002",
     stepTwoTitle: "\u5BFC\u5165 AI \u4E3A\u4F60\u751F\u6210\u7684\u5185\u5BB9",
     stepTwoBody: "\u590D\u5236 AI \u7684\u5B8C\u6574\u56DE\u590D\uFF0C\u6216\u6253\u5F00\u751F\u6210\u7684 JSON \u6587\u4EF6\u3002\u560E\u560E\u5B66\u4E60\u4F1A\u8BC6\u522B\u9898\u96C6\u3001\u52A8\u753B\u767D\u677F\u548C\u95EE\u5377\uFF0C\u5E76\u6253\u5F00\u5BF9\u5E94\u6D3B\u52A8\u3002",
     stepThreeTitle: "\u7EC3\u4E00\u7EC3\uFF0C\u770B\u4E00\u770B\uFF0C\u518D\u95EE\u4E00\u95EE",
-    stepThreeBody: "\u5B8C\u6210\u6D4B\u9A8C\u3001\u9010\u6B65\u89C2\u770B\u52A8\u753B\u8BB2\u89E3\u6216\u586B\u5199\u95EE\u5377\uFF0C\u628A\u4F5C\u7B54\u7ED3\u679C\u548C\u6CA1\u770B\u61C2\u7684\u6B65\u9AA4\u590D\u5236\u56DE AI\uFF0C\u7EE7\u7EED\u5B66\u4E60\u3002",
+    stepThreeBody: "\u5B8C\u6210\u6D4B\u9A8C\u3001\u9010\u6B65\u89C2\u770B\u767D\u677F\u6F14\u793A\u6216\u586B\u5199\u95EE\u5377\uFF0C\u628A\u4F5C\u7B54\u7ED3\u679C\u548C\u6CA1\u770B\u61C2\u7684\u6B65\u9AA4\u590D\u5236\u56DE AI\uFF0C\u7EE7\u7EED\u5B66\u4E60\u3002",
     modesTitle: "\u4E09\u79CD\u6D4B\u9A8C\u6A21\u5F0F\uFF0C\u6309\u4F60\u7684\u8282\u594F\u7EC3\u4E60\u3002",
     easyTitle: "\u8FB9\u7B54\u8FB9\u5B66",
     easyBody: "\u6BCF\u9898\u63D0\u4EA4\u540E\u67E5\u770B\u53CD\u9988\u4E0E\u89E3\u6790\uFF0C\u4E0D\u9650\u65F6\uFF0C\u6162\u6162\u6765\u3002",
@@ -3799,6 +3846,8 @@ var common_default2 = {
     mixedTest: "\u6DF7\u5408\u6D4B\u9A8C",
     currentQuizQuestion: "\u5C5E\u4E8E\u5F53\u524D\u9898\u96C6",
     backToQuiz: "\u8FD4\u56DE\u9898\u96C6",
+    questionnaireProgress: "\u7B2C {{current}} / {{total}} \u95EE",
+    questionnaireNext: "\u4E0B\u4E00\u95EE",
     questionnaireOther: "\u5176\u4ED6",
     questionnaireOtherPlaceholder: "\u8BF7\u8F93\u5165\u5176\u4ED6\u5185\u5BB9"
   },
@@ -3892,6 +3941,7 @@ var common_default2 = {
     clipboard: "\u83B7\u53D6\u526A\u8D34\u677F",
     upload: "\u4E0A\u4F20\u6587\u4EF6",
     library: "\u767D\u677F\u6F14\u793A",
+    backLibrary: "\u8FD4\u56DE\u767D\u677F\u5217\u8868",
     saved: "\u5DF2\u4FDD\u5B58\u5728\u5F53\u524D\u6D4F\u89C8\u5668",
     empty: "AI \u521B\u5EFA\u7684\u767D\u677F\u6F14\u793A\u4F1A\u663E\u793A\u5728\u8FD9\u91CC\u3002",
     choose: "\u9009\u62E9\u4E00\u4E2A\u60C5\u51B5\u6216\u9636\u6BB5\u3002",
@@ -3899,7 +3949,15 @@ var common_default2 = {
     replayStep: "\u70B9\u51FB\u8BB2\u89E3\u6587\u5B57\u53EF\u91CD\u64AD\u5BF9\u5E94\u7684\u8FD9\u4E00\u6B65\uFF0C\u7ED3\u675F\u540E\u505C\u4F4F\u3002",
     unclearStep: "\u6B64\u5904\u4E0D\u61C2",
     markUnclearStep: "\u6807\u8BB0\u4E0D\u61C2",
-    panHint: "\u62D6\u52A8\u753B\u5E03\u67E5\u770B\uFF0C\u65B9\u5411\u952E\u79FB\u52A8\uFF0CHome \u952E\u56DE\u5230\u4E2D\u5FC3\u3002",
+    unclearNoteStep: "\u5BF9\u5E94\u6B65\u9AA4",
+    unclearNoteLabel: "\u5907\u6CE8\uFF08\u9009\u586B\uFF09",
+    unclearNotePlaceholder: "\u8BF4\u660E\u54EA\u91CC\u4E0D\u61C2\uFF0C\u4E5F\u53EF\u4EE5\u7559\u7A7A\u3002",
+    unclearNoteConfirm: "\u786E\u8BA4\u6807\u8BB0",
+    unclearNoteCancel: "\u6682\u4E0D\u6807\u8BB0",
+    panHint: "\u62D6\u52A8\u753B\u5E03\u67E5\u770B\uFF0C\u6309\u94AE\u653E\u5927\u6216\u7F29\u5C0F\uFF0C\u65B9\u5411\u952E\u79FB\u52A8\uFF0CHome \u952E\u5B8C\u6574\u663E\u793A\u753B\u5E03\u3002",
+    zoomIn: "\u653E\u5927",
+    zoomOut: "\u7F29\u5C0F",
+    fitCanvas: "\u9002\u5408\u753B\u5E03",
     drawingError: "\u767D\u677F\u672A\u80FD\u663E\u793A\uFF0C\u8BF7\u8BA9 AI \u68C0\u67E5\u5185\u5BB9\u3002",
     imageError: "\u767D\u677F\u56FE\u7247\u4E0D\u53EF\u8BBF\u95EE",
     readError: "\u672A\u80FD\u8BFB\u53D6\u5185\u5BB9\uFF0C\u8BF7\u91CD\u8BD5\uFF1B\u82E5\u65E0\u6CD5\u8BBF\u95EE\u526A\u8D34\u677F\uFF0C\u53EF\u4EE5\u6539\u7528\u4E0A\u4F20\u6587\u4EF6\u3002",
@@ -3916,7 +3974,21 @@ var common_default2 = {
     loading: "\u6B63\u5728\u8BFB\u53D6 AI \u5185\u5BB9\u2026",
     actionError: "\u767D\u677F\u4FEE\u6539\u672A\u4FDD\u5B58\uFF0C\u8BF7\u91CD\u8BD5\u3002",
     create: "\u65B0\u589E\u767D\u677F",
-    importIntro: "\u901A\u8FC7\u526A\u8D34\u677F\u6216 JSON \u6587\u4EF6\u5BFC\u5165 AI \u751F\u6210\u7684 Canvas \u767D\u677F\u3002\u4E0D\u652F\u6301 HTML \u548C SVG \u52A8\u753B\u3002"
+    importIntro: "\u901A\u8FC7\u526A\u8D34\u677F\u6216 JSON \u6587\u4EF6\u5BFC\u5165 AI \u751F\u6210\u7684 Canvas \u767D\u677F\u3002\u4E0D\u652F\u6301 HTML \u548C SVG \u52A8\u753B\u3002",
+    play: "\u64AD\u653E",
+    pause: "\u6682\u505C",
+    replay: "\u91CD\u64AD",
+    previousStep: "\u4E0A\u4E00\u6B65",
+    nextStep: "\u4E0B\u4E00\u6B65",
+    animationProgress: "\u52A8\u753B\u8FDB\u5EA6",
+    rotateHint: "\u62D6\u52A8\u65CB\u8F6C\u573A\u666F\uFF0C\u53CC\u6307\u6216\u6EDA\u8F6E\u7F29\u653E\uFF1B\u65B9\u5411\u952E\u8F6C\u52A8\u89C6\u89D2\uFF0CHome \u9002\u5408\u753B\u5E03\u3002",
+    backImport: "\u8FD4\u56DE\u5BFC\u5165",
+    threeDimensional: "\u4E09\u7EF4",
+    manage: "\u7BA1\u7406",
+    doneManaging: "\u5B8C\u6210",
+    selectWhiteboard: "\u9009\u62E9\u767D\u677F",
+    deleteSelected: "\u5220\u9664\u9009\u4E2D",
+    deleteSelectedConfirm: "\u8981\u4ECE\u5F53\u524D\u8BBE\u5907\u5220\u9664\u9009\u4E2D\u7684\u767D\u677F\u6F14\u793A\u5417\uFF1F"
   },
   learningUi: {
     homeNav: "\u9996\u9875",
@@ -3932,7 +4004,7 @@ var common_default2 = {
     fileHint: "\u5C06\u6587\u4EF6\u4E0B\u8F7D\u5230\u7535\u8111\u4E0A\uFF0C\u70B9\u51FB\u5BFC\u5165\u9009\u62E9\u5DF2\u4E0B\u8F7D\u7684\u6587\u4EF6",
     fileHintMobile: "\u5C06\u6587\u4EF6\u4E0B\u8F7D\u5230\u624B\u673A\uFF0C\u70B9\u51FB\u5BFC\u5165\u9009\u62E9\u5DF2\u4E0B\u8F7D\u7684\u6587\u4EF6",
     importFile: "\u5BFC\u5165\u6587\u4EF6",
-    importHint: "\u81EA\u52A8\u8BC6\u522B\u95EE\u7B54\u7EC3\u4E60\u3001\u52A8\u753B\u767D\u677F\u548C\u95EE\u5377\u3002\u9898\u5E93\u5907\u4EFD\u8BF7\u5728\u9898\u96C6\u9875\u6062\u590D\u3002",
+    importHint: "\u81EA\u52A8\u8BC6\u522B\u95EE\u7B54\u3001\u52A8\u753B\u767D\u677F\u3001\u4E09\u7EF4\u767D\u677F\u548C\u95EE\u5377\u6587\u4EF6\u3002\u9898\u5E93\u5907\u4EFD\u8BF7\u4ECE\u95EE\u7B54\u7EC3\u4E60\u5E93\u6062\u590D\u3002",
     errorTitle: "\u6682\u65F6\u65E0\u6CD5\u5BFC\u5165",
     repair: "\u590D\u5236\u4FEE\u590D\u63D0\u793A\u8BCD",
     dismiss: "\u77E5\u9053\u4E86",
@@ -3960,13 +4032,21 @@ var common_default2 = {
         title: "\u590D\u76D8\u603B\u7ED3",
         description: "\u68B3\u7406\u5DF2\u6709\u5BF9\u8BDD\u4E0E\u8D44\u6599\uFF0C\u4ECE\u4E2D\u786E\u5B9A\u5B66\u4E60\u91CD\u70B9\u3002"
       },
+      "photo-tutoring": {
+        title: "\u62CD\u7167\u8BB2\u9898",
+        description: "\u4ECE\u4E00\u9053\u5177\u4F53\u9898\u76EE\u5F00\u59CB\u5B66\u4E60\uFF0C\u7406\u89E3\u76F8\u5173\u77E5\u8BC6\uFF0C\u5B66\u4F1A\u89E3\u9898\u65B9\u6CD5\u3002"
+      },
       quiz: {
         title: "\u95EE\u7B54\u7EC3\u4E60",
         description: "\u56F4\u7ED5\u6240\u5B66\u77E5\u8BC6\u7684\u7EC3\u4E60\u4E0E\u638C\u63E1\u68C0\u9A8C\u3002"
       },
       whiteboard: {
-        title: "\u52A8\u753B\u8BB2\u89E3",
-        description: "\u7528\u52A8\u753B\u89E3\u91CA\u6982\u5FF5\u3001\u5173\u7CFB\u4E0E\u53D8\u5316\u8FC7\u7A0B\u3002"
+        title: "\u767D\u677F\u6F14\u793A",
+        description: "\u7528\u767D\u677F\u6F14\u793A\u5448\u73B0\u6982\u5FF5\u3001\u5173\u7CFB\u4E0E\u53D8\u5316\u8FC7\u7A0B\u3002"
+      },
+      "whiteboard-3d": {
+        title: "\u4E09\u7EF4\u767D\u677F",
+        description: "\u65CB\u8F6C\u67E5\u770B\u7ACB\u4F53\u56FE\u5F62\uFF0C\u7528\u52A8\u753B\u7406\u89E3\u7A7A\u95F4\u5173\u7CFB\u4E0E\u53D8\u5316\u3002"
       },
       questionnaire: {
         title: "\u95EE\u5377",
@@ -3978,6 +4058,8 @@ var common_default2 = {
       set: "\u8BBE\u7F6E\u76EE\u6807",
       edit: "\u4FEE\u6539\u76EE\u6807",
       save: "\u4FDD\u5B58\u76EE\u6807",
+      clear: "\u6E05\u7A7A",
+      close: "\u5173\u95ED\u76EE\u6807\u9762\u677F",
       title: "\u5B66\u4E60\u76EE\u6807",
       hint: "\u76EE\u6807\u4FDD\u5B58\u5728\u5F53\u524D\u8BBE\u5907\uFF0C\u590D\u5236\u63D0\u793A\u8BCD\u65F6\u4F1A\u4E00\u8D77\u5E26\u4E0A\u3002\u5404\u9879\u53EF\u7559\u7A7A\uFF0C\u4E4B\u540E\u518D\u8865\u5145\u3002",
       loading: "\u6B63\u5728\u8BFB\u53D6\u5B66\u4E60\u4FE1\u606F\u2026",

@@ -28,15 +28,17 @@ Create one complete JSON document in the user's language. A file or a fenced `js
 - Envelope: `format`, `schemaVersion`, `title`, `questions`, optional `description` and `metadata`.
 - Questions: `id`, `type`, `stem`, `options`, `answer`, optional `explanation` and `metadata`. Each option has `id` and `text`.
 - `type` is `single_choice` or `multiple_choice`. `answer.optionIds` references distinct existing options: exactly one for single choice, at least two for multiple choice.
-- A quiz has 1–100 questions, 2–12 options per question, and a total size of at most 256 KiB. Text limits: title 1–100, description 1–1000, stem 1–5000, option text 1–2000, explanation 1–8000 characters; optional text fields may be omitted.
+- A quiz has 1–20 questions, 2–6 options per question, and a total size of at most 256 KiB. Text limits: title 1–100, description 1–1000, stem 1–5000, option text 1–2000, explanation 1–8000 characters; optional text fields may be omitted.
 - IDs use 1–64 English letters, digits, underscores, or hyphens. Question IDs are unique within a quiz; option IDs within a question. Additional descriptive data belongs in quiz/question `metadata`.
-- Questions and options are shuffled for each new attempt. Keep questions self-contained and refer to option content in explanations so the wording remains accurate after shuffling.
+- Imported quizzes retain question order for initial attempts and retakes; options are shuffled for each new attempt. Mixed practice may change question order. Keep questions self-contained and refer to option content in explanations so the wording remains accurate after shuffling.
 
 `stem`, option `text`, and `explanation` support Markdown and MathJax base/AMS LaTeX in both schema versions. Inline math uses `$...$` or `\( ... \)`; display math uses `$$...$$` or `\[ ... \]` on separate lines. Escape backslashes and newlines in JSON strings, as in the example. Code blocks preserve literal text. A formula inside text does not require visual fields or schema version 2.
 
 ## Unscored learning questionnaire
 
 Use `gaga.questionnaire`, schema version 1, for goals, background, preferences, and difficulties. It shares the quiz's question-count, option-count, ID, and text-length limits. The envelope supports optional `description` and `metadata`; each question has only `id`, `type`, `stem`, `options`, and optional `metadata`. Both choice types are supported. Questions collect responses without `answer` or `explanation` fields.
+
+Questionnaires preserve imported question and option order. The client adds an **Other** choice and a free-text field to every question, so generate 2–6 substantive options without adding a generic Other option or the reserved ID `$other`. Legacy standalone Other labels are hidden from the displayed choices without changing the original imported document. Selected Other responses are returned as `optionIds` containing `$other` and optional `otherText`, at most 2000 characters. Other counts as answered only with nonblank text; completed feedback includes that text. See [storage](storage.md#independent-questionnaire-cache) for unfinished drafts.
 
 ```json
 {
@@ -66,11 +68,24 @@ Use `schemaVersion: 2` for visual nodes when supported by current help. Question
 
 | Kind         | Fields and limits                                                                                                                          |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `canvas`     | `width`, `height`, `source`, `alt`. Dimensions are integers 200–2000; ES5 source at most 65536 characters. A complete static drawing.        |
 | `formula`    | `capabilityVersion: 1`, `latex`, `alt`. Raw base/AMS LaTeX without dollar delimiters, at most 2000 characters; escape backslashes in JSON. |
 | `math_scene` | `templateVersion: 1`, `template`, `params`, `alt`, optional supported `animation`. Use the templates below.                                |
 | `image`      | `url`, `alt`. A complete HTTPS image URL supplied in the conversation; the image needs network access.                                     |
 
 For example, a formula node is `{"kind":"formula","capabilityVersion":1,"latex":"\\frac{1}{2}","alt":"One half"}`. Formulas may also appear directly in quiz text as above.
+
+Prefer Canvas source for new diagrams. Generate question and explanation diagrams at 800×600, and option diagrams at 400×300. After the host's 5% padding, `frame.width`/`frame.height` are 740×540 or 370×270. The host scales uniformly, with display caps of 360×270 screen pixels for question diagrams and 240×180 for option diagrams. Keep comparable option pictures at the same scale; keep labels readable, avoid option letters in the drawing, and do not reveal the correct choice.
+
+Canvas `source` is an ES5 drawing-function body using `ctx` and `frame.width`/`frame.height`. Use `var`, functions, loops, arrays, and Math to draw the complete static picture. The Canvas 2D APIs in current `whiteboard.help` also apply, including `ctx.measureFormula` / `ctx.drawFormula` for raw LaTeX; quiz nodes have no animation, segments, steps, or playback fields. Do not create a canvas or use HTML, SVG, DOM, wx, WebGL, imports, timers, network, or image/pixel APIs. Per drawing, stay within 100000 interpreter steps, 10000 drawing calls, and save depth 64. The whole quiz still must fit within 256 KiB.
+
+For example, a static diagram node is:
+
+```json
+{"kind":"canvas","width":800,"height":600,"source":"ctx.strokeStyle='#1858f5'; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(frame.width*0.15,frame.height*0.75); ctx.lineTo(frame.width*0.85,frame.height*0.25); ctx.stroke();","alt":"A line rising from left to right"}
+```
+
+Existing `math_scene` nodes remain readable with the following templates; use original Canvas diagrams for new drawings.
 
 | Geometry template     | Numeric `params`                                                                                                                                                                                          |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

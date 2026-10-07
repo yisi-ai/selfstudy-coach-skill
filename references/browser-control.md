@@ -20,13 +20,14 @@ Verify the prepared activity:
 
 - Quiz: matching ID/title and visible `#quiz-run`. Start a ready quiz in medium unless another mode was requested; preserve an unfinished attempt's mode and progress.
 - Questionnaire: matching ID/title and visible `#questionnaire-run`; import opens the first question directly.
-- Whiteboard: matching ID/title/segment, explanatory text, and a renderable canvas.
+- 2D whiteboard: matching ID/title/segment, explanatory text, and a renderable canvas.
+- 3D whiteboard: matching ID/title, displayed spatial scene, step explanations, and rotation/playback controls. Current `whiteboard.*` commands do not accept this format; use the same page's unified Import UI.
 
 Inspect a saved-but-pending operation in the same page before another import. Keep the resulting activity visible for the learner to answer.
 
 ## Read and recover
 
-Read completed results through page commands or inspect visible result details with UI tools. Match activity/attempt IDs and completion before reviewing. Read whiteboard marks to find unclear steps.
+Read completed results through page commands or inspect visible result details with UI tools. Match activity/attempt IDs and completion before reviewing. Read whiteboard marks and any remarks to find unclear steps. For 3D boards, inspect visible marks and remarks or use the player's copied feedback; current page commands do not read their records.
 
 If the target is lost, restore the original page once and inspect its current content. Page-command deduplication lasts only within one page process, so check existing data after reload before retrying a write with the original ID and arguments. Confirm origin and record when expected content is missing.
 

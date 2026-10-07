@@ -20,7 +20,7 @@ For self-study, choose a useful starting point from the information already avai
 | Learning aid        | When it helps                                                                                                                                                          | Format                                                                     |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | Questionnaire       | Clarify goals, experience, preferences, or difficulties through unscored choices. Offer it when relevant information is missing; generate it when requested or agreed. | [Questionnaire](references/quiz-format.md#unscored-learning-questionnaire) |
-| Animated whiteboard | Show a process, spatial relationship, comparison, or change through moving pictures and replayable stages.                                                             | [Whiteboard](references/whiteboards.md)                                    |
+| Animated whiteboard | Show a process, spatial relationship, comparison, or change through 2D or 3D pictures and replayable stages.                                                             | [Whiteboard](references/whiteboards.md)                                    |
 | Quiz                | Check understanding, practise applying knowledge, or revisit mistakes through single and multiple choice with reference answers. Default to medium mode.               | [Quiz](references/quiz-format.md)                                          |
 
 Choose aids for the current task, including during review, while keeping explanations in the conversation. Follow [image notes](references/image-notes.md) when working from supplied photos; source photos stay in the conversation and only derived content goes to Web.
@@ -47,7 +47,7 @@ With an automatic route, the agent imports, opens, displays, and reads activitie
 
 Query `help` once after connecting and retain useful capabilities. [Command semantics](references/commands.md) covers requests, retries, and result states; current command help supplies exact parameters and examples. Public `/agent/commands` describes capabilities, not the user's library. Compose available operations using actual returned fields.
 
-After completion, read through the same route and match quiz/attempt IDs or questionnaire ID and `completedAt`. Review the available answers and marked whiteboard steps. A missing result remains unknown; an earlier attempt or a finished animation cannot establish current understanding. Node's route reference covers retained completion receipts; manual handoff covers copied feedback.
+After completion, read through the same route and match quiz/attempt IDs or questionnaire ID and `completedAt`. Review the available answers, marked whiteboard steps, and any user remarks about what is unclear. A missing result remains unknown; an earlier attempt or a finished animation cannot establish current understanding. Node's route reference covers retained completion receipts and activities outside its current coverage; manual handoff covers copied feedback.
 
 For a connection failure blocking an activity, try one recovery with the original session or page, then use the next usable route if needed. Correct content or parameter errors on the current route. Reuse prepared connections for later activities.
 

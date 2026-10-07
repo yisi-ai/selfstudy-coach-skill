@@ -48,6 +48,8 @@ A closed page leaves the listener on standby. After a stopped process or machine
 
 Read current questionnaire answers with `questionnaire.read`, quiz answers with `quiz.result`, and whiteboard marks with `whiteboard.read`. Match the activity and completion before reviewing.
 
+Current whiteboard commands, activity status, and retained completion receipts cover 2D boards only. For a [3D board](whiteboards-3d.md), keep the Node session on standby and use available browser tools on the same answering browser's unified Import page; verify its scene and read visible or copied feedback. If browser control is unavailable, use [manual handoff](manual-handoff.md) for that activity. Do not interpret Node status or a missing 3D receipt as proof of viewing completion. Discover help again before using any later-added automatic 3D operation.
+
 The page can save answers while disconnected. Its completion outbox retries until the service writes `completions.json` and acknowledges delivery. These receipts remain available after refresh, separately from ordinary quiz history.
 
 | CLI operation or state         | Meaning and action                                                                                                                                                                                                                                 |

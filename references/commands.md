@@ -19,7 +19,7 @@ Success is `{ ok: true, command, data }`; failure is `{ ok: false, command, erro
 | Create a questionnaire       | `questionnaire.import` with `{ questionnaire }`; opens the first question.             |
 | Read questionnaire responses | `questionnaire.read` with `{ questionnaireId }`; verify `completedAt`.                 |
 | Read quiz results            | `quiz.result` with `{ quizId, attemptId? }`; verify the matching completion.           |
-| Explain with animation       | `whiteboard.help`, then import/read/update/present using its current contract.         |
+| Explain with 2D animation    | `whiteboard.help`, then import/read/update/present using its current contract.         |
 | Find material or mistakes    | Discover search and read operations and combine their returned fields.                 |
 
 Node retains write receipts across refreshes. Direct page evaluation deduplicates only within the current page process; after reload, inspect the saved operation before retrying a write.
