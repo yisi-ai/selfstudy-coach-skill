@@ -46,6 +46,12 @@ Packaging produces an installable directory, not an archive or archive-checksum 
 
 The local edition defaults to `http://localhost:3218`. Keep test directories local; do not commit or upload them.
 
+## WorkBuddy package
+
+For an explicitly requested WorkBuddy import package, run `pnpm web:skill:workbuddy` (Python 3 is needed only for packaging). It first validates and packs the formal edition, then generates `dist/selfstudy-coach-workbuddy-skill/selfstudy-coach/` and a ZIP named after the Chinese display name and operation version. The ZIP has `SKILL.md` at its root and includes the same references and runtime scripts.
+
+The adapter adds the top-level display names, bilingual descriptions, version, and author documented by [WorkBuddy](https://open.workbuddy.cn/docs/skill), and recomputes the adapted content hash. The source's `metadata.version` remains authoritative; a display-name or packaging change does not increase it. This WorkBuddy ZIP is an explicit import deliverable; the standard pack/export workflow continues to produce an installation directory. Generated WorkBuddy content stays in ignored `dist/` and does not enter the formal Git repository. Updating an installed copy still preserves user customizations.
+
 ## Export to the independent release repository
 
 Initialize `~/project/skills/selfstudy-coach-skill/` once with `git init -b main`. Then run from the main project root:

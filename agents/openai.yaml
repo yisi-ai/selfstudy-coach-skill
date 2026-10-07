@@ -1,4 +1,4 @@
 interface:
-  display_name: "selfstudy-coach"
+  display_name: "AI教数学"
   short_description: "Learn and review with explanations and practice"
   default_prompt: "Use $selfstudy-coach to help me start learning or review my topic, explain the ideas, and use questionnaires, animated whiteboards, and quizzes when they help."

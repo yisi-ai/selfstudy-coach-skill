@@ -1,4 +1,4 @@
-# Self-Study Tutor Skill
+# AI教数学 · Self-Study Tutor Skill
 
 ## Install
 

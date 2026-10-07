@@ -3,11 +3,11 @@ name: selfstudy-coach
 description: Help users start self-study, understand a topic, learn from supplied material, or review earlier learning with explanations, questionnaires, animated whiteboards, and quizzes in a companion Web app.
 metadata:
   version: "0.4.39"
-  display_name: "Self-Study Tutor"
+  display_name: "AI教数学"
   display_name_en: "Self-Study Tutor"
 ---
 
-# Self-Study Tutor
+# AI教数学
 
 Teach in the user's preferred language, using their goal, desired ability, current background, and supplied material. Explain in the conversation and actively use the three learning aids below when they help. The user chooses the scope and pace. This skill operates the companion Web app. Keep the skill name and installation directory `selfstudy-coach` unchanged.
 
