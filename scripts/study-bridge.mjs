@@ -3268,9 +3268,9 @@ var common_default = {
     practiceNav: "Practice",
     navLabel: "Main navigation",
     wechatLabel: "Mini Program",
-    wechatTitle: "Take your quizzes to WeChat",
+    wechatTitle: "Open \u560E\u560E\u5B66AI in WeChat",
     wechatHint: "Scan with WeChat, or save the image and select it in WeChat\u2019s scanner.",
-    wechatCodeAlt: "WeChat Mini Program code for the quiz home page",
+    wechatCodeAlt: "WeChat Mini Program code for the \u560E\u560E\u5B66AI home page",
     wechatSave: "Save Mini Program code",
     wechatSearch: "Search WeChat Mini Programs for: \u560E\u560E\u5B66AI",
     questionnaireTitle: "Learning questionnaire",
@@ -3472,10 +3472,10 @@ var common_default = {
     importNav: "Import",
     meNav: "My learning",
     importReminder: "Send the prompt to AI, then import its reply here.",
-    codeTitle: "AI replies with a long string of text",
+    codeTitle: "If: a long string of text is returned",
     codeExample: '{\n  "format": "gaga.quiz",\n  "schemaVersion": 1,\n  "title": "Spoken English practice"\n}',
     importCode: "Import code",
-    fileTitle: "AI creates a downloadable file",
+    fileTitle: "If: a downloadable file is generated",
     fileHint: "Download the file to your computer, then click Import and select the downloaded file.",
     fileHintMobile: "Download the file to your phone, then tap Import and select the downloaded file.",
     importFile: "Import a file",
@@ -3556,6 +3556,14 @@ var common_default = {
           placeholder: "For example: I know some basic words but rarely speak English. I can practise for twenty minutes a day."
         }
       }
+    },
+    promptGuide: {
+      goal: "Set a learning goal to tell AI what you want to learn.",
+      topic: "Enter what you want to learn",
+      save: "Click \u201CSave goal\u201D. Your goal will be included in the prompts you copy.",
+      copy: "Click \u201CCopy\u201D for \u201CStart learning\u201D, then open your AI chat and paste the prompt.",
+      skip: "Skip",
+      next: "Next step"
     }
   }
 };
@@ -3793,9 +3801,9 @@ var common_default2 = {
     practiceNav: "\u7EC3\u4E60",
     navLabel: "\u4E3B\u5BFC\u822A",
     wechatLabel: "\u5C0F\u7A0B\u5E8F",
-    wechatTitle: "\u5728\u5FAE\u4FE1\u4E2D\u4F7F\u7528\u95EE\u7B54\u6D4B\u9A8C",
+    wechatTitle: "\u5728\u5FAE\u4FE1\u4E2D\u6253\u5F00\u560E\u560E\u5B66AI",
     wechatHint: "\u7528\u5FAE\u4FE1\u626B\u4E00\u626B\uFF0C\u6216\u4FDD\u5B58\u56FE\u7247\u540E\u5728\u5FAE\u4FE1\u626B\u4E00\u626B\u4E2D\u4ECE\u76F8\u518C\u8BC6\u522B\u3002",
-    wechatCodeAlt: "\u626B\u7801\u8FDB\u5165\u95EE\u7B54\u6D4B\u9A8C\u7684\u5FAE\u4FE1\u5C0F\u7A0B\u5E8F\u7801",
+    wechatCodeAlt: "\u626B\u7801\u8FDB\u5165\u560E\u560E\u5B66AI\u9996\u9875\u7684\u5FAE\u4FE1\u5C0F\u7A0B\u5E8F\u7801",
     wechatSave: "\u4FDD\u5B58\u5C0F\u7A0B\u5E8F\u7801",
     wechatSearch: "\u5FAE\u4FE1\u5C0F\u7A0B\u5E8F\u641C\u7D22\uFF1A\u560E\u560E\u5B66AI",
     questionnaireTitle: "\u5B66\u4E60\u60C5\u51B5\u95EE\u5377",
@@ -3997,10 +4005,10 @@ var common_default2 = {
     importNav: "\u5BFC\u5165",
     meNav: "\u6211\u7684",
     importReminder: "\u628A\u63D0\u793A\u8BCD\u53D1\u7ED9AI\u540E\uFF0C\u5C06\u8FD4\u56DE\u7684\u5185\u5BB9\u5BFC\u5165\u8FD9\u91CC",
-    codeTitle: "AI\u56DE\u590D\u4E00\u5927\u4E32\u5B57\u7B26",
+    codeTitle: "\u5982\u679C\uFF1A\u56DE\u590D\u4E00\u5927\u4E32\u5B57\u7B26",
     codeExample: '{\n  "format": "gaga.quiz",\n  "schemaVersion": 1,\n  "title": "\u82F1\u8BED\u53E3\u8BED\u7EC3\u4E60"\n}',
     importCode: "\u5BFC\u5165\u4EE3\u7801",
-    fileTitle: "AI\u751F\u6210\u53EF\u4E0B\u8F7D\u7684\u6587\u4EF6",
+    fileTitle: "\u5982\u679C\uFF1A\u751F\u6210\u53EF\u4E0B\u8F7D\u7684\u6587\u4EF6",
     fileHint: "\u5C06\u6587\u4EF6\u4E0B\u8F7D\u5230\u7535\u8111\u4E0A\uFF0C\u70B9\u51FB\u5BFC\u5165\u9009\u62E9\u5DF2\u4E0B\u8F7D\u7684\u6587\u4EF6",
     fileHintMobile: "\u5C06\u6587\u4EF6\u4E0B\u8F7D\u5230\u624B\u673A\uFF0C\u70B9\u51FB\u5BFC\u5165\u9009\u62E9\u5DF2\u4E0B\u8F7D\u7684\u6587\u4EF6",
     importFile: "\u5BFC\u5165\u6587\u4EF6",
@@ -4081,6 +4089,14 @@ var common_default2 = {
           placeholder: "\u4F8B\u5982\uFF1A\u4F1A\u4E00\u4E9B\u7B80\u5355\u5355\u8BCD\uFF0C\u5E73\u65F6\u5F88\u5C11\u5F00\u53E3\uFF0C\u6BCF\u5929\u53EF\u4EE5\u7EC3\u4E60\u4E8C\u5341\u5206\u949F"
         }
       }
+    },
+    promptGuide: {
+      goal: "\u5148\u8BBE\u7F6E\u4E00\u4E2A\u5B66\u4E60\u76EE\u6807\uFF0C\u544A\u8BC9 AI \u4F60\u60F3\u5B66\u4EC0\u4E48\u3002",
+      topic: "\u586B\u5199\u60F3\u8981\u5B66\u4E60\u7684\u5185\u5BB9",
+      save: "\u70B9\u51FB\u201C\u4FDD\u5B58\u76EE\u6807\u201D\uFF0C\u4E4B\u540E\u590D\u5236\u7684\u63D0\u793A\u8BCD\u4F1A\u81EA\u52A8\u5E26\u4E0A\u4F60\u7684\u76EE\u6807\u3002",
+      copy: "\u70B9\u51FB\u201C\u65B0\u7684\u5F00\u59CB\u201D\u7684\u201C\u590D\u5236\u201D\uFF0C\u518D\u81EA\u884C\u6253\u5F00 AI \u5BF9\u8BDD\u7C98\u8D34\u53D1\u9001\u3002",
+      skip: "\u8DF3\u8FC7",
+      next: "\u4E0B\u4E00\u6B65"
     }
   }
 };

@@ -68,7 +68,7 @@ Use `schemaVersion: 2` for visual nodes when supported by current help. Question
 
 | Kind         | Fields and limits                                                                                                                          |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `canvas`     | `width`, `height`, `source`, `alt`. Dimensions are integers 200–2000; ES5 source at most 65536 characters. A complete static drawing.        |
+| `canvas`     | `width`, `height`, `source`, `alt`. Dimensions are integers 200–2000; ES5 source at most 65536 characters. A complete static drawing.      |
 | `formula`    | `capabilityVersion: 1`, `latex`, `alt`. Raw base/AMS LaTeX without dollar delimiters, at most 2000 characters; escape backslashes in JSON. |
 | `math_scene` | `templateVersion: 1`, `template`, `params`, `alt`, optional supported `animation`. Use the templates below.                                |
 | `image`      | `url`, `alt`. A complete HTTPS image URL supplied in the conversation; the image needs network access.                                     |
@@ -82,7 +82,13 @@ Canvas `source` is an ES5 drawing-function body using `ctx` and `frame.width`/`f
 For example, a static diagram node is:
 
 ```json
-{"kind":"canvas","width":800,"height":600,"source":"ctx.strokeStyle='#1858f5'; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(frame.width*0.15,frame.height*0.75); ctx.lineTo(frame.width*0.85,frame.height*0.25); ctx.stroke();","alt":"A line rising from left to right"}
+{
+  "kind": "canvas",
+  "width": 800,
+  "height": 600,
+  "source": "ctx.strokeStyle='#1858f5'; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(frame.width*0.15,frame.height*0.75); ctx.lineTo(frame.width*0.85,frame.height*0.25); ctx.stroke();",
+  "alt": "A line rising from left to right"
+}
 ```
 
 Existing `math_scene` nodes remain readable with the following templates; use original Canvas diagrams for new drawings.

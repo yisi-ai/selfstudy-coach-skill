@@ -19,9 +19,9 @@ After the activity, ask the user to choose **Copy feedback to AI** and send it i
 | Activity      | Copied feedback                                                                                                        |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | Quiz          | Questions, reference answers, actual correctness or unanswered status, and any incorrectly selected or missed options. |
-| Questionnaire | Questions and the user's selected responses, including text for a selected Other choice.                              |
-| 2D whiteboard | Topic, current segment, and explanations of steps marked unclear across segments, with any nonblank user remarks.    |
-| 3D whiteboard | Topic, marked step numbers and explanations, with any nonblank user remarks.                                          |
+| Questionnaire | Questions and the user's selected responses, including text for a selected Other choice.                               |
+| 2D whiteboard | Topic, current segment, and explanations of steps marked unclear across segments, with any nonblank user remarks.      |
+| 3D whiteboard | Topic, marked step numbers and explanations, with any nonblank user remarks.                                           |
 
 Work from this concise feedback. Source JSON and drawing code are unnecessary for ordinary review. A completion message without answers provides no performance evidence; a whiteboard with no marked steps leaves understanding unknown.
 

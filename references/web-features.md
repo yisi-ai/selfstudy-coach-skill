@@ -12,16 +12,16 @@ Quiz commands default to medium and open the first question. Easy mode gives imm
 
 ## Pages
 
-| Path                       | Purpose                                                                                                                                                      |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/app`                     | Learning home, random quiz, and mixed practice using up to 20 existing questions.                                                                            |
-| `/app/prompts`             | Learning goals and prompts. The locally saved topic, desired ability, and current situation are included in copied prompts.                                  |
+| Path                       | Purpose                                                                                                                                                            |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/app`                     | Learning home, random quiz, and mixed practice using up to 20 existing questions.                                                                                  |
+| `/app/prompts`             | Learning goals and prompts. The locally saved topic, desired ability, and current situation are included in copied prompts.                                        |
 | `/app/import`              | Unified import of quiz, questionnaire, or 2D/3D whiteboard JSON from the clipboard or a file. `/app/open` and `/app/whiteboards/import` remain compatible entries. |
-| `/app/library`             | Local quiz library, history, backup, and restore.                                                                                                            |
-| `/app/whiteboards`         | Local 2D/3D whiteboard library, management, and links to individual players.                                                                                   |
-| `/app/whiteboards/<id>`    | A 2D whiteboard player.                                                                                                                                      |
-| `/app/whiteboards-3d/<id>` | An interactive 3D whiteboard player.                                                                                                                         |
-| `/app/questionnaires/<id>` | The current questionnaire.                                                                                                                                   |
+| `/app/library`             | Local quiz library, history, backup, and restore.                                                                                                                  |
+| `/app/whiteboards`         | Local 2D/3D whiteboard library, management, and links to individual players.                                                                                       |
+| `/app/whiteboards/<id>`    | A 2D whiteboard player.                                                                                                                                            |
+| `/app/whiteboards-3d/<id>` | An interactive 3D whiteboard player.                                                                                                                               |
+| `/app/questionnaires/<id>` | The current questionnaire.                                                                                                                                         |
 
 Prompt-page goals are local user input, not a saved curriculum or an implied Agent command. Use goals available in the conversation or actual returned data.
 

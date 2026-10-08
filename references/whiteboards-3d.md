@@ -14,7 +14,10 @@ Create one complete JSON document in the conversation's language:
   "durationMs": 4000,
   "steps": [
     { "atMs": 0, "text": "Observe the starting vector." },
-    { "atMs": 2000, "text": "Watch its endpoint move upward while its horizontal position stays fixed." }
+    {
+      "atMs": 2000,
+      "text": "Watch its endpoint move upward while its horizontal position stays fixed."
+    }
   ],
   "source": "var y=0.5+Math.max(0,Math.min(1,(frame.elapsedMs-2000)/1500)); scene.axes({size:2.5}); scene.vector({from:[0,0,0],to:[1.5,y,0.8],color:'#436fb3'}); scene.label({position:[1.5,y,0.8],text:'A',color:'#436fb3',fontSize:22});"
 }
@@ -29,16 +32,16 @@ Create one complete JSON document in the conversation's language:
 
 Positions are `[x,y,z]` in a right-handed coordinate system with y up; each component is between -10000 and 10000. Colors are `#rrggbb`; opacity is 0–1. Widths and radii are spatial units.
 
-| Method | Arguments |
-| ------ | --------- |
-| `scene.axes` | `{size:2.5}`; optional coordinate axes. |
-| `scene.point` | `{position,radius:0.06,color,label?,opacity?}`. |
-| `scene.line` | `{from,to,width:0.015,color,opacity?}`. |
-| `scene.vector` | `{from,to,width:0.025,headLength:0.22,color,label?,opacity?}`; spatial arrow. |
-| `scene.polyline` | `{points,closed:false,width,color,opacity?}`; 2–1000 positions. Sample curves with loops and Math. |
-| `scene.mesh` | `{vertices,faces,color,opacity?}`; each array at most 5000 entries. Faces use zero-based vertex indices and contain triangles or convex polygons with 3–100 vertices. |
-| `scene.label` | `{position,text,color,fontSize:22}`; text at most 160 characters. Use `latex` instead of `text` for math. |
-| `scene.caption` | A string providing the current explanation when steps are absent. |
+| Method           | Arguments                                                                                                                                                             |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scene.axes`     | `{size:2.5}`; optional coordinate axes.                                                                                                                               |
+| `scene.point`    | `{position,radius:0.06,color,label?,opacity?}`.                                                                                                                       |
+| `scene.line`     | `{from,to,width:0.015,color,opacity?}`.                                                                                                                               |
+| `scene.vector`   | `{from,to,width:0.025,headLength:0.22,color,label?,opacity?}`; spatial arrow.                                                                                         |
+| `scene.polyline` | `{points,closed:false,width,color,opacity?}`; 2–1000 positions. Sample curves with loops and Math.                                                                    |
+| `scene.mesh`     | `{vertices,faces,color,opacity?}`; each array at most 5000 entries. Faces use zero-based vertex indices and contain triangles or convex polygons with 3–100 vertices. |
+| `scene.label`    | `{position,text,color,fontSize:22}`; text at most 160 characters. Use `latex` instead of `text` for math.                                                             |
+| `scene.caption`  | A string providing the current explanation when steps are absent.                                                                                                     |
 
 Group transforms use paired `scene.save()` / `scene.restore()`, with nesting at most 32. Between them, use `scene.translate(x,y,z)`, `scene.rotate(rx,ry,rz)` in radians, and `scene.scale(s)` or `scene.scale(x,y,z)`.
 
